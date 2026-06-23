@@ -28,9 +28,12 @@ export default function TrackerApp() {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) {
+        window.location.href = '/'
+        return
+      }
       setUser(user)
-      if (user) loadData(user.id)
-      else setLoading(false)
+      loadData(user.id)
     })
   }, [supabase, loadData])
 

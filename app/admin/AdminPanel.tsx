@@ -14,7 +14,12 @@ export default function AdminPanel() {
   const [showAdd, setShowAdd] = useState(false)
 
   useEffect(() => {
-    loadCasinos()
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) { window.location.href = '/'; return }
+      const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', user.id).single()
+      if (!profile?.is_admin) { window.location.href = '/app'; return }
+      loadCasinos()
+    })
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
