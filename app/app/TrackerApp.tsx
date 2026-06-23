@@ -27,14 +27,15 @@ export default function TrackerApp() {
   }, [supabase, today])
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setUser(session.user)
+        loadData(session.user.id)
+      } else {
         window.location.href = '/'
-        return
       }
-      setUser(user)
-      loadData(user.id)
     })
+    return () => subscription.unsubscribe()
   }, [supabase, loadData])
 
   const toggleClaim = async (casino: CasinoWithClaim) => {
