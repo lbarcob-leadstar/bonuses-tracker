@@ -14,13 +14,12 @@ export default function AdminPanel() {
   const [showAdd, setShowAdd] = useState(false)
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!session?.user) { window.location.href = '/'; return }
       const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', session.user.id).single()
       if (!profile?.is_admin) { window.location.href = '/app'; return }
       loadCasinos()
     })
-    return () => subscription.unsubscribe()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
