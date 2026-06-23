@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import type { Casino } from '@/types'
 
+export const dynamic = 'force-dynamic'
+
 export default function AdminPage() {
   const supabase = createClient()
   const [casinos, setCasinos] = useState<Casino[]>([])

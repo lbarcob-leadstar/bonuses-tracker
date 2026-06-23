@@ -5,6 +5,8 @@ import { createClient } from '@/lib/supabase'
 import type { User } from '@supabase/supabase-js'
 import type { CasinoWithClaim } from '@/types'
 
+export const dynamic = 'force-dynamic'
+
 export default function AppPage() {
   const supabase = createClient()
   const [user, setUser] = useState<User | null>(null)
