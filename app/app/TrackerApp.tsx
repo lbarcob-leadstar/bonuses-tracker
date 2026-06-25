@@ -13,6 +13,7 @@ export default function TrackerApp() {
   const [expandedCasinoIds, setExpandedCasinoIds] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'claimed' | 'unclaimed'>('all')
+  const [sortBy, setSortBy] = useState<'highest-sc' | 'lowest-sc' | 'a-z' | 'z-a' | 'next-available'>('next-available')
   const [search, setSearch] = useState('')
   const [now, setNow] = useState(Date.now())
 
@@ -37,6 +38,26 @@ export default function TrackerApp() {
     const minutes = Math.floor((totalSeconds % 3600) / 60)
     const seconds = totalSeconds % 60
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+  }, [getCooldownEndsAt, now])
+
+  const getScValue = useCallback((bonusDescription: string) => {
+    const scMatches = [...bonusDescription.matchAll(/(\d[\d,.]*)(?:\s*-\s*(\d[\d,.]*))?\s*SC\b/gi)]
+    if (scMatches.length === 0) return 0
+
+    let maxValue = 0
+    for (const match of scMatches) {
+      const first = Number.parseFloat((match[1] ?? '0').replace(/,/g, ''))
+      const second = Number.parseFloat((match[2] ?? '0').replace(/,/g, ''))
+      maxValue = Math.max(maxValue, Number.isFinite(first) ? first : 0, Number.isFinite(second) ? second : 0)
+    }
+
+    return maxValue
+  }, [])
+
+  const getRemainingCooldownMs = useCallback((casino: CasinoWithClaim) => {
+    const endsAt = getCooldownEndsAt(casino.last_claimed_at)
+    if (!endsAt) return 0
+    return Math.max(0, endsAt.getTime() - now)
   }, [getCooldownEndsAt, now])
 
   const loadData = useCallback(async (userId: string) => {
@@ -161,6 +182,39 @@ export default function TrackerApp() {
     return matchesSearch
   })
 
+  const sortedFiltered = [...filtered].sort((a, b) => {
+    if (a.is_favorite !== b.is_favorite) return a.is_favorite ? -1 : 1
+
+    switch (sortBy) {
+      case 'highest-sc': {
+        const diff = getScValue(b.bonus_description) - getScValue(a.bonus_description)
+        if (diff !== 0) return diff
+        return a.name.localeCompare(b.name)
+      }
+      case 'lowest-sc': {
+        const diff = getScValue(a.bonus_description) - getScValue(b.bonus_description)
+        if (diff !== 0) return diff
+        return a.name.localeCompare(b.name)
+      }
+      case 'a-z':
+        return a.name.localeCompare(b.name)
+      case 'z-a':
+        return b.name.localeCompare(a.name)
+      case 'next-available': {
+        const aCooldown = isOnCooldown(a)
+        const bCooldown = isOnCooldown(b)
+        if (aCooldown !== bCooldown) return aCooldown ? -1 : 1
+        if (aCooldown && bCooldown) {
+          const diff = getRemainingCooldownMs(a) - getRemainingCooldownMs(b)
+          if (diff !== 0) return diff
+        }
+        return a.name.localeCompare(b.name)
+      }
+      default:
+        return a.sort_order - b.sort_order
+    }
+  })
+
   const claimedCount = casinos.filter((c) => isOnCooldown(c)).length
   const totalCount = casinos.length
   const progress = totalCount > 0 ? (claimedCount / totalCount) * 100 : 0
@@ -225,6 +279,17 @@ export default function TrackerApp() {
             onChange={(e) => setSearch(e.target.value)}
             className="flex-1 px-4 py-3 rounded-xl outline-none text-sm"
             style={{ background: '#2C343F', border: '1px solid rgba(255,255,255,0.1)', color: '#f0f0f0' }} />
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as 'highest-sc' | 'lowest-sc' | 'a-z' | 'z-a' | 'next-available')}
+            className="px-4 py-3 rounded-xl outline-none text-sm"
+            style={{ background: '#2C343F', border: '1px solid rgba(255,255,255,0.1)', color: '#f0f0f0' }}>
+            <option value="highest-sc">Sort: Highest SC</option>
+            <option value="lowest-sc">Sort: Lowest SC</option>
+            <option value="a-z">Sort: A-Z</option>
+            <option value="z-a">Sort: Z-A</option>
+            <option value="next-available">Sort: Next available bonus</option>
+          </select>
           <div className="flex gap-2">
             {(['all', 'unclaimed', 'claimed'] as const).map((f) => (
               <button key={f} onClick={() => setFilter(f)}
@@ -242,7 +307,7 @@ export default function TrackerApp() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((casino) => {
+          {sortedFiltered.map((casino) => {
             const claimed = isOnCooldown(casino)
             const countdown = formatCountdown(casino)
 
