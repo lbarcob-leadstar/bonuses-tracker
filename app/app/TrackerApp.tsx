@@ -7,6 +7,7 @@ import type { CasinoWithClaim } from '@/types'
 
 export default function TrackerApp() {
   const COOLDOWN_MS = 24 * 60 * 60 * 1000
+  const STREAK_ACTIVE_MS = 48 * 60 * 60 * 1000
   const supabase = createClient()
   const [user, setUser] = useState<User | null>(null)
   const [casinos, setCasinos] = useState<CasinoWithClaim[]>([])
@@ -60,18 +61,34 @@ export default function TrackerApp() {
     return Math.max(0, endsAt.getTime() - now)
   }, [getCooldownEndsAt, now])
 
+  const isStreakActive = useCallback((casino: CasinoWithClaim) => {
+    if (casino.streak <= 0 || !casino.last_claimed_at) return false
+    const elapsedMs = now - new Date(casino.last_claimed_at).getTime()
+    return elapsedMs < STREAK_ACTIVE_MS
+  }, [now, STREAK_ACTIVE_MS])
+
   const loadData = useCallback(async (userId: string) => {
     const { data: casinoData } = await supabase.from('casinos').select('*').eq('is_active', true).order('sort_order')
     const { data: claimsData } = await supabase
       .from('user_claims')
-      .select('casino_id, streak, claimed_at')
+      .select('casino_id, streak, claimed_at, updated_at')
       .eq('user_id', userId)
       .order('claimed_at', { ascending: false })
+      .order('updated_at', { ascending: false })
     const { data: favoritesData } = await supabase.from('user_favorites').select('casino_id').eq('user_id', userId)
-    const claimMap = new Map<string, { streak: number | null, claimed_at: string }>()
+    const claimMap = new Map<string, { streak: number | null, claimed_at: string, updated_at: string }>()
     for (const claim of claimsData ?? []) {
-      if (!claimMap.has(claim.casino_id)) {
-        claimMap.set(claim.casino_id, { streak: claim.streak, claimed_at: claim.claimed_at })
+      const current = claimMap.get(claim.casino_id)
+      if (!current) {
+        claimMap.set(claim.casino_id, { streak: claim.streak, claimed_at: claim.claimed_at, updated_at: claim.updated_at })
+        continue
+      }
+      const claimTime = new Date(claim.claimed_at).getTime()
+      const currentTime = new Date(current.claimed_at).getTime()
+      const claimUpdated = new Date(claim.updated_at).getTime()
+      const currentUpdated = new Date(current.updated_at).getTime()
+      if (claimTime > currentTime || (claimTime === currentTime && claimUpdated > currentUpdated)) {
+        claimMap.set(claim.casino_id, { streak: claim.streak, claimed_at: claim.claimed_at, updated_at: claim.updated_at })
       }
     }
     const favoriteIds = new Set(favoritesData?.map((f) => f.casino_id) ?? [])
@@ -359,7 +376,7 @@ export default function TrackerApp() {
                       )}
                     </div>
                   )}
-                  {casino.streak > 0 && (
+                  {isStreakActive(casino) && (
                     <div className="mt-2 inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold"
                       style={{ background: 'rgba(255,231,153,0.15)', color: '#FFE799' }}>
                       🔥 {casino.streak} day streak
