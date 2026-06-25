@@ -22,6 +22,7 @@ export interface UserClaim {
   user_id: string
   casino_id: string
   claimed_date: string
+  claimed_at: string
   streak: number
   last_claim_date: string | null
   updated_at: string
@@ -35,7 +36,7 @@ export interface Profile {
 }
 
 export interface CasinoWithClaim extends Casino {
-  claimed_today: boolean
+  last_claimed_at: string | null
   streak: number
   is_favorite: boolean
 }

@@ -6,6 +6,7 @@ import type { User } from '@supabase/supabase-js'
 import type { CasinoWithClaim } from '@/types'
 
 export default function TrackerApp() {
+  const COOLDOWN_MS = 24 * 60 * 60 * 1000
   const supabase = createClient()
   const [user, setUser] = useState<User | null>(null)
   const [casinos, setCasinos] = useState<CasinoWithClaim[]>([])
@@ -13,22 +14,59 @@ export default function TrackerApp() {
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'claimed' | 'unclaimed'>('all')
   const [search, setSearch] = useState('')
-  const today = new Date().toISOString().split('T')[0]
+  const [now, setNow] = useState(Date.now())
+
+  const getCooldownEndsAt = useCallback((lastClaimedAt: string | null) => {
+    if (!lastClaimedAt) return null
+    return new Date(new Date(lastClaimedAt).getTime() + COOLDOWN_MS)
+  }, [COOLDOWN_MS])
+
+  const isOnCooldown = useCallback((casino: CasinoWithClaim) => {
+    const endsAt = getCooldownEndsAt(casino.last_claimed_at)
+    return !!endsAt && endsAt.getTime() > now
+  }, [getCooldownEndsAt, now])
+
+  const formatCountdown = useCallback((casino: CasinoWithClaim) => {
+    const endsAt = getCooldownEndsAt(casino.last_claimed_at)
+    if (!endsAt) return null
+    const remaining = endsAt.getTime() - now
+    if (remaining <= 0) return null
+
+    const totalSeconds = Math.floor(remaining / 1000)
+    const hours = Math.floor(totalSeconds / 3600)
+    const minutes = Math.floor((totalSeconds % 3600) / 60)
+    const seconds = totalSeconds % 60
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+  }, [getCooldownEndsAt, now])
 
   const loadData = useCallback(async (userId: string) => {
     const { data: casinoData } = await supabase.from('casinos').select('*').eq('is_active', true).order('sort_order')
-    const { data: claimsData } = await supabase.from('user_claims').select('*').eq('user_id', userId).eq('claimed_date', today)
+    const { data: claimsData } = await supabase
+      .from('user_claims')
+      .select('casino_id, streak, claimed_at')
+      .eq('user_id', userId)
+      .order('claimed_at', { ascending: false })
     const { data: favoritesData } = await supabase.from('user_favorites').select('casino_id').eq('user_id', userId)
-    const claimMap = new Map(claimsData?.map((c) => [c.casino_id, c]) ?? [])
+    const claimMap = new Map<string, { streak: number | null, claimed_at: string }>()
+    for (const claim of claimsData ?? []) {
+      if (!claimMap.has(claim.casino_id)) {
+        claimMap.set(claim.casino_id, { streak: claim.streak, claimed_at: claim.claimed_at })
+      }
+    }
     const favoriteIds = new Set(favoritesData?.map((f) => f.casino_id) ?? [])
     const merged: CasinoWithClaim[] = (casinoData ?? []).map((casino) => {
       const claim = claimMap.get(casino.id)
-      return { ...casino, claimed_today: !!claim, streak: claim?.streak ?? 0, is_favorite: favoriteIds.has(casino.id) }
+      return {
+        ...casino,
+        last_claimed_at: claim?.claimed_at ?? null,
+        streak: claim?.streak ?? 0,
+        is_favorite: favoriteIds.has(casino.id),
+      }
     })
     merged.sort((a, b) => Number(b.is_favorite) - Number(a.is_favorite) || a.sort_order - b.sort_order)
     setCasinos(merged)
     setLoading(false)
-  }, [supabase, today])
+  }, [supabase])
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -41,26 +79,45 @@ export default function TrackerApp() {
     })
   }, [supabase, loadData])
 
+  useEffect(() => {
+    const timerId = window.setInterval(() => setNow(Date.now()), 1000)
+    return () => window.clearInterval(timerId)
+  }, [])
+
   const toggleClaim = async (casino: CasinoWithClaim) => {
     if (!user) return
-    if (!casino.claimed_today) {
-      const { data: lastClaim } = await supabase
-        .from('user_claims').select('claimed_date, streak')
-        .eq('user_id', user.id).eq('casino_id', casino.id)
-        .order('claimed_date', { ascending: false }).limit(1).maybeSingle()
-      const yesterday = new Date()
-      yesterday.setDate(yesterday.getDate() - 1)
-      const yesterdayStr = yesterday.toISOString().split('T')[0]
-      const newStreak = lastClaim?.claimed_date === yesterdayStr ? (lastClaim.streak ?? 0) + 1 : 1
-      await supabase.from('user_claims').upsert({
-        user_id: user.id, casino_id: casino.id, claimed_date: today,
-        streak: newStreak, last_claim_date: today, updated_at: new Date().toISOString(),
-      }, { onConflict: 'user_id,casino_id,claimed_date' })
-      setCasinos((prev) => prev.map((c) => c.id === casino.id ? { ...c, claimed_today: true, streak: newStreak } : c))
-    } else {
-      await supabase.from('user_claims').delete().eq('user_id', user.id).eq('casino_id', casino.id).eq('claimed_date', today)
-      setCasinos((prev) => prev.map((c) => c.id === casino.id ? { ...c, claimed_today: false, streak: 0 } : c))
+    if (isOnCooldown(casino)) return
+
+    const nowDate = new Date()
+    const nowIso = nowDate.toISOString()
+    const today = nowIso.split('T')[0]
+    const { data: lastClaim } = await supabase
+      .from('user_claims').select('claimed_at, streak')
+      .eq('user_id', user.id).eq('casino_id', casino.id)
+      .order('claimed_at', { ascending: false }).limit(1).maybeSingle()
+
+    const hoursSinceLastClaim = lastClaim?.claimed_at
+      ? (nowDate.getTime() - new Date(lastClaim.claimed_at).getTime()) / (1000 * 60 * 60)
+      : null
+
+    let newStreak = 1
+    if (hoursSinceLastClaim !== null && hoursSinceLastClaim >= 24 && hoursSinceLastClaim < 48) {
+      newStreak = (lastClaim?.streak ?? 0) + 1
     }
+
+    await supabase.from('user_claims').insert({
+      user_id: user.id,
+      casino_id: casino.id,
+      claimed_date: today,
+      claimed_at: nowIso,
+      streak: newStreak,
+      last_claim_date: today,
+      updated_at: nowIso,
+    })
+
+    setCasinos((prev) => prev.map((c) => c.id === casino.id
+      ? { ...c, last_claimed_at: nowIso, streak: newStreak }
+      : c))
   }
 
   const handleSignOut = async () => {
@@ -98,12 +155,13 @@ export default function TrackerApp() {
 
   const filtered = casinos.filter((c) => {
     const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase())
-    if (filter === 'claimed') return matchesSearch && c.claimed_today
-    if (filter === 'unclaimed') return matchesSearch && !c.claimed_today
+    const claimed = isOnCooldown(c)
+    if (filter === 'claimed') return matchesSearch && claimed
+    if (filter === 'unclaimed') return matchesSearch && !claimed
     return matchesSearch
   })
 
-  const claimedCount = casinos.filter((c) => c.claimed_today).length
+  const claimedCount = casinos.filter((c) => isOnCooldown(c)).length
   const totalCount = casinos.length
   const progress = totalCount > 0 ? (claimedCount / totalCount) * 100 : 0
 
@@ -184,12 +242,16 @@ export default function TrackerApp() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((casino) => (
+          {filtered.map((casino) => {
+            const claimed = isOnCooldown(casino)
+            const countdown = formatCountdown(casino)
+
+            return (
             <div key={casino.id} className="rounded-2xl p-5 transition-all duration-200"
               style={{
-                background: casino.claimed_today ? 'rgba(229,45,75,0.1)' : '#2C343F',
-                border: `1px solid ${casino.claimed_today ? 'rgba(229,45,75,0.4)' : 'rgba(255,255,255,0.08)'}`,
-                boxShadow: casino.claimed_today ? '0 0 15px rgba(229,45,75,0.15)' : 'none',
+                background: claimed ? 'rgba(229,45,75,0.1)' : '#2C343F',
+                border: `1px solid ${claimed ? 'rgba(229,45,75,0.4)' : 'rgba(255,255,255,0.08)'}`,
+                boxShadow: claimed ? '0 0 15px rgba(229,45,75,0.15)' : 'none',
               }}>
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
@@ -205,11 +267,17 @@ export default function TrackerApp() {
                       }}>
                       <span style={{ color: casino.is_favorite ? '#FFE799' : 'rgba(255,255,255,0.35)' }}>★</span>
                     </button>
-                    <h3 className="font-bold text-base truncate" style={{ color: casino.claimed_today ? '#FFE799' : '#f0f0f0' }}>
+                    <h3 className="font-bold text-base truncate" style={{ color: claimed ? '#FFE799' : '#f0f0f0' }}>
                       {casino.name}
                     </h3>
                   </div>
                   <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>{casino.bonus_description}</p>
+                  {countdown && (
+                    <div className="mt-2 inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold"
+                      style={{ background: 'rgba(229,45,75,0.2)', color: '#ff9bad' }}>
+                      ⏳ Available in {countdown}
+                    </div>
+                  )}
                   {casino.welcome_offer_info && (
                     <div className="mt-2">
                       <button
@@ -234,13 +302,16 @@ export default function TrackerApp() {
                   )}
                 </div>
                 <button onClick={() => toggleClaim(casino)}
-                  className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 cursor-pointer"
+                  disabled={claimed}
+                  className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200"
                   style={{
-                    background: casino.claimed_today ? '#E52D4B' : 'rgba(255,255,255,0.08)',
-                    border: `2px solid ${casino.claimed_today ? '#E52D4B' : 'rgba(255,255,255,0.2)'}`,
-                    boxShadow: casino.claimed_today ? '0 0 10px rgba(229,45,75,0.5)' : 'none',
+                    background: claimed ? '#E52D4B' : 'rgba(255,255,255,0.08)',
+                    border: `2px solid ${claimed ? '#E52D4B' : 'rgba(255,255,255,0.2)'}`,
+                    boxShadow: claimed ? '0 0 10px rgba(229,45,75,0.5)' : 'none',
+                    cursor: claimed ? 'not-allowed' : 'pointer',
+                    opacity: claimed ? 0.85 : 1,
                   }}>
-                  {casino.claimed_today && (
+                  {claimed && (
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                       <path d="M2 7l3.5 3.5L12 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
@@ -248,7 +319,8 @@ export default function TrackerApp() {
                 </button>
               </div>
             </div>
-          ))}
+            )
+          })}
         </div>
         {filtered.length === 0 && (
           <div className="text-center py-20">
