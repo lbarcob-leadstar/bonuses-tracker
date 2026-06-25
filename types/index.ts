@@ -4,8 +4,16 @@ export interface Casino {
   id: string
   name: string
   bonus_description: string
+  welcome_offer_info: string | null
   is_active: boolean
   sort_order: number
+  created_at: string
+}
+
+export interface UserFavorite {
+  id: string
+  user_id: string
+  casino_id: string
   created_at: string
 }
 
@@ -29,4 +37,5 @@ export interface Profile {
 export interface CasinoWithClaim extends Casino {
   claimed_today: boolean
   streak: number
+  is_favorite: boolean
 }

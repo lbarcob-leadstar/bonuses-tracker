@@ -9,6 +9,7 @@ export default function TrackerApp() {
   const supabase = createClient()
   const [user, setUser] = useState<User | null>(null)
   const [casinos, setCasinos] = useState<CasinoWithClaim[]>([])
+  const [expandedCasinoIds, setExpandedCasinoIds] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'claimed' | 'unclaimed'>('all')
   const [search, setSearch] = useState('')
@@ -17,11 +18,14 @@ export default function TrackerApp() {
   const loadData = useCallback(async (userId: string) => {
     const { data: casinoData } = await supabase.from('casinos').select('*').eq('is_active', true).order('sort_order')
     const { data: claimsData } = await supabase.from('user_claims').select('*').eq('user_id', userId).eq('claimed_date', today)
+    const { data: favoritesData } = await supabase.from('user_favorites').select('casino_id').eq('user_id', userId)
     const claimMap = new Map(claimsData?.map((c) => [c.casino_id, c]) ?? [])
+    const favoriteIds = new Set(favoritesData?.map((f) => f.casino_id) ?? [])
     const merged: CasinoWithClaim[] = (casinoData ?? []).map((casino) => {
       const claim = claimMap.get(casino.id)
-      return { ...casino, claimed_today: !!claim, streak: claim?.streak ?? 0 }
+      return { ...casino, claimed_today: !!claim, streak: claim?.streak ?? 0, is_favorite: favoriteIds.has(casino.id) }
     })
+    merged.sort((a, b) => Number(b.is_favorite) - Number(a.is_favorite) || a.sort_order - b.sort_order)
     setCasinos(merged)
     setLoading(false)
   }, [supabase, today])
@@ -62,6 +66,34 @@ export default function TrackerApp() {
   const handleSignOut = async () => {
     await supabase.auth.signOut()
     window.location.href = '/'
+  }
+
+  const toggleFavorite = async (casino: CasinoWithClaim) => {
+    if (!user) return
+
+    if (casino.is_favorite) {
+      await supabase.from('user_favorites').delete().eq('user_id', user.id).eq('casino_id', casino.id)
+    } else {
+      await supabase.from('user_favorites').upsert({ user_id: user.id, casino_id: casino.id }, { onConflict: 'user_id,casino_id' })
+    }
+
+    setCasinos((prev) => {
+      const updated = prev.map((c) => c.id === casino.id ? { ...c, is_favorite: !c.is_favorite } : c)
+      updated.sort((a, b) => Number(b.is_favorite) - Number(a.is_favorite) || a.sort_order - b.sort_order)
+      return updated
+    })
+  }
+
+  const toggleWelcomeOfferInfo = (casinoId: string) => {
+    setExpandedCasinoIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(casinoId)) {
+        next.delete(casinoId)
+      } else {
+        next.add(casinoId)
+      }
+      return next
+    })
   }
 
   const filtered = casinos.filter((c) => {
@@ -161,10 +193,39 @@ export default function TrackerApp() {
               }}>
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-base truncate" style={{ color: casino.claimed_today ? '#FFE799' : '#f0f0f0' }}>
-                    {casino.name}
-                  </h3>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => toggleFavorite(casino)}
+                      className="flex-shrink-0 w-6 h-6 rounded-md flex items-center justify-center transition-all duration-200 cursor-pointer"
+                      aria-label={casino.is_favorite ? `Remove ${casino.name} from favorites` : `Add ${casino.name} to favorites`}
+                      title={casino.is_favorite ? 'Remove from favorites' : 'Add to favorites'}
+                      style={{
+                        background: casino.is_favorite ? 'rgba(255,231,153,0.15)' : 'rgba(255,255,255,0.08)',
+                        border: `1px solid ${casino.is_favorite ? 'rgba(255,231,153,0.5)' : 'rgba(255,255,255,0.2)'}`,
+                      }}>
+                      <span style={{ color: casino.is_favorite ? '#FFE799' : 'rgba(255,255,255,0.35)' }}>★</span>
+                    </button>
+                    <h3 className="font-bold text-base truncate" style={{ color: casino.claimed_today ? '#FFE799' : '#f0f0f0' }}>
+                      {casino.name}
+                    </h3>
+                  </div>
                   <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>{casino.bonus_description}</p>
+                  {casino.welcome_offer_info && (
+                    <div className="mt-2">
+                      <button
+                        onClick={() => toggleWelcomeOfferInfo(casino.id)}
+                        className="text-xs font-semibold cursor-pointer"
+                        style={{ color: '#FFE799' }}>
+                        {expandedCasinoIds.has(casino.id) ? 'Hide welcome offer info ▲' : 'Show welcome offer info ▼'}
+                      </button>
+                      {expandedCasinoIds.has(casino.id) && (
+                        <div className="mt-2 p-3 rounded-lg text-xs leading-relaxed"
+                          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.75)' }}>
+                          {casino.welcome_offer_info}
+                        </div>
+                      )}
+                    </div>
+                  )}
                   {casino.streak > 0 && (
                     <div className="mt-2 inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold"
                       style={{ background: 'rgba(255,231,153,0.15)', color: '#FFE799' }}>

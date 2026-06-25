@@ -9,8 +9,8 @@ export default function AdminPanel() {
   const [casinos, setCasinos] = useState<Casino[]>([])
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [editForm, setEditForm] = useState({ name: '', bonus_description: '' })
-  const [newForm, setNewForm] = useState({ name: '', bonus_description: '' })
+  const [editForm, setEditForm] = useState({ name: '', bonus_description: '', welcome_offer_info: '' })
+  const [newForm, setNewForm] = useState({ name: '', bonus_description: '', welcome_offer_info: '' })
   const [showAdd, setShowAdd] = useState(false)
 
   useEffect(() => {
@@ -36,12 +36,21 @@ export default function AdminPanel() {
 
   const startEdit = (casino: Casino) => {
     setEditingId(casino.id)
-    setEditForm({ name: casino.name, bonus_description: casino.bonus_description })
+    setEditForm({
+      name: casino.name,
+      bonus_description: casino.bonus_description,
+      welcome_offer_info: casino.welcome_offer_info ?? '',
+    })
   }
 
   const saveEdit = async (id: string) => {
-    await supabase.from('casinos').update(editForm).eq('id', id)
-    setCasinos((prev) => prev.map((c) => c.id === id ? { ...c, ...editForm } : c))
+    const payload = {
+      name: editForm.name,
+      bonus_description: editForm.bonus_description,
+      welcome_offer_info: editForm.welcome_offer_info.trim() ? editForm.welcome_offer_info : null,
+    }
+    await supabase.from('casinos').update(payload).eq('id', id)
+    setCasinos((prev) => prev.map((c) => c.id === id ? { ...c, ...payload } : c))
     setEditingId(null)
   }
 
@@ -54,13 +63,20 @@ export default function AdminPanel() {
   const addCasino = async () => {
     if (!newForm.name || !newForm.bonus_description) return
     const maxOrder = Math.max(...casinos.map((c) => c.sort_order), 0)
+    const payload = {
+      name: newForm.name,
+      bonus_description: newForm.bonus_description,
+      welcome_offer_info: newForm.welcome_offer_info.trim() ? newForm.welcome_offer_info : null,
+      is_active: true,
+      sort_order: maxOrder + 1,
+    }
     const { data } = await supabase
       .from('casinos')
-      .insert({ ...newForm, is_active: true, sort_order: maxOrder + 1 })
+      .insert(payload)
       .select()
       .single()
     if (data) setCasinos((prev) => [...prev, data])
-    setNewForm({ name: '', bonus_description: '' })
+    setNewForm({ name: '', bonus_description: '', welcome_offer_info: '' })
     setShowAdd(false)
   }
 
@@ -113,6 +129,10 @@ export default function AdminPanel() {
                 className="px-4 py-3 rounded-xl outline-none text-sm"
                 style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#f0f0f0' }} />
             </div>
+            <textarea placeholder="Welcome offer info (expanded details shown in app)" value={newForm.welcome_offer_info}
+              onChange={(e) => setNewForm((p) => ({ ...p, welcome_offer_info: e.target.value }))}
+              className="w-full mb-4 px-4 py-3 rounded-xl outline-none text-sm resize-y min-h-[96px]"
+              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#f0f0f0' }} />
             <div className="flex gap-3">
               <button onClick={addCasino} className="px-6 py-2 rounded-xl text-sm font-bold cursor-pointer"
                 style={{ background: '#E52D4B', color: '#fff' }}>Save</button>
@@ -127,12 +147,18 @@ export default function AdminPanel() {
             <div key={casino.id} className="rounded-2xl p-4 transition-all"
               style={{ background: '#2C343F', border: `1px solid ${casino.is_active ? 'rgba(255,255,255,0.08)' : 'rgba(229,45,75,0.2)'}`, opacity: casino.is_active ? 1 : 0.5 }}>
               {editingId === casino.id ? (
-                <div className="flex flex-col md:flex-row gap-3">
-                  <input value={editForm.name} onChange={(e) => setEditForm((p) => ({ ...p, name: e.target.value }))}
-                    className="flex-1 px-3 py-2 rounded-xl text-sm outline-none"
-                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,231,153,0.4)', color: '#f0f0f0' }} />
-                  <input value={editForm.bonus_description} onChange={(e) => setEditForm((p) => ({ ...p, bonus_description: e.target.value }))}
-                    className="flex-[2] px-3 py-2 rounded-xl text-sm outline-none"
+                <div className="flex flex-col gap-3">
+                  <div className="flex flex-col md:flex-row gap-3">
+                    <input value={editForm.name} onChange={(e) => setEditForm((p) => ({ ...p, name: e.target.value }))}
+                      className="flex-1 px-3 py-2 rounded-xl text-sm outline-none"
+                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,231,153,0.4)', color: '#f0f0f0' }} />
+                    <input value={editForm.bonus_description} onChange={(e) => setEditForm((p) => ({ ...p, bonus_description: e.target.value }))}
+                      className="flex-[2] px-3 py-2 rounded-xl text-sm outline-none"
+                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,231,153,0.4)', color: '#f0f0f0' }} />
+                  </div>
+                  <textarea value={editForm.welcome_offer_info} onChange={(e) => setEditForm((p) => ({ ...p, welcome_offer_info: e.target.value }))}
+                    placeholder="Welcome offer info"
+                    className="w-full px-3 py-2 rounded-xl text-sm outline-none resize-y min-h-[88px]"
                     style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,231,153,0.4)', color: '#f0f0f0' }} />
                   <div className="flex gap-2">
                     <button onClick={() => saveEdit(casino.id)} className="px-4 py-2 rounded-xl text-sm font-bold cursor-pointer"
@@ -152,6 +178,11 @@ export default function AdminPanel() {
                       )}
                     </div>
                     <p className="text-xs mt-0.5 truncate" style={{ color: 'rgba(255,255,255,0.4)' }}>{casino.bonus_description}</p>
+                    {casino.welcome_offer_info && (
+                      <p className="text-xs mt-1" style={{ color: 'rgba(255,231,153,0.75)' }}>
+                        Welcome offer: {casino.welcome_offer_info}
+                      </p>
+                    )}
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <button onClick={() => toggleActive(casino)} className="px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer"
