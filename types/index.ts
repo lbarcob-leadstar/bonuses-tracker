@@ -5,6 +5,8 @@ export interface Casino {
   name: string
   bonus_description: string
   welcome_offer_info: string | null
+  logo_url: string | null
+  casino_url: string | null
   is_active: boolean
   sort_order: number
   created_at: string

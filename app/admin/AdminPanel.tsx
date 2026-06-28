@@ -9,8 +9,20 @@ export default function AdminPanel() {
   const [casinos, setCasinos] = useState<Casino[]>([])
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [editForm, setEditForm] = useState({ name: '', bonus_description: '', welcome_offer_info: '' })
-  const [newForm, setNewForm] = useState({ name: '', bonus_description: '', welcome_offer_info: '' })
+  const [editForm, setEditForm] = useState({
+    name: '',
+    bonus_description: '',
+    welcome_offer_info: '',
+    logo_url: '',
+    casino_url: '',
+  })
+  const [newForm, setNewForm] = useState({
+    name: '',
+    bonus_description: '',
+    welcome_offer_info: '',
+    logo_url: '',
+    casino_url: '',
+  })
   const [showAdd, setShowAdd] = useState(false)
 
   useEffect(() => {
@@ -40,6 +52,8 @@ export default function AdminPanel() {
       name: casino.name,
       bonus_description: casino.bonus_description,
       welcome_offer_info: casino.welcome_offer_info ?? '',
+      logo_url: casino.logo_url ?? '',
+      casino_url: casino.casino_url ?? '',
     })
   }
 
@@ -48,6 +62,8 @@ export default function AdminPanel() {
       name: editForm.name,
       bonus_description: editForm.bonus_description,
       welcome_offer_info: editForm.welcome_offer_info.trim() ? editForm.welcome_offer_info : null,
+      logo_url: editForm.logo_url.trim() ? editForm.logo_url : null,
+      casino_url: editForm.casino_url.trim() ? editForm.casino_url : null,
     }
     await supabase.from('casinos').update(payload).eq('id', id)
     setCasinos((prev) => prev.map((c) => c.id === id ? { ...c, ...payload } : c))
@@ -67,6 +83,8 @@ export default function AdminPanel() {
       name: newForm.name,
       bonus_description: newForm.bonus_description,
       welcome_offer_info: newForm.welcome_offer_info.trim() ? newForm.welcome_offer_info : null,
+      logo_url: newForm.logo_url.trim() ? newForm.logo_url : null,
+      casino_url: newForm.casino_url.trim() ? newForm.casino_url : null,
       is_active: true,
       sort_order: maxOrder + 1,
     }
@@ -76,7 +94,7 @@ export default function AdminPanel() {
       .select()
       .single()
     if (data) setCasinos((prev) => [...prev, data])
-    setNewForm({ name: '', bonus_description: '', welcome_offer_info: '' })
+    setNewForm({ name: '', bonus_description: '', welcome_offer_info: '', logo_url: '', casino_url: '' })
     setShowAdd(false)
   }
 
@@ -129,6 +147,16 @@ export default function AdminPanel() {
                 className="px-4 py-3 rounded-xl outline-none text-sm"
                 style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#f0f0f0' }} />
             </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <input placeholder="Logo URL (https://...)" value={newForm.logo_url}
+                onChange={(e) => setNewForm((p) => ({ ...p, logo_url: e.target.value }))}
+                className="px-4 py-3 rounded-xl outline-none text-sm"
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#f0f0f0' }} />
+              <input placeholder="Casino URL (https://...)" value={newForm.casino_url}
+                onChange={(e) => setNewForm((p) => ({ ...p, casino_url: e.target.value }))}
+                className="px-4 py-3 rounded-xl outline-none text-sm"
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#f0f0f0' }} />
+            </div>
             <textarea placeholder="Welcome offer info (expanded details shown in app)" value={newForm.welcome_offer_info}
               onChange={(e) => setNewForm((p) => ({ ...p, welcome_offer_info: e.target.value }))}
               className="w-full mb-4 px-4 py-3 rounded-xl outline-none text-sm resize-y min-h-[96px]"
@@ -156,6 +184,16 @@ export default function AdminPanel() {
                       className="flex-[2] px-3 py-2 rounded-xl text-sm outline-none"
                       style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,231,153,0.4)', color: '#f0f0f0' }} />
                   </div>
+                  <div className="flex flex-col md:flex-row gap-3">
+                    <input value={editForm.logo_url} onChange={(e) => setEditForm((p) => ({ ...p, logo_url: e.target.value }))}
+                      placeholder="Logo URL (https://...)"
+                      className="flex-1 px-3 py-2 rounded-xl text-sm outline-none"
+                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,231,153,0.4)', color: '#f0f0f0' }} />
+                    <input value={editForm.casino_url} onChange={(e) => setEditForm((p) => ({ ...p, casino_url: e.target.value }))}
+                      placeholder="Casino URL (https://...)"
+                      className="flex-1 px-3 py-2 rounded-xl text-sm outline-none"
+                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,231,153,0.4)', color: '#f0f0f0' }} />
+                  </div>
                   <textarea value={editForm.welcome_offer_info} onChange={(e) => setEditForm((p) => ({ ...p, welcome_offer_info: e.target.value }))}
                     placeholder="Welcome offer info"
                     className="w-full px-3 py-2 rounded-xl text-sm outline-none resize-y min-h-[88px]"
@@ -178,6 +216,19 @@ export default function AdminPanel() {
                       )}
                     </div>
                     <p className="text-xs mt-0.5 truncate" style={{ color: 'rgba(255,255,255,0.4)' }}>{casino.bonus_description}</p>
+                    {casino.casino_url && (
+                      <p className="text-xs mt-1 truncate">
+                        <a href={casino.casino_url} target="_blank" rel="noreferrer"
+                          style={{ color: '#FFE799' }}>
+                          {casino.casino_url}
+                        </a>
+                      </p>
+                    )}
+                    {casino.logo_url && (
+                      <p className="text-xs mt-1 truncate" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                        Logo: {casino.logo_url}
+                      </p>
+                    )}
                     {casino.welcome_offer_info && (
                       <p className="text-xs mt-1" style={{ color: 'rgba(255,231,153,0.75)' }}>
                         Welcome offer: {casino.welcome_offer_info}

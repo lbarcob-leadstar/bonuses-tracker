@@ -338,20 +338,33 @@ export default function TrackerApp() {
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => toggleFavorite(casino)}
-                      className="flex-shrink-0 w-6 h-6 rounded-md flex items-center justify-center transition-all duration-200 cursor-pointer"
-                      aria-label={casino.is_favorite ? `Remove ${casino.name} from favorites` : `Add ${casino.name} to favorites`}
-                      title={casino.is_favorite ? 'Remove from favorites' : 'Add to favorites'}
-                      style={{
-                        background: casino.is_favorite ? 'rgba(255,231,153,0.15)' : 'rgba(255,255,255,0.08)',
-                        border: `1px solid ${casino.is_favorite ? 'rgba(255,231,153,0.5)' : 'rgba(255,255,255,0.2)'}`,
-                      }}>
-                      <span style={{ color: casino.is_favorite ? '#FFE799' : 'rgba(255,255,255,0.35)' }}>★</span>
-                    </button>
-                    <h3 className="font-bold text-base truncate" style={{ color: claimed ? '#FFE799' : '#f0f0f0' }}>
-                      {casino.name}
-                    </h3>
+                    {casino.logo_url ? (
+                      <img
+                        src={casino.logo_url}
+                        alt={`${casino.name} logo`}
+                        className="w-6 h-6 rounded object-cover flex-shrink-0"
+                      />
+                    ) : (
+                      <div
+                        className="w-6 h-6 rounded flex-shrink-0"
+                        style={{ background: 'rgba(255,255,255,0.1)' }}
+                      />
+                    )}
+                    {casino.casino_url ? (
+                      <a
+                        href={casino.casino_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="font-bold text-base truncate"
+                        style={{ color: claimed ? '#FFE799' : '#f0f0f0' }}
+                      >
+                        {casino.name}
+                      </a>
+                    ) : (
+                      <h3 className="font-bold text-base truncate" style={{ color: claimed ? '#FFE799' : '#f0f0f0' }}>
+                        {casino.name}
+                      </h3>
+                    )}
                   </div>
                   <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>{casino.bonus_description}</p>
                   {countdown && (
@@ -383,22 +396,36 @@ export default function TrackerApp() {
                     </div>
                   )}
                 </div>
-                <button onClick={() => toggleClaim(casino)}
-                  disabled={claimed}
-                  className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200"
-                  style={{
-                    background: claimed ? '#E52D4B' : 'rgba(255,255,255,0.08)',
-                    border: `2px solid ${claimed ? '#E52D4B' : 'rgba(255,255,255,0.2)'}`,
-                    boxShadow: claimed ? '0 0 10px rgba(229,45,75,0.5)' : 'none',
-                    cursor: claimed ? 'not-allowed' : 'pointer',
-                    opacity: claimed ? 0.85 : 1,
-                  }}>
-                  {claimed && (
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                      <path d="M2 7l3.5 3.5L12 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  )}
-                </button>
+                <div className="flex-shrink-0 flex items-center gap-2">
+                  <button
+                    onClick={() => toggleFavorite(casino)}
+                    className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 cursor-pointer"
+                    aria-label={casino.is_favorite ? `Remove ${casino.name} from favorites` : `Add ${casino.name} to favorites`}
+                    title={casino.is_favorite ? 'Remove from favorites' : 'Add to favorites'}
+                    style={{
+                      background: casino.is_favorite ? 'rgba(229,45,75,0.2)' : 'rgba(255,255,255,0.08)',
+                      border: `1px solid ${casino.is_favorite ? 'rgba(229,45,75,0.6)' : 'rgba(255,255,255,0.2)'}`,
+                    }}
+                  >
+                    <span style={{ color: casino.is_favorite ? '#E52D4B' : 'rgba(255,255,255,0.35)' }}>♥</span>
+                  </button>
+                  <button onClick={() => toggleClaim(casino)}
+                    disabled={claimed}
+                    className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200"
+                    style={{
+                      background: claimed ? '#E52D4B' : 'rgba(255,255,255,0.08)',
+                      border: `2px solid ${claimed ? '#E52D4B' : 'rgba(255,255,255,0.2)'}`,
+                      boxShadow: claimed ? '0 0 10px rgba(229,45,75,0.5)' : 'none',
+                      cursor: claimed ? 'not-allowed' : 'pointer',
+                      opacity: claimed ? 0.85 : 1,
+                    }}>
+                    {claimed && (
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                        <path d="M2 7l3.5 3.5L12 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
             )
