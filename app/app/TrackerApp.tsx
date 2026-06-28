@@ -318,89 +318,58 @@ export default function TrackerApp() {
             const countdown = formatCountdown(casino)
 
             return (
-            <div key={casino.id} className="rounded-2xl p-5 transition-all duration-200"
+            <div key={casino.id} className="rounded-2xl p-4 transition-all duration-200"
               style={{
-                background: claimed ? 'rgba(229,45,75,0.1)' : '#2C343F',
-                border: `1px solid ${claimed ? 'rgba(229,45,75,0.4)' : 'rgba(255,255,255,0.08)'}`,
-                boxShadow: claimed ? '0 0 15px rgba(229,45,75,0.15)' : 'none',
+                background: claimed ? 'rgba(229,45,75,0.08)' : '#2C343F',
+                border: `1px solid ${claimed ? 'rgba(229,45,75,0.35)' : 'rgba(255,255,255,0.08)'}`,
+                boxShadow: claimed ? '0 0 12px rgba(229,45,75,0.12)' : 'none',
               }}>
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    {casino.logo_url ? (
-                      <img
-                        src={casino.logo_url}
-                        alt={`${casino.name} logo`}
-                        className="w-6 h-6 rounded object-cover flex-shrink-0"
-                      />
-                    ) : (
-                      <div
-                        className="w-6 h-6 rounded flex-shrink-0"
-                        style={{ background: 'rgba(255,255,255,0.1)' }}
-                      />
-                    )}
-                    {casino.casino_url ? (
-                      <a
-                        href={casino.casino_url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="font-bold text-base truncate"
-                        style={{ color: claimed ? '#FFE799' : '#f0f0f0' }}
-                      >
-                        {casino.name}
-                      </a>
-                    ) : (
-                      <h3 className="font-bold text-base truncate" style={{ color: claimed ? '#FFE799' : '#f0f0f0' }}>
-                        {casino.name}
-                      </h3>
-                    )}
-                  </div>
-                  <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>{casino.bonus_description}</p>
-                  {countdown && (
-                    <div className="mt-2 inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold"
-                      style={{ background: 'rgba(229,45,75,0.2)', color: '#ff9bad' }}>
-                      ⏳ Available in {countdown}
-                    </div>
+              <div className="flex items-start justify-between gap-3 mb-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  {casino.logo_url ? (
+                    <img
+                      src={casino.logo_url}
+                      alt={`${casino.name} logo`}
+                      className="w-7 h-7 rounded object-cover flex-shrink-0"
+                    />
+                  ) : (
+                    <div
+                      className="w-7 h-7 rounded flex-shrink-0"
+                      style={{ background: 'rgba(255,255,255,0.1)' }}
+                    />
                   )}
-                  {casino.welcome_offer_info && (
-                    <div className="mt-2">
-                      <button
-                        onClick={() => toggleWelcomeOfferInfo(casino.id)}
-                        className="text-xs font-semibold cursor-pointer"
-                        style={{ color: '#FFE799' }}>
-                        {expandedCasinoIds.has(casino.id) ? 'Hide welcome offer info ▲' : 'Show welcome offer info ▼'}
-                      </button>
-                      {expandedCasinoIds.has(casino.id) && (
-                        <div className="mt-2 p-3 rounded-lg text-xs leading-relaxed"
-                          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.75)' }}>
-                          {casino.welcome_offer_info}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  {isStreakActive(casino) && (
-                    <div className="mt-2 inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold"
-                      style={{ background: 'rgba(255,231,153,0.15)', color: '#FFE799' }}>
-                      🔥 {casino.streak} day streak
-                    </div>
+                  {casino.casino_url ? (
+                    <a
+                      href={casino.casino_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="font-bold text-[1.05rem] truncate"
+                      style={{ color: claimed ? '#FFE799' : '#f0f0f0' }}
+                    >
+                      {casino.name}
+                    </a>
+                  ) : (
+                    <h3 className="font-bold text-[1.05rem] truncate" style={{ color: claimed ? '#FFE799' : '#f0f0f0' }}>
+                      {casino.name}
+                    </h3>
                   )}
                 </div>
                 <div className="flex-shrink-0 flex items-center gap-2">
                   <button
                     onClick={() => toggleFavorite(casino)}
-                    className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 cursor-pointer"
+                    className="w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-200 cursor-pointer"
                     aria-label={casino.is_favorite ? `Remove ${casino.name} from favorites` : `Add ${casino.name} to favorites`}
                     title={casino.is_favorite ? 'Remove from favorites' : 'Add to favorites'}
                     style={{
-                      background: casino.is_favorite ? 'rgba(229,45,75,0.2)' : 'rgba(255,255,255,0.08)',
-                      border: `1px solid ${casino.is_favorite ? 'rgba(229,45,75,0.6)' : 'rgba(255,255,255,0.2)'}`,
+                      background: casino.is_favorite ? 'rgba(229,45,75,0.24)' : 'rgba(255,255,255,0.08)',
+                      border: `1px solid ${casino.is_favorite ? 'rgba(229,45,75,0.65)' : 'rgba(255,255,255,0.22)'}`,
                     }}
                   >
-                    <span style={{ color: casino.is_favorite ? '#E52D4B' : 'rgba(255,255,255,0.35)' }}>♥</span>
+                    <span style={{ color: casino.is_favorite ? '#E52D4B' : 'rgba(255,255,255,0.38)' }}>♥</span>
                   </button>
                   <button onClick={() => toggleClaim(casino)}
                     disabled={claimed}
-                    className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200"
+                    className="w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-200"
                     style={{
                       background: claimed ? '#E52D4B' : 'rgba(255,255,255,0.08)',
                       border: `2px solid ${claimed ? '#E52D4B' : 'rgba(255,255,255,0.2)'}`,
@@ -416,6 +385,37 @@ export default function TrackerApp() {
                   </button>
                 </div>
               </div>
+              <p className="text-sm mb-2" style={{ color: 'rgba(255,255,255,0.62)' }}>{casino.bonus_description}</p>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {countdown && (
+                  <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold"
+                    style={{ background: 'rgba(229,45,75,0.17)', border: '1px solid rgba(229,45,75,0.25)', color: '#ff9bad' }}>
+                    ⏳ {countdown}
+                  </div>
+                )}
+                {isStreakActive(casino) && (
+                  <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold"
+                    style={{ background: 'rgba(255,231,153,0.14)', border: '1px solid rgba(255,231,153,0.22)', color: '#FFE799' }}>
+                    🔥 {casino.streak} day streak
+                  </div>
+                )}
+              </div>
+              {casino.welcome_offer_info && (
+                <div>
+                  <button
+                    onClick={() => toggleWelcomeOfferInfo(casino.id)}
+                    className="text-xs font-semibold cursor-pointer"
+                    style={{ color: '#FFE799' }}>
+                    {expandedCasinoIds.has(casino.id) ? 'Hide welcome offer info ▲' : 'Show welcome offer info ▼'}
+                  </button>
+                  {expandedCasinoIds.has(casino.id) && (
+                    <div className="mt-2 p-3 rounded-lg text-xs leading-relaxed"
+                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.75)' }}>
+                      {casino.welcome_offer_info}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
             )
           })}
