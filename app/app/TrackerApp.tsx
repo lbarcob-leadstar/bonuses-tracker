@@ -227,32 +227,32 @@ export default function TrackerApp() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#1e252e' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#f4f7fb' }}>
         <div className="text-center">
           <div className="text-4xl mb-4 animate-spin">🎰</div>
-          <p style={{ color: '#FFE799' }}>Loading your bonuses...</p>
+          <p style={{ color: '#2C343F' }}>Loading your bonuses...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'radial-gradient(circle at top right, rgba(229,45,75,0.12), transparent 40%), #1e252e' }}>
-      <header style={{ background: '#2f3a4d', borderBottom: '2px solid rgba(108,189,255,0.65)' }}>
+    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #f8fbff 0%, #eef3f8 100%)' }}>
+      <header style={{ background: '#ffffff', borderBottom: '2px solid rgba(108,189,255,0.65)' }}>
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="text-2xl">🎰</span>
             <div>
-              <h1 className="font-black text-lg leading-none" style={{ color: '#FFE799' }}>Bonus Tracker</h1>
-              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
+              <h1 className="font-black text-lg leading-none" style={{ color: '#2C343F' }}>Bonus Tracker</h1>
+              <p className="text-xs" style={{ color: 'rgba(44,52,63,0.6)' }}>
                 {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-sm hidden md:block" style={{ color: 'rgba(255,255,255,0.5)' }}>{user?.email}</span>
+            <span className="text-sm hidden md:block" style={{ color: 'rgba(44,52,63,0.6)' }}>{user?.email}</span>
             <button onClick={handleSignOut} className="px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer hover:-translate-y-px"
-              style={{ background: 'rgba(229,45,75,0.2)', color: '#E52D4B', border: '1px solid rgba(229,45,75,0.3)' }}>
+              style={{ background: 'rgba(229,45,75,0.12)', color: '#E52D4B', border: '1px solid rgba(229,45,75,0.25)' }}>
               Sign Out
             </button>
           </div>
@@ -260,21 +260,21 @@ export default function TrackerApp() {
       </header>
 
       <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="rounded-2xl p-6 mb-8" style={{ background: 'linear-gradient(135deg, rgba(47,58,77,0.95), rgba(34,44,58,0.95))', border: '1px solid rgba(108,189,255,0.25)' }}>
+        <div className="rounded-2xl p-6 mb-8" style={{ background: '#ffffff', border: '1px solid rgba(108,189,255,0.3)', boxShadow: '0 8px 24px rgba(34,44,58,0.08)' }}>
           <div className="flex items-center justify-between mb-3">
             <div>
-              <p className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.6)' }}>Today&apos;s Progress</p>
+              <p className="text-sm font-semibold" style={{ color: 'rgba(44,52,63,0.7)' }}>Today&apos;s Progress</p>
               <p className="text-3xl font-black">
-                <span style={{ color: '#FFE799' }}>{claimedCount}</span>
-                <span style={{ color: 'rgba(255,255,255,0.3)' }}> / {totalCount}</span>
+                <span style={{ color: '#E52D4B' }}>{claimedCount}</span>
+                <span style={{ color: 'rgba(44,52,63,0.35)' }}> / {totalCount}</span>
               </p>
             </div>
             <div className="text-right">
               <p className="text-4xl font-black" style={{ color: '#E52D4B' }}>{Math.round(progress)}%</p>
-              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>bonuses claimed</p>
+              <p className="text-xs" style={{ color: 'rgba(44,52,63,0.45)' }}>bonuses claimed</p>
             </div>
           </div>
-          <div className="w-full h-3 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.1)' }}>
+          <div className="w-full h-3 rounded-full overflow-hidden" style={{ background: 'rgba(44,52,63,0.08)' }}>
             <div className="h-full rounded-full transition-all duration-500"
               style={{ width: `${progress}%`, background: 'linear-gradient(90deg, #E52D4B, #FFE799)', boxShadow: '0 0 10px rgba(229,45,75,0.5)' }} />
           </div>
@@ -284,12 +284,12 @@ export default function TrackerApp() {
           <input type="text" placeholder="Search casinos..." value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="flex-1 px-4 py-3 rounded-xl outline-none text-sm"
-            style={{ background: '#2C343F', border: '1px solid rgba(255,255,255,0.1)', color: '#f0f0f0' }} />
+            style={{ background: '#ffffff', border: '1px solid rgba(44,52,63,0.15)', color: '#2C343F' }} />
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as 'highest-sc' | 'highest-gc' | 'a-z' | 'z-a' | 'next-available')}
             className="px-4 py-3 rounded-xl outline-none text-sm"
-            style={{ background: '#2C343F', border: '1px solid rgba(255,255,255,0.1)', color: '#f0f0f0' }}>
+            style={{ background: '#ffffff', border: '1px solid rgba(44,52,63,0.15)', color: '#2C343F' }}>
             <option value="highest-sc">Sort: Highest SC</option>
             <option value="highest-gc">Sort: Highest GC</option>
             <option value="a-z">Sort: A-Z</option>
@@ -301,10 +301,10 @@ export default function TrackerApp() {
               <button key={f} onClick={() => setFilter(f)}
                 className="px-4 py-3 rounded-xl text-sm font-semibold capitalize transition-all cursor-pointer"
                 style={{
-                  background: filter === f ? '#E52D4B' : '#2C343F',
-                  color: filter === f ? '#fff' : 'rgba(255,255,255,0.5)',
-                  border: `1px solid ${filter === f ? '#E52D4B' : 'rgba(255,255,255,0.1)'}`,
-                  boxShadow: filter === f ? '0 0 15px rgba(229,45,75,0.4)' : 'none',
+                  background: filter === f ? '#E52D4B' : '#ffffff',
+                  color: filter === f ? '#fff' : 'rgba(44,52,63,0.65)',
+                  border: `1px solid ${filter === f ? '#E52D4B' : 'rgba(44,52,63,0.15)'}`,
+                  boxShadow: filter === f ? '0 6px 16px rgba(229,45,75,0.25)' : 'none',
                 }}>
                 {f}
               </button>
@@ -321,12 +321,12 @@ export default function TrackerApp() {
             <div key={casino.id} className="rounded-2xl p-4 transition-all duration-200 hover:-translate-y-0.5"
               style={{
                 background: claimed
-                  ? 'linear-gradient(135deg, rgba(77,46,63,0.94), rgba(54,44,58,0.94))'
-                  : 'linear-gradient(135deg, rgba(47,58,77,0.9), rgba(40,50,66,0.9))',
-                border: `1px solid ${claimed ? 'rgba(229,45,75,0.35)' : 'rgba(108,189,255,0.22)'}`,
+                  ? 'linear-gradient(135deg, rgba(255,240,244,0.98), rgba(255,247,249,0.98))'
+                  : '#ffffff',
+                border: `1px solid ${claimed ? 'rgba(229,45,75,0.35)' : 'rgba(44,52,63,0.12)'}`,
                 boxShadow: claimed
-                  ? '0 8px 24px rgba(229,45,75,0.16)'
-                  : '0 8px 24px rgba(6,12,20,0.22)',
+                  ? '0 8px 24px rgba(229,45,75,0.12)'
+                  : '0 8px 24px rgba(34,44,58,0.08)',
               }}>
               <div className="flex items-start justify-between gap-3 mb-2">
                 <div className="flex items-center gap-2 min-w-0">
@@ -348,12 +348,12 @@ export default function TrackerApp() {
                       target="_blank"
                       rel="noreferrer"
                       className="font-bold text-[1.05rem] truncate"
-                      style={{ color: claimed ? '#FFE799' : '#f0f0f0' }}
+                      style={{ color: claimed ? '#C22B45' : '#2C343F' }}
                     >
                       {casino.name}
                     </a>
                   ) : (
-                    <h3 className="font-bold text-[1.05rem] truncate" style={{ color: claimed ? '#FFE799' : '#f0f0f0' }}>
+                    <h3 className="font-bold text-[1.05rem] truncate" style={{ color: claimed ? '#C22B45' : '#2C343F' }}>
                       {casino.name}
                     </h3>
                   )}
@@ -365,18 +365,18 @@ export default function TrackerApp() {
                     aria-label={casino.is_favorite ? `Remove ${casino.name} from favorites` : `Add ${casino.name} to favorites`}
                     title={casino.is_favorite ? 'Remove from favorites' : 'Add to favorites'}
                     style={{
-                      background: casino.is_favorite ? 'rgba(229,45,75,0.24)' : 'rgba(255,255,255,0.08)',
-                      border: `1px solid ${casino.is_favorite ? 'rgba(229,45,75,0.65)' : 'rgba(255,255,255,0.22)'}`,
+                      background: casino.is_favorite ? 'rgba(229,45,75,0.16)' : 'rgba(44,52,63,0.04)',
+                      border: `1px solid ${casino.is_favorite ? 'rgba(229,45,75,0.5)' : 'rgba(44,52,63,0.15)'}`,
                     }}
                   >
-                    <span style={{ color: casino.is_favorite ? '#E52D4B' : 'rgba(255,255,255,0.38)', fontSize: '0.95rem' }}>♥</span>
+                    <span style={{ color: casino.is_favorite ? '#E52D4B' : 'rgba(44,52,63,0.35)', fontSize: '0.95rem' }}>♥</span>
                   </button>
                   <button onClick={() => toggleClaim(casino)}
                     disabled={claimed}
                     className="w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-105"
                     style={{
-                      background: claimed ? '#E52D4B' : 'rgba(255,255,255,0.08)',
-                      border: `2px solid ${claimed ? '#E52D4B' : 'rgba(255,255,255,0.2)'}`,
+                      background: claimed ? '#E52D4B' : 'rgba(44,52,63,0.04)',
+                      border: `2px solid ${claimed ? '#E52D4B' : 'rgba(44,52,63,0.15)'}`,
                       boxShadow: claimed ? '0 0 10px rgba(229,45,75,0.5)' : 'none',
                       cursor: claimed ? 'not-allowed' : 'pointer',
                       opacity: claimed ? 0.85 : 1,
@@ -389,17 +389,17 @@ export default function TrackerApp() {
                   </button>
                 </div>
               </div>
-              <p className="text-sm mb-2" style={{ color: 'rgba(255,255,255,0.62)' }}>{casino.bonus_description}</p>
+              <p className="text-sm mb-2" style={{ color: 'rgba(44,52,63,0.65)' }}>{casino.bonus_description}</p>
               <div className="flex flex-wrap gap-2 mb-2">
                 {countdown && (
                   <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold"
-                    style={{ background: 'rgba(229,45,75,0.2)', border: '1px solid rgba(229,45,75,0.3)', color: '#ff9bad' }}>
+                    style={{ background: 'rgba(229,45,75,0.12)', border: '1px solid rgba(229,45,75,0.2)', color: '#C22B45' }}>
                     ⏳ Available in {countdown}
                   </div>
                 )}
                 {isStreakActive(casino) && (
                   <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold"
-                    style={{ background: 'rgba(255,231,153,0.14)', border: '1px solid rgba(255,231,153,0.28)', color: '#FFE799' }}>
+                    style={{ background: 'rgba(255,231,153,0.25)', border: '1px solid rgba(239,194,77,0.35)', color: '#9E7300' }}>
                     🔥 {casino.streak} day streak
                   </div>
                 )}
@@ -409,12 +409,12 @@ export default function TrackerApp() {
                   <button
                     onClick={() => toggleWelcomeOfferInfo(casino.id)}
                     className="text-xs font-semibold cursor-pointer"
-                    style={{ color: '#FFE799' }}>
+                    style={{ color: '#C22B45' }}>
                     {expandedCasinoIds.has(casino.id) ? 'Hide welcome offer info ▲' : 'Show welcome offer info ▼'}
                   </button>
                   {expandedCasinoIds.has(casino.id) && (
                     <div className="mt-2 p-3 rounded-lg text-xs leading-relaxed"
-                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.75)' }}>
+                      style={{ background: 'rgba(44,52,63,0.03)', border: '1px solid rgba(44,52,63,0.1)', color: 'rgba(44,52,63,0.75)' }}>
                       {casino.welcome_offer_info}
                     </div>
                   )}
@@ -427,7 +427,7 @@ export default function TrackerApp() {
         {filtered.length === 0 && (
           <div className="text-center py-20">
             <div className="text-5xl mb-4">🎲</div>
-            <p style={{ color: 'rgba(255,255,255,0.4)' }}>No casinos match your filter</p>
+            <p style={{ color: 'rgba(44,52,63,0.45)' }}>No casinos match your filter</p>
           </div>
         )}
       </div>
