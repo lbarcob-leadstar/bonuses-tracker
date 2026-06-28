@@ -322,11 +322,11 @@ export default function TrackerApp() {
               style={{
                 background: claimed
                   ? 'linear-gradient(135deg, rgba(77,46,63,0.94), rgba(54,44,58,0.94))'
-                  : 'linear-gradient(135deg, rgba(47,58,77,0.9), rgba(40,50,66,0.9))',
-                border: `1px solid ${claimed ? 'rgba(229,45,75,0.35)' : 'rgba(108,189,255,0.22)'}`,
+                  : 'linear-gradient(135deg, rgba(66,91,122,0.96), rgba(53,77,106,0.96))',
+                border: `1px solid ${claimed ? 'rgba(229,45,75,0.35)' : 'rgba(108,189,255,0.35)'}`,
                 boxShadow: claimed
                   ? '0 8px 24px rgba(229,45,75,0.16)'
-                  : '0 8px 24px rgba(6,12,20,0.22)',
+                  : '0 10px 26px rgba(14,26,42,0.35)',
               }}>
               <div className="flex items-start justify-between gap-3 mb-2">
                 <div className="flex items-center gap-2 min-w-0">
