@@ -139,27 +139,27 @@ export default function AdminPanel() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#f4f7fb' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#1e252e' }}>
         <div className="text-4xl animate-spin">🎰</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #f8fbff 0%, #eef3f8 100%)' }}>
-      <header style={{ background: '#ffffff', borderBottom: '2px solid rgba(108,189,255,0.65)' }}>
+    <div className="min-h-screen" style={{ background: '#1e252e' }}>
+      <header style={{ background: '#2C343F', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="text-2xl">⚙️</span>
             <div>
-              <h1 className="font-black text-lg" style={{ color: '#2C343F' }}>Admin Panel</h1>
-              <p className="text-xs" style={{ color: 'rgba(44,52,63,0.6)' }}>{casinos.length} casinos total</p>
+              <h1 className="font-black text-lg" style={{ color: '#FFE799' }}>Admin Panel</h1>
+              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>{casinos.length} casinos total</p>
             </div>
           </div>
           <div className="flex gap-3">
             <a href="/app"
               className="px-4 py-2 rounded-xl text-sm font-semibold"
-              style={{ background: '#ffffff', color: 'rgba(44,52,63,0.7)', border: '1px solid rgba(44,52,63,0.15)' }}>
+              style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.1)' }}>
               ← Back to App
             </a>
             <button onClick={() => setShowAdd(true)}
@@ -174,37 +174,37 @@ export default function AdminPanel() {
       <div className="max-w-5xl mx-auto px-4 py-8">
         {showAdd && (
           <div className="rounded-2xl p-6 mb-6"
-            style={{ background: '#ffffff', border: '1px solid rgba(229,45,75,0.25)', boxShadow: '0 8px 24px rgba(34,44,58,0.08)' }}>
-            <h2 className="font-bold mb-4" style={{ color: '#2C343F' }}>New Casino</h2>
+            style={{ background: '#2C343F', border: '1px solid rgba(229,45,75,0.4)', boxShadow: '0 0 20px rgba(229,45,75,0.15)' }}>
+            <h2 className="font-bold mb-4" style={{ color: '#FFE799' }}>New Casino</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <input placeholder="Casino name" value={newForm.name}
                 onChange={(e) => setNewForm((p) => ({ ...p, name: e.target.value }))}
                 className="px-4 py-3 rounded-xl outline-none text-sm"
-                style={{ background: '#ffffff', border: '1px solid rgba(44,52,63,0.15)', color: '#2C343F' }} />
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#f0f0f0' }} />
               <input placeholder="Bonus description" value={newForm.bonus_description}
                 onChange={(e) => setNewForm((p) => ({ ...p, bonus_description: e.target.value }))}
                 className="px-4 py-3 rounded-xl outline-none text-sm"
-                style={{ background: '#ffffff', border: '1px solid rgba(44,52,63,0.15)', color: '#2C343F' }} />
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#f0f0f0' }} />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <input placeholder="Logo URL (https://...)" value={newForm.logo_url}
                 onChange={(e) => setNewForm((p) => ({ ...p, logo_url: e.target.value }))}
                 className="px-4 py-3 rounded-xl outline-none text-sm"
-                style={{ background: '#ffffff', border: '1px solid rgba(44,52,63,0.15)', color: '#2C343F' }} />
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#f0f0f0' }} />
               <input placeholder="Casino URL (https://...)" value={newForm.casino_url}
                 onChange={(e) => setNewForm((p) => ({ ...p, casino_url: e.target.value }))}
                 className="px-4 py-3 rounded-xl outline-none text-sm"
-                style={{ background: '#ffffff', border: '1px solid rgba(44,52,63,0.15)', color: '#2C343F' }} />
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#f0f0f0' }} />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <input placeholder="SC amount (e.g. 0.5)" value={newForm.sc_amount}
                 onChange={(e) => setNewForm((p) => ({ ...p, sc_amount: e.target.value }))}
                 className="px-4 py-3 rounded-xl outline-none text-sm"
-                style={{ background: '#ffffff', border: '1px solid rgba(44,52,63,0.15)', color: '#2C343F' }} />
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#f0f0f0' }} />
               <input placeholder="GC amount (e.g. 10000)" value={newForm.gc_amount}
                 onChange={(e) => setNewForm((p) => ({ ...p, gc_amount: e.target.value }))}
                 className="px-4 py-3 rounded-xl outline-none text-sm"
-                style={{ background: '#ffffff', border: '1px solid rgba(44,52,63,0.15)', color: '#2C343F' }} />
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#f0f0f0' }} />
             </div>
             <textarea placeholder="Welcome offer info (expanded details shown in app)" value={newForm.welcome_offer_info}
               onChange={(e) => setNewForm((p) => ({ ...p, welcome_offer_info: e.target.value }))}
@@ -214,7 +214,7 @@ export default function AdminPanel() {
               <button onClick={addCasino} className="px-6 py-2 rounded-xl text-sm font-bold cursor-pointer"
                 style={{ background: '#E52D4B', color: '#fff' }}>Save</button>
               <button onClick={() => setShowAdd(false)} className="px-6 py-2 rounded-xl text-sm cursor-pointer"
-                style={{ background: '#ffffff', color: 'rgba(44,52,63,0.7)', border: '1px solid rgba(44,52,63,0.15)' }}>Cancel</button>
+                style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.6)' }}>Cancel</button>
             </div>
           </div>
         )}
@@ -222,32 +222,32 @@ export default function AdminPanel() {
         <div className="space-y-3">
           {casinos.map((casino) => (
             <div key={casino.id} className="rounded-2xl p-4 transition-all"
-              style={{ background: '#ffffff', border: `1px solid ${casino.is_active ? 'rgba(44,52,63,0.12)' : 'rgba(229,45,75,0.25)'}`, opacity: casino.is_active ? 1 : 0.65, boxShadow: '0 6px 18px rgba(34,44,58,0.06)' }}>
+              style={{ background: '#2C343F', border: `1px solid ${casino.is_active ? 'rgba(255,255,255,0.08)' : 'rgba(229,45,75,0.2)'}`, opacity: casino.is_active ? 1 : 0.5 }}>
               {editingId === casino.id ? (
                 <div className="flex flex-col gap-3">
                   <div className="flex flex-col md:flex-row gap-3">
                     <input value={editForm.name} onChange={(e) => setEditForm((p) => ({ ...p, name: e.target.value }))}
                       className="flex-1 px-3 py-2 rounded-xl text-sm outline-none"
-                      style={{ background: '#ffffff', border: '1px solid rgba(44,52,63,0.15)', color: '#2C343F' }} />
+                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,231,153,0.4)', color: '#f0f0f0' }} />
                     <input value={editForm.bonus_description} onChange={(e) => setEditForm((p) => ({ ...p, bonus_description: e.target.value }))}
                       className="flex-[2] px-3 py-2 rounded-xl text-sm outline-none"
-                      style={{ background: '#ffffff', border: '1px solid rgba(44,52,63,0.15)', color: '#2C343F' }} />
+                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,231,153,0.4)', color: '#f0f0f0' }} />
                   </div>
                   <div className="flex flex-col md:flex-row gap-3">
                     <input value={editForm.logo_url} onChange={(e) => setEditForm((p) => ({ ...p, logo_url: e.target.value }))}
                       placeholder="Logo URL (https://...)"
                       className="flex-1 px-3 py-2 rounded-xl text-sm outline-none"
-                      style={{ background: '#ffffff', border: '1px solid rgba(44,52,63,0.15)', color: '#2C343F' }} />
+                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,231,153,0.4)', color: '#f0f0f0' }} />
                     <input value={editForm.casino_url} onChange={(e) => setEditForm((p) => ({ ...p, casino_url: e.target.value }))}
                       placeholder="Casino URL (https://...)"
                       className="flex-1 px-3 py-2 rounded-xl text-sm outline-none"
-                      style={{ background: '#ffffff', border: '1px solid rgba(44,52,63,0.15)', color: '#2C343F' }} />
+                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,231,153,0.4)', color: '#f0f0f0' }} />
                   </div>
                   <div className="flex flex-col md:flex-row gap-3">
                     <input value={editForm.sc_amount} onChange={(e) => setEditForm((p) => ({ ...p, sc_amount: e.target.value }))}
                       placeholder="SC amount (e.g. 0.5)"
                       className="flex-1 px-3 py-2 rounded-xl text-sm outline-none"
-                      style={{ background: '#ffffff', border: '1px solid rgba(44,52,63,0.15)', color: '#2C343F' }} />
+                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,231,153,0.4)', color: '#f0f0f0' }} />
                     <input value={editForm.gc_amount} onChange={(e) => setEditForm((p) => ({ ...p, gc_amount: e.target.value }))}
                       placeholder="GC amount (e.g. 10000)"
                       className="flex-1 px-3 py-2 rounded-xl text-sm outline-none"
@@ -261,20 +261,20 @@ export default function AdminPanel() {
                     <button onClick={() => saveEdit(casino.id)} className="px-4 py-2 rounded-xl text-sm font-bold cursor-pointer"
                       style={{ background: '#E52D4B', color: '#fff' }}>Save</button>
                     <button onClick={() => setEditingId(null)} className="px-4 py-2 rounded-xl text-sm cursor-pointer"
-                      style={{ background: '#ffffff', color: 'rgba(44,52,63,0.7)', border: '1px solid rgba(44,52,63,0.15)' }}>Cancel</button>
+                      style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.5)' }}>Cancel</button>
                   </div>
                 </div>
               ) : (
                 <div className="flex items-center gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-sm" style={{ color: '#2C343F' }}>{casino.name}</span>
+                      <span className="font-bold text-sm" style={{ color: '#f0f0f0' }}>{casino.name}</span>
                       {!casino.is_active && (
                         <span className="text-xs px-2 py-0.5 rounded-full"
                           style={{ background: 'rgba(229,45,75,0.2)', color: '#E52D4B' }}>hidden</span>
                       )}
                     </div>
-                    <p className="text-xs mt-0.5 truncate" style={{ color: 'rgba(44,52,63,0.55)' }}>{casino.bonus_description}</p>
+                    <p className="text-xs mt-0.5 truncate" style={{ color: 'rgba(255,255,255,0.4)' }}>{casino.bonus_description}</p>
                     {casino.casino_url && (
                       <p className="text-xs mt-1 truncate">
                         <a href={casino.casino_url} target="_blank" rel="noreferrer"
@@ -284,7 +284,7 @@ export default function AdminPanel() {
                       </p>
                     )}
                     {casino.logo_url && (
-                      <p className="text-xs mt-1 truncate" style={{ color: 'rgba(44,52,63,0.55)' }}>
+                      <p className="text-xs mt-1 truncate" style={{ color: 'rgba(255,255,255,0.55)' }}>
                         Logo: {casino.logo_url}
                       </p>
                     )}
@@ -293,13 +293,13 @@ export default function AdminPanel() {
                         Welcome offer: {casino.welcome_offer_info}
                       </p>
                     )}
-                    <p className="text-xs mt-1" style={{ color: 'rgba(44,52,63,0.55)' }}>
+                    <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>
                       SC: {casino.sc_amount ?? '—'} · GC: {casino.gc_amount ?? '—'}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <button onClick={() => toggleActive(casino)} className="px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer"
-                      style={{ background: casino.is_active ? 'rgba(44,52,63,0.04)' : 'rgba(229,45,75,0.12)', color: casino.is_active ? 'rgba(44,52,63,0.55)' : '#E52D4B', border: '1px solid rgba(44,52,63,0.15)' }}>
+                      style={{ background: casino.is_active ? 'rgba(255,255,255,0.05)' : 'rgba(229,45,75,0.2)', color: casino.is_active ? 'rgba(255,255,255,0.4)' : '#E52D4B', border: '1px solid rgba(255,255,255,0.1)' }}>
                       {casino.is_active ? 'Hide' : 'Show'}
                     </button>
                     <button onClick={() => startEdit(casino)} className="px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer"

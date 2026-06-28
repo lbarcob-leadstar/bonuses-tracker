@@ -15,7 +15,7 @@ export default function LandingPage() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(180deg, #f8fbff 0%, #eef3f8 100%)' }}>
+    <main className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(135deg, #1e252e 0%, #2C343F 50%, #1e252e 100%)' }}>
       <div className="flex-1 flex flex-col items-center justify-center px-4 text-center">
         <div className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold"
           style={{ background: 'rgba(229,45,75,0.15)', border: '1px solid rgba(229,45,75,0.4)', color: '#E52D4B' }}>
@@ -23,12 +23,12 @@ export default function LandingPage() {
         </div>
         <h1 className="text-5xl md:text-7xl font-black mb-4 leading-tight tracking-tight">
           Never Miss a{' '}
-          <span style={{ color: '#E52D4B' }}>
+          <span style={{ color: '#FFE799', textShadow: '0 0 30px rgba(255,231,153,0.5)' }}>
             Daily Bonus
           </span>
           {' '}Again
         </h1>
-        <p className="text-lg md:text-xl max-w-2xl mb-10" style={{ color: 'rgba(44,52,63,0.7)' }}>
+        <p className="text-lg md:text-xl max-w-2xl mb-10" style={{ color: 'rgba(255,255,255,0.6)' }}>
           Track all your sweepstakes casino daily bonuses in one place.
           Check them off as you claim, build your streaks, and never leave free coins on the table.
         </p>
@@ -40,7 +40,7 @@ export default function LandingPage() {
           <GoogleIcon />
           Sign in with Google — It&apos;s Free
         </button>
-        <p className="mt-4 text-sm" style={{ color: 'rgba(44,52,63,0.45)' }}>
+        <p className="mt-4 text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
           No credit card required · Syncs across all your devices
         </p>
       </div>
@@ -51,10 +51,10 @@ export default function LandingPage() {
           { icon: '🔄', title: 'Auto-Reset', desc: 'Bonuses reset at midnight so you\'re always up to date' },
         ].map((f) => (
           <div key={f.title} className="rounded-2xl p-6 text-center"
-            style={{ background: '#ffffff', border: '1px solid rgba(44,52,63,0.12)', boxShadow: '0 8px 24px rgba(34,44,58,0.08)' }}>
+            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
             <div className="text-4xl mb-3">{f.icon}</div>
-            <h3 className="font-bold text-lg mb-2" style={{ color: '#2C343F' }}>{f.title}</h3>
-            <p style={{ color: 'rgba(44,52,63,0.65)' }}>{f.desc}</p>
+            <h3 className="font-bold text-lg mb-2" style={{ color: '#FFE799' }}>{f.title}</h3>
+            <p style={{ color: 'rgba(255,255,255,0.6)' }}>{f.desc}</p>
           </div>
         ))}
       </div>

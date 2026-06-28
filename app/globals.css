@@ -21,8 +21,8 @@
 }
 
 body {
-  background-color: #eef3f8;
-  color: #2c343f;
+  background-color: var(--primary-dark);
+  color: #f0f0f0;
   font-family: var(--font-geist-sans), sans-serif;
 }
 
