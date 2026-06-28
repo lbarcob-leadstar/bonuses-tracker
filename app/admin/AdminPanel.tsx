@@ -15,6 +15,8 @@ export default function AdminPanel() {
     welcome_offer_info: '',
     logo_url: '',
     casino_url: '',
+    sc_amount: '',
+    gc_amount: '',
   })
   const [newForm, setNewForm] = useState({
     name: '',
@@ -22,8 +24,21 @@ export default function AdminPanel() {
     welcome_offer_info: '',
     logo_url: '',
     casino_url: '',
+    sc_amount: '',
+    gc_amount: '',
   })
   const [showAdd, setShowAdd] = useState(false)
+
+  const parseNullableNumber = (value: string, label: string) => {
+    const trimmed = value.trim()
+    if (!trimmed) return { ok: true as const, value: null as number | null }
+    const parsed = Number.parseFloat(trimmed.replace(',', '.'))
+    if (!Number.isFinite(parsed)) {
+      alert(`${label} must be a valid number`)
+      return { ok: false as const, value: null as number | null }
+    }
+    return { ok: true as const, value: parsed }
+  }
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -54,16 +69,25 @@ export default function AdminPanel() {
       welcome_offer_info: casino.welcome_offer_info ?? '',
       logo_url: casino.logo_url ?? '',
       casino_url: casino.casino_url ?? '',
+      sc_amount: casino.sc_amount?.toString() ?? '',
+      gc_amount: casino.gc_amount?.toString() ?? '',
     })
   }
 
   const saveEdit = async (id: string) => {
+    const scAmount = parseNullableNumber(editForm.sc_amount, 'SC amount')
+    if (!scAmount.ok) return
+    const gcAmount = parseNullableNumber(editForm.gc_amount, 'GC amount')
+    if (!gcAmount.ok) return
+
     const payload = {
       name: editForm.name,
       bonus_description: editForm.bonus_description,
       welcome_offer_info: editForm.welcome_offer_info.trim() ? editForm.welcome_offer_info : null,
       logo_url: editForm.logo_url.trim() ? editForm.logo_url : null,
       casino_url: editForm.casino_url.trim() ? editForm.casino_url : null,
+      sc_amount: scAmount.value,
+      gc_amount: gcAmount.value,
     }
     await supabase.from('casinos').update(payload).eq('id', id)
     setCasinos((prev) => prev.map((c) => c.id === id ? { ...c, ...payload } : c))
@@ -78,6 +102,11 @@ export default function AdminPanel() {
 
   const addCasino = async () => {
     if (!newForm.name || !newForm.bonus_description) return
+    const scAmount = parseNullableNumber(newForm.sc_amount, 'SC amount')
+    if (!scAmount.ok) return
+    const gcAmount = parseNullableNumber(newForm.gc_amount, 'GC amount')
+    if (!gcAmount.ok) return
+
     const maxOrder = Math.max(...casinos.map((c) => c.sort_order), 0)
     const payload = {
       name: newForm.name,
@@ -85,6 +114,8 @@ export default function AdminPanel() {
       welcome_offer_info: newForm.welcome_offer_info.trim() ? newForm.welcome_offer_info : null,
       logo_url: newForm.logo_url.trim() ? newForm.logo_url : null,
       casino_url: newForm.casino_url.trim() ? newForm.casino_url : null,
+      sc_amount: scAmount.value,
+      gc_amount: gcAmount.value,
       is_active: true,
       sort_order: maxOrder + 1,
     }
@@ -94,7 +125,15 @@ export default function AdminPanel() {
       .select()
       .single()
     if (data) setCasinos((prev) => [...prev, data])
-    setNewForm({ name: '', bonus_description: '', welcome_offer_info: '', logo_url: '', casino_url: '' })
+    setNewForm({
+      name: '',
+      bonus_description: '',
+      welcome_offer_info: '',
+      logo_url: '',
+      casino_url: '',
+      sc_amount: '',
+      gc_amount: '',
+    })
     setShowAdd(false)
   }
 
@@ -157,6 +196,16 @@ export default function AdminPanel() {
                 className="px-4 py-3 rounded-xl outline-none text-sm"
                 style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#f0f0f0' }} />
             </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <input placeholder="SC amount (e.g. 0.5)" value={newForm.sc_amount}
+                onChange={(e) => setNewForm((p) => ({ ...p, sc_amount: e.target.value }))}
+                className="px-4 py-3 rounded-xl outline-none text-sm"
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#f0f0f0' }} />
+              <input placeholder="GC amount (e.g. 10000)" value={newForm.gc_amount}
+                onChange={(e) => setNewForm((p) => ({ ...p, gc_amount: e.target.value }))}
+                className="px-4 py-3 rounded-xl outline-none text-sm"
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#f0f0f0' }} />
+            </div>
             <textarea placeholder="Welcome offer info (expanded details shown in app)" value={newForm.welcome_offer_info}
               onChange={(e) => setNewForm((p) => ({ ...p, welcome_offer_info: e.target.value }))}
               className="w-full mb-4 px-4 py-3 rounded-xl outline-none text-sm resize-y min-h-[96px]"
@@ -191,6 +240,16 @@ export default function AdminPanel() {
                       style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,231,153,0.4)', color: '#f0f0f0' }} />
                     <input value={editForm.casino_url} onChange={(e) => setEditForm((p) => ({ ...p, casino_url: e.target.value }))}
                       placeholder="Casino URL (https://...)"
+                      className="flex-1 px-3 py-2 rounded-xl text-sm outline-none"
+                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,231,153,0.4)', color: '#f0f0f0' }} />
+                  </div>
+                  <div className="flex flex-col md:flex-row gap-3">
+                    <input value={editForm.sc_amount} onChange={(e) => setEditForm((p) => ({ ...p, sc_amount: e.target.value }))}
+                      placeholder="SC amount (e.g. 0.5)"
+                      className="flex-1 px-3 py-2 rounded-xl text-sm outline-none"
+                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,231,153,0.4)', color: '#f0f0f0' }} />
+                    <input value={editForm.gc_amount} onChange={(e) => setEditForm((p) => ({ ...p, gc_amount: e.target.value }))}
+                      placeholder="GC amount (e.g. 10000)"
                       className="flex-1 px-3 py-2 rounded-xl text-sm outline-none"
                       style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,231,153,0.4)', color: '#f0f0f0' }} />
                   </div>
@@ -234,6 +293,9 @@ export default function AdminPanel() {
                         Welcome offer: {casino.welcome_offer_info}
                       </p>
                     )}
+                    <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                      SC: {casino.sc_amount ?? '—'} · GC: {casino.gc_amount ?? '—'}
+                    </p>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <button onClick={() => toggleActive(casino)} className="px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer"

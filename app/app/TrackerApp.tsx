@@ -14,7 +14,7 @@ export default function TrackerApp() {
   const [expandedCasinoIds, setExpandedCasinoIds] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'claimed' | 'unclaimed'>('all')
-  const [sortBy, setSortBy] = useState<'highest-sc' | 'lowest-sc' | 'a-z' | 'z-a' | 'next-available'>('next-available')
+  const [sortBy, setSortBy] = useState<'highest-sc' | 'highest-gc' | 'a-z' | 'z-a' | 'next-available'>('next-available')
   const [search, setSearch] = useState('')
   const [now, setNow] = useState(Date.now())
 
@@ -41,19 +41,8 @@ export default function TrackerApp() {
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
   }, [getCooldownEndsAt, now])
 
-  const getScValue = useCallback((bonusDescription: string) => {
-    const scMatches = [...bonusDescription.matchAll(/(\d[\d,.]*)(?:\s*-\s*(\d[\d,.]*))?\s*SC\b/gi)]
-    if (scMatches.length === 0) return 0
-
-    let maxValue = 0
-    for (const match of scMatches) {
-      const first = Number.parseFloat((match[1] ?? '0').replace(/,/g, ''))
-      const second = Number.parseFloat((match[2] ?? '0').replace(/,/g, ''))
-      maxValue = Math.max(maxValue, Number.isFinite(first) ? first : 0, Number.isFinite(second) ? second : 0)
-    }
-
-    return maxValue
-  }, [])
+  const getScValue = useCallback((casino: CasinoWithClaim) => Number(casino.sc_amount ?? 0), [])
+  const getGcValue = useCallback((casino: CasinoWithClaim) => Number(casino.gc_amount ?? 0), [])
 
   const getRemainingCooldownMs = useCallback((casino: CasinoWithClaim) => {
     const endsAt = getCooldownEndsAt(casino.last_claimed_at)
@@ -204,12 +193,12 @@ export default function TrackerApp() {
 
     switch (sortBy) {
       case 'highest-sc': {
-        const diff = getScValue(b.bonus_description) - getScValue(a.bonus_description)
+        const diff = getScValue(b) - getScValue(a)
         if (diff !== 0) return diff
         return a.name.localeCompare(b.name)
       }
-      case 'lowest-sc': {
-        const diff = getScValue(a.bonus_description) - getScValue(b.bonus_description)
+      case 'highest-gc': {
+        const diff = getGcValue(b) - getGcValue(a)
         if (diff !== 0) return diff
         return a.name.localeCompare(b.name)
       }
@@ -298,11 +287,11 @@ export default function TrackerApp() {
             style={{ background: '#2C343F', border: '1px solid rgba(255,255,255,0.1)', color: '#f0f0f0' }} />
           <select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as 'highest-sc' | 'lowest-sc' | 'a-z' | 'z-a' | 'next-available')}
+            onChange={(e) => setSortBy(e.target.value as 'highest-sc' | 'highest-gc' | 'a-z' | 'z-a' | 'next-available')}
             className="px-4 py-3 rounded-xl outline-none text-sm"
             style={{ background: '#2C343F', border: '1px solid rgba(255,255,255,0.1)', color: '#f0f0f0' }}>
             <option value="highest-sc">Sort: Highest SC</option>
-            <option value="lowest-sc">Sort: Lowest SC</option>
+            <option value="highest-gc">Sort: Highest GC</option>
             <option value="a-z">Sort: A-Z</option>
             <option value="z-a">Sort: Z-A</option>
             <option value="next-available">Sort: Next available bonus</option>
