@@ -317,6 +317,8 @@ export default function TrackerApp() {
           {sortedFiltered.map((casino) => {
             const claimed = isOnCooldown(casino)
             const countdown = formatCountdown(casino)
+            const scAmount = casino.sc_amount ?? 0
+            const gcAmount = casino.gc_amount ?? 0
 
             return (
             <div key={casino.id} className={`casino-card p-4 ${claimed ? 'casino-card-claimed' : 'casino-card-available'}`}>
@@ -383,10 +385,10 @@ export default function TrackerApp() {
               </div>
               <p className="text-sm mb-2" style={{ color: 'rgba(255,255,255,0.62)' }}>{casino.bonus_description}</p>
               <div className="flex flex-wrap gap-2 mb-2">
-                {(casino.sc_amount > 0 || casino.gc_amount > 0) && (
+                {(scAmount > 0 || gcAmount > 0) && (
                   <>
-                    {casino.sc_amount > 0 && <span className="casino-chip casino-chip-sc">SC {casino.sc_amount.toLocaleString()}</span>}
-                    {casino.gc_amount > 0 && <span className="casino-chip casino-chip-gc">GC {casino.gc_amount.toLocaleString()}</span>}
+                    {scAmount > 0 && <span className="casino-chip casino-chip-sc">SC {scAmount.toLocaleString()}</span>}
+                    {gcAmount > 0 && <span className="casino-chip casino-chip-gc">GC {gcAmount.toLocaleString()}</span>}
                   </>
                 )}
                 {countdown && (
