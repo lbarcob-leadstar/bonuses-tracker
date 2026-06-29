@@ -237,13 +237,14 @@ export default function TrackerApp() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'radial-gradient(circle at top right, rgba(229,45,75,0.12), transparent 40%), #1e252e' }}>
-      <header style={{ background: '#2f3a4d', borderBottom: '2px solid rgba(108,189,255,0.65)' }}>
+    <div className="min-h-screen casino-app-bg relative overflow-hidden">
+      <div className="casino-texture" />
+      <header className="casino-header relative z-10">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="text-2xl">🎰</span>
             <div>
-              <h1 className="font-black text-lg leading-none" style={{ color: '#FFE799' }}>Bonus Tracker</h1>
+              <h1 className="font-black text-lg leading-none" style={{ color: '#FFE799', textShadow: '0 0 10px rgba(255, 231, 153, 0.3)' }}>Bonus Tracker</h1>
               <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
                 {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
               </p>
@@ -259,8 +260,8 @@ export default function TrackerApp() {
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="rounded-2xl p-6 mb-8" style={{ background: 'linear-gradient(135deg, rgba(47,58,77,0.95), rgba(34,44,58,0.95))', border: '1px solid rgba(108,189,255,0.25)' }}>
+      <div className="max-w-6xl mx-auto px-4 py-8 relative z-10">
+        <div className="casino-progress rounded-2xl p-6 mb-8">
           <div className="flex items-center justify-between mb-3">
             <div>
               <p className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.6)' }}>Today&apos;s Progress</p>
@@ -274,22 +275,21 @@ export default function TrackerApp() {
               <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>bonuses claimed</p>
             </div>
           </div>
-          <div className="w-full h-3 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.1)' }}>
+          <div className="w-full h-3 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.12)' }}>
             <div className="h-full rounded-full transition-all duration-500"
-              style={{ width: `${progress}%`, background: 'linear-gradient(90deg, #E52D4B, #FFE799)', boxShadow: '0 0 10px rgba(229,45,75,0.5)' }} />
+              style={{ width: `${progress}%`, background: 'linear-gradient(90deg, #E52D4B 0%, #ff6f98 40%, #FFE799 100%)', boxShadow: '0 0 14px rgba(229,45,75,0.56)' }} />
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
+        <div className="casino-panel p-4 mb-6">
+          <div className="flex flex-col md:flex-row gap-4">
           <input type="text" placeholder="Search casinos..." value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="flex-1 px-4 py-3 rounded-xl outline-none text-sm"
-            style={{ background: '#2C343F', border: '1px solid rgba(255,255,255,0.1)', color: '#f0f0f0' }} />
+            className="flex-1 px-4 py-3 rounded-xl outline-none text-sm casino-control" />
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as 'highest-sc' | 'highest-gc' | 'a-z' | 'z-a' | 'next-available')}
-            className="px-4 py-3 rounded-xl outline-none text-sm"
-            style={{ background: '#2C343F', border: '1px solid rgba(255,255,255,0.1)', color: '#f0f0f0' }}>
+            className="px-4 py-3 rounded-xl outline-none text-sm casino-control">
             <option value="highest-sc">Sort: Highest SC</option>
             <option value="highest-gc">Sort: Highest GC</option>
             <option value="a-z">Sort: A-Z</option>
@@ -310,6 +310,7 @@ export default function TrackerApp() {
               </button>
             ))}
           </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -318,16 +319,7 @@ export default function TrackerApp() {
             const countdown = formatCountdown(casino)
 
             return (
-            <div key={casino.id} className="rounded-2xl p-4 transition-all duration-200 hover:-translate-y-0.5"
-              style={{
-                background: claimed
-                  ? 'linear-gradient(135deg, rgba(77,46,63,0.94), rgba(54,44,58,0.94))'
-                  : 'linear-gradient(135deg, rgba(66,91,122,0.96), rgba(53,77,106,0.96))',
-                border: `1px solid ${claimed ? 'rgba(229,45,75,0.35)' : 'rgba(108,189,255,0.35)'}`,
-                boxShadow: claimed
-                  ? '0 8px 24px rgba(229,45,75,0.16)'
-                  : '0 10px 26px rgba(14,26,42,0.35)',
-              }}>
+            <div key={casino.id} className={`casino-card p-4 ${claimed ? 'casino-card-claimed' : 'casino-card-available'}`}>
               <div className="flex items-start justify-between gap-3 mb-2">
                 <div className="flex items-center gap-2 min-w-0">
                   {casino.logo_url ? (
@@ -391,6 +383,12 @@ export default function TrackerApp() {
               </div>
               <p className="text-sm mb-2" style={{ color: 'rgba(255,255,255,0.62)' }}>{casino.bonus_description}</p>
               <div className="flex flex-wrap gap-2 mb-2">
+                {(casino.sc_amount > 0 || casino.gc_amount > 0) && (
+                  <>
+                    {casino.sc_amount > 0 && <span className="casino-chip casino-chip-sc">SC {casino.sc_amount.toLocaleString()}</span>}
+                    {casino.gc_amount > 0 && <span className="casino-chip casino-chip-gc">GC {casino.gc_amount.toLocaleString()}</span>}
+                  </>
+                )}
                 {countdown && (
                   <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold"
                     style={{ background: 'rgba(229,45,75,0.2)', border: '1px solid rgba(229,45,75,0.3)', color: '#ff9bad' }}>

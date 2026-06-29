@@ -26,6 +26,107 @@ body {
   font-family: var(--font-geist-sans), sans-serif;
 }
 
+.casino-app-bg {
+  background:
+    radial-gradient(circle at 9% 8%, rgba(255, 231, 153, 0.22), transparent 22%),
+    radial-gradient(circle at 90% 4%, rgba(77, 196, 255, 0.2), transparent 30%),
+    radial-gradient(circle at 82% 72%, rgba(229, 45, 75, 0.26), transparent 32%),
+    linear-gradient(150deg, #161f2c 0%, #202b3a 38%, #261d31 100%);
+}
+
+.casino-texture {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.2;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 26px 26px;
+  mix-blend-mode: soft-light;
+}
+
+.casino-header {
+  background: linear-gradient(90deg, rgba(40, 50, 65, 0.94), rgba(31, 43, 58, 0.96));
+  border-bottom: 2px solid rgba(90, 193, 255, 0.62);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+}
+
+.casino-panel {
+  background: linear-gradient(130deg, rgba(49, 63, 84, 0.9), rgba(31, 41, 56, 0.92));
+  border: 1px solid rgba(90, 193, 255, 0.26);
+  border-radius: 1rem;
+  box-shadow: 0 16px 34px rgba(5, 13, 22, 0.34);
+  backdrop-filter: blur(6px);
+}
+
+.casino-progress {
+  background:
+    radial-gradient(circle at 84% 22%, rgba(229, 45, 75, 0.34), transparent 34%),
+    linear-gradient(128deg, rgba(55, 71, 96, 0.95), rgba(28, 37, 52, 0.95));
+  border: 1px solid rgba(100, 199, 255, 0.24);
+  box-shadow: 0 18px 40px rgba(8, 16, 27, 0.36);
+}
+
+.casino-control {
+  background: rgba(18, 26, 37, 0.72);
+  border: 1px solid rgba(100, 199, 255, 0.24);
+  color: #f5f8ff;
+}
+
+.casino-control:focus {
+  border-color: rgba(255, 231, 153, 0.6);
+  box-shadow: 0 0 0 2px rgba(255, 231, 153, 0.22);
+}
+
+.casino-card {
+  border-radius: 1rem;
+  border: 1px solid rgba(104, 197, 255, 0.35);
+  box-shadow: 0 14px 30px rgba(5, 13, 24, 0.35);
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.casino-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 22px 36px rgba(5, 13, 24, 0.45);
+}
+
+.casino-card-claimed {
+  background:
+    radial-gradient(circle at 90% 18%, rgba(255, 77, 117, 0.28), transparent 35%),
+    linear-gradient(130deg, rgba(83, 39, 62, 0.96), rgba(51, 44, 67, 0.96));
+  border-color: rgba(229, 45, 75, 0.46);
+}
+
+.casino-card-available {
+  background:
+    radial-gradient(circle at 15% 0%, rgba(94, 213, 255, 0.18), transparent 25%),
+    linear-gradient(130deg, rgba(68, 95, 130, 0.96), rgba(46, 67, 94, 0.96));
+}
+
+.casino-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.26rem 0.52rem;
+  border-radius: 0.58rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.casino-chip-sc {
+  background: rgba(229, 45, 75, 0.22);
+  border: 1px solid rgba(229, 45, 75, 0.45);
+  color: #ffd3dc;
+}
+
+.casino-chip-gc {
+  background: rgba(255, 231, 153, 0.15);
+  border: 1px solid rgba(255, 231, 153, 0.36);
+  color: #ffe799;
+}
+
 .glow-red {
   box-shadow: 0 0 20px rgba(229, 45, 75, 0.4);
 }
