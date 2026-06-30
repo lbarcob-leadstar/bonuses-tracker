@@ -222,10 +222,11 @@ export default function TrackerApp() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#1e252e' }}>
+      <div className="min-h-screen casino-app-bg flex items-center justify-center relative overflow-hidden">
+        <div className="casino-texture" />
         <div className="text-center">
           <div className="text-4xl mb-4 animate-spin">🎰</div>
-          <p style={{ color: '#FFE799' }}>Loading your bonuses...</p>
+          <p style={{ color: '#2C343F', fontWeight: 700 }}>Loading your bonuses...</p>
         </div>
       </div>
     )

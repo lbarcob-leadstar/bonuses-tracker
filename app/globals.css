@@ -21,27 +21,28 @@
 }
 
 body {
-  background-color: var(--primary-dark);
-  color: #f0f0f0;
+  background-color: #ffffff;
+  color: #1e252e;
   font-family: var(--font-geist-sans), sans-serif;
 }
 
 .casino-app-bg {
+  background-color: #ffffff;
   background:
-    radial-gradient(circle at 9% 8%, rgba(255, 231, 153, 0.22), transparent 22%),
-    radial-gradient(circle at 90% 4%, rgba(77, 196, 255, 0.2), transparent 30%),
-    radial-gradient(circle at 82% 72%, rgba(229, 45, 75, 0.26), transparent 32%),
-    linear-gradient(150deg, #161f2c 0%, #202b3a 38%, #261d31 100%);
+    linear-gradient(128deg, rgba(229, 45, 75, 0.35) 0%, rgba(73, 148, 201, 0.34) 56%, rgba(255, 255, 255, 0.94) 100%),
+    radial-gradient(circle at 13% 12%, rgba(229, 45, 75, 0.3), transparent 31%),
+    radial-gradient(circle at 86% 16%, rgba(73, 148, 201, 0.28), transparent 34%),
+    radial-gradient(circle at 74% 74%, rgba(229, 45, 75, 0.18), transparent 30%);
 }
 
 .casino-texture {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: 0.2;
+  opacity: 0.12;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    linear-gradient(rgba(28, 45, 67, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(28, 45, 67, 0.12) 1px, transparent 1px);
   background-size: 26px 26px;
   mix-blend-mode: soft-light;
 }
