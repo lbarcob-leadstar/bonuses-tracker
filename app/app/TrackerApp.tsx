@@ -13,7 +13,7 @@ export default function TrackerApp() {
   const [casinos, setCasinos] = useState<CasinoWithClaim[]>([])
   const [expandedCasinoIds, setExpandedCasinoIds] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState<'all' | 'claimed' | 'unclaimed'>('all')
+  const [filter, setFilter] = useState<'all' | 'claimed' | 'unclaimed' | 'favorites'>('all')
   const [sortBy, setSortBy] = useState<'highest-sc' | 'highest-gc' | 'a-z' | 'z-a' | 'next-available'>('next-available')
   const [search, setSearch] = useState('')
   const [now, setNow] = useState(Date.now())
@@ -90,7 +90,7 @@ export default function TrackerApp() {
         is_favorite: favoriteIds.has(casino.id),
       }
     })
-    merged.sort((a, b) => Number(b.is_favorite) - Number(a.is_favorite) || a.sort_order - b.sort_order)
+    merged.sort((a, b) => a.sort_order - b.sort_order)
     setCasinos(merged)
     setLoading(false)
   }, [supabase])
@@ -161,11 +161,7 @@ export default function TrackerApp() {
       await supabase.from('user_favorites').upsert({ user_id: user.id, casino_id: casino.id }, { onConflict: 'user_id,casino_id' })
     }
 
-    setCasinos((prev) => {
-      const updated = prev.map((c) => c.id === casino.id ? { ...c, is_favorite: !c.is_favorite } : c)
-      updated.sort((a, b) => Number(b.is_favorite) - Number(a.is_favorite) || a.sort_order - b.sort_order)
-      return updated
-    })
+    setCasinos((prev) => prev.map((c) => c.id === casino.id ? { ...c, is_favorite: !c.is_favorite } : c))
   }
 
   const toggleWelcomeOfferInfo = (casinoId: string) => {
@@ -185,12 +181,11 @@ export default function TrackerApp() {
     const claimed = isOnCooldown(c)
     if (filter === 'claimed') return matchesSearch && claimed
     if (filter === 'unclaimed') return matchesSearch && !claimed
+    if (filter === 'favorites') return matchesSearch && c.is_favorite
     return matchesSearch
   })
 
   const sortedFiltered = [...filtered].sort((a, b) => {
-    if (a.is_favorite !== b.is_favorite) return a.is_favorite ? -1 : 1
-
     switch (sortBy) {
       case 'highest-sc': {
         const diff = getScValue(b) - getScValue(a)
@@ -297,7 +292,7 @@ export default function TrackerApp() {
             <option value="next-available">Sort: Next available bonus</option>
           </select>
           <div className="flex gap-2">
-            {(['all', 'unclaimed', 'claimed'] as const).map((f) => (
+            {(['all', 'unclaimed', 'claimed', 'favorites'] as const).map((f) => (
               <button key={f} onClick={() => setFilter(f)}
                 className="px-4 py-3 rounded-xl text-sm font-semibold capitalize transition-all cursor-pointer"
                 style={{
