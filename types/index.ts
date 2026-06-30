@@ -7,6 +7,8 @@ export interface Casino {
   welcome_offer_info: string | null
   logo_url: string | null
   casino_url: string | null
+  logo_primary_color: string | null
+  logo_secondary_color: string | null
   sc_amount: number | null
   gc_amount: number | null
   is_active: boolean

@@ -53,6 +53,16 @@ export default function TrackerApp() {
     return `rgba(${m[0]}, ${m[1]}, ${m[2]}, ${alpha})`
   }, [])
 
+  const hexToRgb = useCallback((hex: string | null | undefined) => {
+    if (!hex) return null
+    const normalized = hex.trim().startsWith('#') ? hex.trim() : `#${hex.trim()}`
+    if (!/^#[0-9a-fA-F]{6}$/.test(normalized)) return null
+    const r = Number.parseInt(normalized.slice(1, 3), 16)
+    const g = Number.parseInt(normalized.slice(3, 5), 16)
+    const b = Number.parseInt(normalized.slice(5, 7), 16)
+    return `rgb(${r}, ${g}, ${b})`
+  }, [])
+
   const buildLogoGradient = useCallback(async (logoUrl: string): Promise<LogoGradient | null> => {
     try {
       const img = new Image()
@@ -467,9 +477,15 @@ export default function TrackerApp() {
             const countdown = formatCountdown(casino)
             const scAmount = casino.sc_amount ?? 0
             const gcAmount = casino.gc_amount ?? 0
-            const logoGradient = (casino.logo_url && logoGradients[casino.logo_url])
+            const manualPrimary = hexToRgb(casino.logo_primary_color)
+            const manualSecondary = hexToRgb(casino.logo_secondary_color)
+            const manualGradient = manualPrimary && manualSecondary
+              ? { primary: manualPrimary, secondary: manualSecondary }
+              : null
+            const autoGradient = (casino.logo_url && logoGradients[casino.logo_url])
               ? logoGradients[casino.logo_url]
-              : { primary: 'rgb(73, 148, 201)', secondary: 'rgb(229, 45, 75)' }
+              : null
+            const logoGradient = manualGradient ?? autoGradient ?? { primary: 'rgb(73, 148, 201)', secondary: 'rgb(229, 45, 75)' }
             const cardBackground = claimed
               ? `linear-gradient(135deg, ${withAlpha(logoGradient.primary, 0.22)}, ${withAlpha(logoGradient.secondary, 0.28)}), linear-gradient(140deg, rgba(67, 42, 58, 0.95), rgba(49, 41, 63, 0.95))`
               : `linear-gradient(135deg, ${withAlpha(logoGradient.primary, 0.27)}, ${withAlpha(logoGradient.secondary, 0.23)}), linear-gradient(140deg, rgba(45, 61, 83, 0.96), rgba(35, 51, 73, 0.96))`

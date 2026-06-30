@@ -15,6 +15,8 @@ export default function AdminPanel() {
     welcome_offer_info: '',
     logo_url: '',
     casino_url: '',
+    logo_primary_color: '',
+    logo_secondary_color: '',
     sc_amount: '',
     gc_amount: '',
   })
@@ -24,6 +26,8 @@ export default function AdminPanel() {
     welcome_offer_info: '',
     logo_url: '',
     casino_url: '',
+    logo_primary_color: '',
+    logo_secondary_color: '',
     sc_amount: '',
     gc_amount: '',
   })
@@ -38,6 +42,17 @@ export default function AdminPanel() {
       return { ok: false as const, value: null as number | null }
     }
     return { ok: true as const, value: parsed }
+  }
+
+  const parseNullableHexColor = (value: string, label: string) => {
+    const trimmed = value.trim()
+    if (!trimmed) return { ok: true as const, value: null as string | null }
+    const normalized = trimmed.startsWith('#') ? trimmed : `#${trimmed}`
+    if (!/^#[0-9a-fA-F]{6}$/.test(normalized)) {
+      alert(`${label} must be a valid 6-digit hex color (e.g. #E52D4B)`)
+      return { ok: false as const, value: null as string | null }
+    }
+    return { ok: true as const, value: normalized.toUpperCase() }
   }
 
   useEffect(() => {
@@ -69,6 +84,8 @@ export default function AdminPanel() {
       welcome_offer_info: casino.welcome_offer_info ?? '',
       logo_url: casino.logo_url ?? '',
       casino_url: casino.casino_url ?? '',
+      logo_primary_color: casino.logo_primary_color ?? '',
+      logo_secondary_color: casino.logo_secondary_color ?? '',
       sc_amount: casino.sc_amount?.toString() ?? '',
       gc_amount: casino.gc_amount?.toString() ?? '',
     })
@@ -79,6 +96,10 @@ export default function AdminPanel() {
     if (!scAmount.ok) return
     const gcAmount = parseNullableNumber(editForm.gc_amount, 'GC amount')
     if (!gcAmount.ok) return
+    const primaryColor = parseNullableHexColor(editForm.logo_primary_color, 'Primary logo color')
+    if (!primaryColor.ok) return
+    const secondaryColor = parseNullableHexColor(editForm.logo_secondary_color, 'Secondary logo color')
+    if (!secondaryColor.ok) return
 
     const payload = {
       name: editForm.name,
@@ -86,6 +107,8 @@ export default function AdminPanel() {
       welcome_offer_info: editForm.welcome_offer_info.trim() ? editForm.welcome_offer_info : null,
       logo_url: editForm.logo_url.trim() ? editForm.logo_url : null,
       casino_url: editForm.casino_url.trim() ? editForm.casino_url : null,
+      logo_primary_color: primaryColor.value,
+      logo_secondary_color: secondaryColor.value,
       sc_amount: scAmount.value,
       gc_amount: gcAmount.value,
     }
@@ -106,6 +129,10 @@ export default function AdminPanel() {
     if (!scAmount.ok) return
     const gcAmount = parseNullableNumber(newForm.gc_amount, 'GC amount')
     if (!gcAmount.ok) return
+    const primaryColor = parseNullableHexColor(newForm.logo_primary_color, 'Primary logo color')
+    if (!primaryColor.ok) return
+    const secondaryColor = parseNullableHexColor(newForm.logo_secondary_color, 'Secondary logo color')
+    if (!secondaryColor.ok) return
 
     const maxOrder = Math.max(...casinos.map((c) => c.sort_order), 0)
     const payload = {
@@ -114,6 +141,8 @@ export default function AdminPanel() {
       welcome_offer_info: newForm.welcome_offer_info.trim() ? newForm.welcome_offer_info : null,
       logo_url: newForm.logo_url.trim() ? newForm.logo_url : null,
       casino_url: newForm.casino_url.trim() ? newForm.casino_url : null,
+      logo_primary_color: primaryColor.value,
+      logo_secondary_color: secondaryColor.value,
       sc_amount: scAmount.value,
       gc_amount: gcAmount.value,
       is_active: true,
@@ -131,6 +160,8 @@ export default function AdminPanel() {
       welcome_offer_info: '',
       logo_url: '',
       casino_url: '',
+      logo_primary_color: '',
+      logo_secondary_color: '',
       sc_amount: '',
       gc_amount: '',
     })
@@ -197,6 +228,16 @@ export default function AdminPanel() {
                 style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#f0f0f0' }} />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <input placeholder="Primary logo color (#E52D4B)" value={newForm.logo_primary_color}
+                onChange={(e) => setNewForm((p) => ({ ...p, logo_primary_color: e.target.value }))}
+                className="px-4 py-3 rounded-xl outline-none text-sm"
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#f0f0f0' }} />
+              <input placeholder="Secondary logo color (#4994C9)" value={newForm.logo_secondary_color}
+                onChange={(e) => setNewForm((p) => ({ ...p, logo_secondary_color: e.target.value }))}
+                className="px-4 py-3 rounded-xl outline-none text-sm"
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#f0f0f0' }} />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <input placeholder="SC amount (e.g. 0.5)" value={newForm.sc_amount}
                 onChange={(e) => setNewForm((p) => ({ ...p, sc_amount: e.target.value }))}
                 className="px-4 py-3 rounded-xl outline-none text-sm"
@@ -244,6 +285,16 @@ export default function AdminPanel() {
                       style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,231,153,0.4)', color: '#f0f0f0' }} />
                   </div>
                   <div className="flex flex-col md:flex-row gap-3">
+                    <input value={editForm.logo_primary_color} onChange={(e) => setEditForm((p) => ({ ...p, logo_primary_color: e.target.value }))}
+                      placeholder="Primary logo color (#E52D4B)"
+                      className="flex-1 px-3 py-2 rounded-xl text-sm outline-none"
+                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,231,153,0.4)', color: '#f0f0f0' }} />
+                    <input value={editForm.logo_secondary_color} onChange={(e) => setEditForm((p) => ({ ...p, logo_secondary_color: e.target.value }))}
+                      placeholder="Secondary logo color (#4994C9)"
+                      className="flex-1 px-3 py-2 rounded-xl text-sm outline-none"
+                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,231,153,0.4)', color: '#f0f0f0' }} />
+                  </div>
+                  <div className="flex flex-col md:flex-row gap-3">
                     <input value={editForm.sc_amount} onChange={(e) => setEditForm((p) => ({ ...p, sc_amount: e.target.value }))}
                       placeholder="SC amount (e.g. 0.5)"
                       className="flex-1 px-3 py-2 rounded-xl text-sm outline-none"
@@ -286,6 +337,11 @@ export default function AdminPanel() {
                     {casino.logo_url && (
                       <p className="text-xs mt-1 truncate" style={{ color: 'rgba(255,255,255,0.55)' }}>
                         Logo: {casino.logo_url}
+                      </p>
+                    )}
+                    {(casino.logo_primary_color || casino.logo_secondary_color) && (
+                      <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                        Gradient: {casino.logo_primary_color ?? '—'} / {casino.logo_secondary_color ?? '—'}
                       </p>
                     )}
                     {casino.welcome_offer_info && (
