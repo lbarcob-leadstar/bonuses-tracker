@@ -5,6 +5,8 @@ import { createClient } from '@/lib/supabase'
 import type { User } from '@supabase/supabase-js'
 import type { CasinoWithClaim } from '@/types'
 
+type LogoGradient = { primary: string, secondary: string }
+
 export default function TrackerApp() {
   const COOLDOWN_MS = 24 * 60 * 60 * 1000
   const STREAK_ACTIVE_MS = 48 * 60 * 60 * 1000
@@ -17,6 +19,7 @@ export default function TrackerApp() {
   const [sortBy, setSortBy] = useState<'highest-sc' | 'highest-gc' | 'a-z' | 'z-a' | 'next-available'>('next-available')
   const [search, setSearch] = useState('')
   const [now, setNow] = useState(Date.now())
+  const [logoGradients, setLogoGradients] = useState<Record<string, LogoGradient>>({})
 
   const getCooldownEndsAt = useCallback((lastClaimedAt: string | null) => {
     if (!lastClaimedAt) return null
@@ -43,6 +46,70 @@ export default function TrackerApp() {
 
   const getScValue = useCallback((casino: CasinoWithClaim) => Number(casino.sc_amount ?? 0), [])
   const getGcValue = useCallback((casino: CasinoWithClaim) => Number(casino.gc_amount ?? 0), [])
+
+  const withAlpha = useCallback((rgb: string, alpha: number) => {
+    const m = rgb.match(/\d+/g)
+    if (!m || m.length < 3) return `rgba(73,148,201,${alpha})`
+    return `rgba(${m[0]}, ${m[1]}, ${m[2]}, ${alpha})`
+  }, [])
+
+  const buildLogoGradient = useCallback(async (logoUrl: string): Promise<LogoGradient | null> => {
+    try {
+      const img = new Image()
+      img.crossOrigin = 'anonymous'
+      img.referrerPolicy = 'no-referrer'
+
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve()
+        img.onerror = () => reject(new Error('logo-load-failed'))
+        img.src = logoUrl
+      })
+
+      const canvas = document.createElement('canvas')
+      canvas.width = 28
+      canvas.height = 28
+      const ctx = canvas.getContext('2d', { willReadFrequently: true })
+      if (!ctx) return null
+
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+      const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height)
+      const buckets = new Map<string, { count: number, r: number, g: number, b: number }>()
+
+      for (let i = 0; i < data.length; i += 16) {
+        const r = data[i]
+        const g = data[i + 1]
+        const b = data[i + 2]
+        const a = data[i + 3]
+        if (a < 120) continue
+        const key = `${r >> 4}-${g >> 4}-${b >> 4}`
+        const current = buckets.get(key) ?? { count: 0, r: 0, g: 0, b: 0 }
+        current.count += 1
+        current.r += r
+        current.g += g
+        current.b += b
+        buckets.set(key, current)
+      }
+
+      const ranked = [...buckets.values()]
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 4)
+        .map((p) => ({
+          r: Math.round(p.r / p.count),
+          g: Math.round(p.g / p.count),
+          b: Math.round(p.b / p.count),
+        }))
+
+      if (ranked.length === 0) return null
+      const first = ranked[0]
+      const second = ranked[1] ?? ranked[0]
+      return {
+        primary: `rgb(${first.r}, ${first.g}, ${first.b})`,
+        secondary: `rgb(${second.r}, ${second.g}, ${second.b})`,
+      }
+    } catch {
+      return null
+    }
+  }, [])
 
   const getRemainingCooldownMs = useCallback((casino: CasinoWithClaim) => {
     const endsAt = getCooldownEndsAt(casino.last_claimed_at)
@@ -110,6 +177,32 @@ export default function TrackerApp() {
     const timerId = window.setInterval(() => setNow(Date.now()), 1000)
     return () => window.clearInterval(timerId)
   }, [])
+
+  useEffect(() => {
+    const logoUrls = [...new Set(casinos.map((c) => c.logo_url).filter((u): u is string => !!u))]
+      .filter((url) => !logoGradients[url])
+    if (logoUrls.length === 0) return
+
+    let cancelled = false
+
+    Promise.all(logoUrls.map(async (url) => ({
+      url,
+      gradient: await buildLogoGradient(url),
+    }))).then((results) => {
+      if (cancelled) return
+      setLogoGradients((prev) => {
+        const next = { ...prev }
+        for (const result of results) {
+          next[result.url] = result.gradient ?? { primary: 'rgb(73, 148, 201)', secondary: 'rgb(229, 45, 75)' }
+        }
+        return next
+      })
+    })
+
+    return () => {
+      cancelled = true
+    }
+  }, [casinos, logoGradients, buildLogoGradient])
 
   const toggleClaim = async (casino: CasinoWithClaim) => {
     if (!user) return
@@ -229,6 +322,8 @@ export default function TrackerApp() {
     .reduce((sum, casino) => sum + (casino.gc_amount ?? 0), 0)
   const scProgress = totalScAvailable > 0 ? (totalScClaimed / totalScAvailable) * 100 : 0
   const gcProgress = totalGcAvailable > 0 ? (totalGcClaimed / totalGcAvailable) * 100 : 0
+  const activeStreaks = casinos.filter((casino) => isStreakActive(casino)).length
+  const favoriteCount = casinos.filter((casino) => casino.is_favorite).length
 
   if (loading) {
     return (
@@ -268,6 +363,21 @@ export default function TrackerApp() {
 
       <div className="max-w-6xl mx-auto px-4 py-8 relative z-10">
         <div className="casino-progress rounded-2xl p-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
+            <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(255,255,255,0.14)', border: '1px solid rgba(255,255,255,0.2)' }}>
+              <p className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.72)' }}>Claimed Bonuses</p>
+              <p className="text-2xl font-black" style={{ color: '#ffffff' }}>{claimedCount}</p>
+            </div>
+            <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(229,45,75,0.15)', border: '1px solid rgba(229,45,75,0.3)' }}>
+              <p className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.72)' }}>Active Streaks</p>
+              <p className="text-2xl font-black" style={{ color: '#ffdbe4' }}>{activeStreaks}</p>
+            </div>
+            <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(73,148,201,0.2)', border: '1px solid rgba(73,148,201,0.34)' }}>
+              <p className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.72)' }}>Favorite Brands</p>
+              <p className="text-2xl font-black" style={{ color: '#d8f0ff' }}>{favoriteCount}</p>
+            </div>
+          </div>
+
           <div className="flex items-center justify-between mb-3">
             <div>
               <p className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.6)' }}>Today&apos;s Progress</p>
@@ -357,9 +467,21 @@ export default function TrackerApp() {
             const countdown = formatCountdown(casino)
             const scAmount = casino.sc_amount ?? 0
             const gcAmount = casino.gc_amount ?? 0
+            const logoGradient = (casino.logo_url && logoGradients[casino.logo_url])
+              ? logoGradients[casino.logo_url]
+              : { primary: 'rgb(73, 148, 201)', secondary: 'rgb(229, 45, 75)' }
+            const cardBackground = claimed
+              ? `linear-gradient(135deg, ${withAlpha(logoGradient.primary, 0.22)}, ${withAlpha(logoGradient.secondary, 0.28)}), linear-gradient(140deg, rgba(67, 42, 58, 0.95), rgba(49, 41, 63, 0.95))`
+              : `linear-gradient(135deg, ${withAlpha(logoGradient.primary, 0.27)}, ${withAlpha(logoGradient.secondary, 0.23)}), linear-gradient(140deg, rgba(45, 61, 83, 0.96), rgba(35, 51, 73, 0.96))`
 
             return (
-            <div key={casino.id} className={`casino-card p-4 ${claimed ? 'casino-card-claimed' : 'casino-card-available'}`}>
+            <div
+              key={casino.id}
+              className="casino-card p-4"
+              style={{
+                background: cardBackground,
+                borderColor: claimed ? withAlpha(logoGradient.secondary, 0.5) : withAlpha(logoGradient.primary, 0.44),
+              }}>
               <div className="flex items-start justify-between gap-3 mb-2">
                 <div className="flex items-center gap-2 min-w-0">
                   {casino.logo_url ? (

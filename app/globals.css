@@ -92,19 +92,6 @@ body {
   box-shadow: 0 22px 36px rgba(5, 13, 24, 0.45);
 }
 
-.casino-card-claimed {
-  background:
-    radial-gradient(circle at 90% 18%, rgba(255, 77, 117, 0.28), transparent 35%),
-    linear-gradient(130deg, rgba(83, 39, 62, 0.96), rgba(51, 44, 67, 0.96));
-  border-color: rgba(229, 45, 75, 0.46);
-}
-
-.casino-card-available {
-  background:
-    radial-gradient(circle at 15% 0%, rgba(94, 213, 255, 0.18), transparent 25%),
-    linear-gradient(130deg, rgba(68, 95, 130, 0.96), rgba(46, 67, 94, 0.96));
-}
-
 .casino-chip {
   display: inline-flex;
   align-items: center;
