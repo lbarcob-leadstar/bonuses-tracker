@@ -219,6 +219,16 @@ export default function TrackerApp() {
   const claimedCount = casinos.filter((c) => isOnCooldown(c)).length
   const totalCount = casinos.length
   const progress = totalCount > 0 ? (claimedCount / totalCount) * 100 : 0
+  const totalScAvailable = casinos.reduce((sum, casino) => sum + (casino.sc_amount ?? 0), 0)
+  const totalGcAvailable = casinos.reduce((sum, casino) => sum + (casino.gc_amount ?? 0), 0)
+  const totalScClaimed = casinos
+    .filter((casino) => isOnCooldown(casino))
+    .reduce((sum, casino) => sum + (casino.sc_amount ?? 0), 0)
+  const totalGcClaimed = casinos
+    .filter((casino) => isOnCooldown(casino))
+    .reduce((sum, casino) => sum + (casino.gc_amount ?? 0), 0)
+  const scProgress = totalScAvailable > 0 ? (totalScClaimed / totalScAvailable) * 100 : 0
+  const gcProgress = totalGcAvailable > 0 ? (totalGcClaimed / totalGcAvailable) * 100 : 0
 
   if (loading) {
     return (
@@ -274,6 +284,38 @@ export default function TrackerApp() {
           <div className="w-full h-3 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.12)' }}>
             <div className="h-full rounded-full transition-all duration-500"
               style={{ width: `${progress}%`, background: 'linear-gradient(90deg, #E52D4B 0%, #ff6f98 40%, #FFE799 100%)', boxShadow: '0 0 14px rgba(229,45,75,0.56)' }} />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.75)' }}>Total SC claimed today</p>
+                <p className="text-xs font-bold" style={{ color: '#ffd7e1' }}>
+                  {totalScClaimed.toLocaleString()} / {totalScAvailable.toLocaleString()}
+                </p>
+              </div>
+              <div className="w-full h-2.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.14)' }}>
+                <div
+                  className="h-full rounded-full transition-all duration-500"
+                  style={{ width: `${scProgress}%`, background: 'linear-gradient(90deg, #E52D4B, #ff7ea5)', boxShadow: '0 0 10px rgba(229,45,75,0.45)' }}
+                />
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.75)' }}>Total GC claimed today</p>
+                <p className="text-xs font-bold" style={{ color: '#cfeeff' }}>
+                  {totalGcClaimed.toLocaleString()} / {totalGcAvailable.toLocaleString()}
+                </p>
+              </div>
+              <div className="w-full h-2.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.14)' }}>
+                <div
+                  className="h-full rounded-full transition-all duration-500"
+                  style={{ width: `${gcProgress}%`, background: 'linear-gradient(90deg, #4994C9, #7fd3ff)', boxShadow: '0 0 10px rgba(73,148,201,0.45)' }}
+                />
+              </div>
+            </div>
           </div>
         </div>
 
