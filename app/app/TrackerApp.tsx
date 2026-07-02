@@ -621,9 +621,21 @@ export default function TrackerApp() {
                         height: 'auto',
                       }}
                     >
-                      <span style={{ color: casino.is_favorite ? '#E52D4B' : 'rgba(255,255,255,0.42)', fontSize: '1.3rem', lineHeight: 1 }}>
-                        {casino.is_favorite ? '♥' : '♡'}
-                      </span>
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 20 20"
+                        fill="none"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="M10 17.25 8.84 16.2C4.7 12.45 2 9.99 2 6.98 2 4.52 3.93 2.75 6.4 2.75c1.39 0 2.73.64 3.6 1.64.87-1 2.21-1.64 3.6-1.64C16.07 2.75 18 4.52 18 6.98c0 3.01-2.7 5.47-6.84 9.22L10 17.25Z"
+                          fill={casino.is_favorite ? '#E52D4B' : 'transparent'}
+                          stroke={casino.is_favorite ? '#E52D4B' : 'rgba(255,255,255,0.42)'}
+                          strokeWidth="1.7"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
                     </span>
                   </div>
                 </div>
