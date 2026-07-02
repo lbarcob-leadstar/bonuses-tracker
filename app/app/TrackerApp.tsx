@@ -598,10 +598,18 @@ export default function TrackerApp() {
                         {casino.name}
                       </h3>
                     )}
-                    <button
+                    <span
                       onClick={() => toggleFavorite(casino)}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault()
+                          void toggleFavorite(casino)
+                        }
+                      }}
                       className="flex items-center justify-center transition-all duration-200 cursor-pointer hover:scale-110 flex-shrink-0 p-0"
                       aria-label={casino.is_favorite ? `Remove ${casino.name} from favorites` : `Add ${casino.name} to favorites`}
+                      role="button"
+                      tabIndex={0}
                       title={casino.is_favorite ? 'Remove from favorites' : 'Add to favorites'}
                       style={{
                         background: 'transparent',
@@ -609,8 +617,6 @@ export default function TrackerApp() {
                         borderRadius: 0,
                         boxShadow: 'none',
                         outline: 'none',
-                        appearance: 'none',
-                        WebkitAppearance: 'none',
                         width: 'auto',
                         height: 'auto',
                       }}
@@ -618,7 +624,7 @@ export default function TrackerApp() {
                       <span style={{ color: casino.is_favorite ? '#E52D4B' : 'rgba(255,255,255,0.42)', fontSize: '1.3rem', lineHeight: 1 }}>
                         {casino.is_favorite ? '♥' : '♡'}
                       </span>
-                    </button>
+                    </span>
                   </div>
                 </div>
                 <div className="flex-shrink-0 flex items-center gap-2">
