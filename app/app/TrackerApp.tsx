@@ -600,15 +600,24 @@ export default function TrackerApp() {
                     )}
                     <button
                       onClick={() => toggleFavorite(casino)}
-                      className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer hover:scale-105 flex-shrink-0"
+                      className="flex items-center justify-center transition-all duration-200 cursor-pointer hover:scale-110 flex-shrink-0 p-0"
                       aria-label={casino.is_favorite ? `Remove ${casino.name} from favorites` : `Add ${casino.name} to favorites`}
                       title={casino.is_favorite ? 'Remove from favorites' : 'Add to favorites'}
                       style={{
-                        background: casino.is_favorite ? 'rgba(229,45,75,0.24)' : 'rgba(255,255,255,0.08)',
-                        border: `1px solid ${casino.is_favorite ? 'rgba(229,45,75,0.65)' : 'rgba(255,255,255,0.22)'}`,
+                        background: 'transparent',
+                        border: 'none',
+                        borderRadius: 0,
+                        boxShadow: 'none',
+                        outline: 'none',
+                        appearance: 'none',
+                        WebkitAppearance: 'none',
+                        width: 'auto',
+                        height: 'auto',
                       }}
                     >
-                      <span style={{ color: casino.is_favorite ? '#E52D4B' : 'rgba(255,255,255,0.38)', fontSize: '0.95rem' }}>♥</span>
+                      <span style={{ color: casino.is_favorite ? '#E52D4B' : 'rgba(255,255,255,0.42)', fontSize: '1.3rem', lineHeight: 1 }}>
+                        {casino.is_favorite ? '♥' : '♡'}
+                      </span>
                     </button>
                   </div>
                 </div>
