@@ -17,6 +17,8 @@ export default function AdminPanel() {
     casino_url: '',
     logo_primary_color: '',
     logo_secondary_color: '',
+    min_redemption: '',
+    reset_at_midnight: false,
     sc_amount: '',
     gc_amount: '',
   })
@@ -28,6 +30,8 @@ export default function AdminPanel() {
     casino_url: '',
     logo_primary_color: '',
     logo_secondary_color: '',
+    min_redemption: '',
+    reset_at_midnight: false,
     sc_amount: '',
     gc_amount: '',
   })
@@ -86,6 +90,8 @@ export default function AdminPanel() {
       casino_url: casino.casino_url ?? '',
       logo_primary_color: casino.logo_primary_color ?? '',
       logo_secondary_color: casino.logo_secondary_color ?? '',
+      min_redemption: casino.min_redemption?.toString() ?? '',
+      reset_at_midnight: casino.reset_at_midnight,
       sc_amount: casino.sc_amount?.toString() ?? '',
       gc_amount: casino.gc_amount?.toString() ?? '',
     })
@@ -100,6 +106,8 @@ export default function AdminPanel() {
     if (!primaryColor.ok) return
     const secondaryColor = parseNullableHexColor(editForm.logo_secondary_color, 'Secondary logo color')
     if (!secondaryColor.ok) return
+    const minRedemption = parseNullableNumber(editForm.min_redemption, 'Min redemption')
+    if (!minRedemption.ok) return
 
     const payload = {
       name: editForm.name,
@@ -109,6 +117,8 @@ export default function AdminPanel() {
       casino_url: editForm.casino_url.trim() ? editForm.casino_url : null,
       logo_primary_color: primaryColor.value,
       logo_secondary_color: secondaryColor.value,
+      min_redemption: minRedemption.value,
+      reset_at_midnight: editForm.reset_at_midnight,
       sc_amount: scAmount.value,
       gc_amount: gcAmount.value,
     }
@@ -133,6 +143,8 @@ export default function AdminPanel() {
     if (!primaryColor.ok) return
     const secondaryColor = parseNullableHexColor(newForm.logo_secondary_color, 'Secondary logo color')
     if (!secondaryColor.ok) return
+    const minRedemption = parseNullableNumber(newForm.min_redemption, 'Min redemption')
+    if (!minRedemption.ok) return
 
     const maxOrder = Math.max(...casinos.map((c) => c.sort_order), 0)
     const payload = {
@@ -143,6 +155,8 @@ export default function AdminPanel() {
       casino_url: newForm.casino_url.trim() ? newForm.casino_url : null,
       logo_primary_color: primaryColor.value,
       logo_secondary_color: secondaryColor.value,
+      min_redemption: minRedemption.value,
+      reset_at_midnight: newForm.reset_at_midnight,
       sc_amount: scAmount.value,
       gc_amount: gcAmount.value,
       is_active: true,
@@ -162,6 +176,8 @@ export default function AdminPanel() {
       casino_url: '',
       logo_primary_color: '',
       logo_secondary_color: '',
+      min_redemption: '',
+      reset_at_midnight: false,
       sc_amount: '',
       gc_amount: '',
     })
@@ -238,6 +254,10 @@ export default function AdminPanel() {
                 style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#f0f0f0' }} />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <input placeholder="Min redemption (e.g. 50)" value={newForm.min_redemption}
+                onChange={(e) => setNewForm((p) => ({ ...p, min_redemption: e.target.value }))}
+                className="px-4 py-3 rounded-xl outline-none text-sm"
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#f0f0f0' }} />
               <input placeholder="SC amount (e.g. 0.5)" value={newForm.sc_amount}
                 onChange={(e) => setNewForm((p) => ({ ...p, sc_amount: e.target.value }))}
                 className="px-4 py-3 rounded-xl outline-none text-sm"
@@ -247,6 +267,14 @@ export default function AdminPanel() {
                 className="px-4 py-3 rounded-xl outline-none text-sm"
                 style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#f0f0f0' }} />
             </div>
+            <label className="mb-4 flex items-center gap-2 text-sm" style={{ color: 'rgba(255,255,255,0.78)' }}>
+              <input
+                type="checkbox"
+                checked={newForm.reset_at_midnight}
+                onChange={(e) => setNewForm((p) => ({ ...p, reset_at_midnight: e.target.checked }))}
+              />
+              Set timer reset to midnight (instead of 24h cooldown)
+            </label>
             <textarea placeholder="Welcome offer info (expanded details shown in app)" value={newForm.welcome_offer_info}
               onChange={(e) => setNewForm((p) => ({ ...p, welcome_offer_info: e.target.value }))}
               className="w-full mb-4 px-4 py-3 rounded-xl outline-none text-sm resize-y min-h-[96px]"
@@ -295,6 +323,10 @@ export default function AdminPanel() {
                       style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,231,153,0.4)', color: '#f0f0f0' }} />
                   </div>
                   <div className="flex flex-col md:flex-row gap-3">
+                    <input value={editForm.min_redemption} onChange={(e) => setEditForm((p) => ({ ...p, min_redemption: e.target.value }))}
+                      placeholder="Min redemption (e.g. 50)"
+                      className="flex-1 px-3 py-2 rounded-xl text-sm outline-none"
+                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,231,153,0.4)', color: '#f0f0f0' }} />
                     <input value={editForm.sc_amount} onChange={(e) => setEditForm((p) => ({ ...p, sc_amount: e.target.value }))}
                       placeholder="SC amount (e.g. 0.5)"
                       className="flex-1 px-3 py-2 rounded-xl text-sm outline-none"
@@ -304,6 +336,14 @@ export default function AdminPanel() {
                       className="flex-1 px-3 py-2 rounded-xl text-sm outline-none"
                       style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,231,153,0.4)', color: '#f0f0f0' }} />
                   </div>
+                  <label className="flex items-center gap-2 text-sm" style={{ color: 'rgba(255,255,255,0.78)' }}>
+                    <input
+                      type="checkbox"
+                      checked={editForm.reset_at_midnight}
+                      onChange={(e) => setEditForm((p) => ({ ...p, reset_at_midnight: e.target.checked }))}
+                    />
+                    Set timer reset to midnight (instead of 24h cooldown)
+                  </label>
                   <textarea value={editForm.welcome_offer_info} onChange={(e) => setEditForm((p) => ({ ...p, welcome_offer_info: e.target.value }))}
                     placeholder="Welcome offer info"
                     className="w-full px-3 py-2 rounded-xl text-sm outline-none resize-y min-h-[88px]"
@@ -350,7 +390,10 @@ export default function AdminPanel() {
                       </p>
                     )}
                     <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>
-                      SC: {casino.sc_amount ?? '—'} · GC: {casino.gc_amount ?? '—'}
+                      Min redemption: {casino.min_redemption ?? '—'} · SC: {casino.sc_amount ?? '—'} · GC: {casino.gc_amount ?? '—'}
+                    </p>
+                    <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                      Reset mode: {casino.reset_at_midnight ? 'Midnight' : '24h cooldown'}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">

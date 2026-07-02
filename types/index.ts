@@ -9,6 +9,8 @@ export interface Casino {
   casino_url: string | null
   logo_primary_color: string | null
   logo_secondary_color: string | null
+  min_redemption: number | null
+  reset_at_midnight: boolean
   sc_amount: number | null
   gc_amount: number | null
   is_active: boolean

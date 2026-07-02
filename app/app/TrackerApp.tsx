@@ -21,18 +21,23 @@ export default function TrackerApp() {
   const [now, setNow] = useState(Date.now())
   const [logoGradients, setLogoGradients] = useState<Record<string, LogoGradient>>({})
 
-  const getCooldownEndsAt = useCallback((lastClaimedAt: string | null) => {
+  const getCooldownEndsAt = useCallback((casino: CasinoWithClaim, lastClaimedAt: string | null) => {
     if (!lastClaimedAt) return null
+    if (casino.reset_at_midnight) {
+      const midnightReset = new Date(lastClaimedAt)
+      midnightReset.setHours(24, 0, 0, 0)
+      return midnightReset
+    }
     return new Date(new Date(lastClaimedAt).getTime() + COOLDOWN_MS)
   }, [COOLDOWN_MS])
 
   const isOnCooldown = useCallback((casino: CasinoWithClaim) => {
-    const endsAt = getCooldownEndsAt(casino.last_claimed_at)
+    const endsAt = getCooldownEndsAt(casino, casino.last_claimed_at)
     return !!endsAt && endsAt.getTime() > now
   }, [getCooldownEndsAt, now])
 
   const formatCountdown = useCallback((casino: CasinoWithClaim) => {
-    const endsAt = getCooldownEndsAt(casino.last_claimed_at)
+    const endsAt = getCooldownEndsAt(casino, casino.last_claimed_at)
     if (!endsAt) return null
     const remaining = endsAt.getTime() - now
     if (remaining <= 0) return null
@@ -47,6 +52,10 @@ export default function TrackerApp() {
   const getScValue = useCallback((casino: CasinoWithClaim) => Number(casino.sc_amount ?? 0), [])
   const getGcValue = useCallback((casino: CasinoWithClaim) => Number(casino.gc_amount ?? 0), [])
   const getMinRedemptionValue = useCallback((casino: CasinoWithClaim) => {
+    if (casino.min_redemption !== null && Number.isFinite(casino.min_redemption)) {
+      return Number(casino.min_redemption)
+    }
+
     const text = `${casino.bonus_description ?? ''} ${casino.welcome_offer_info ?? ''}`
     const matches = [...text.matchAll(/\$\s*(\d+(?:[.,]\d+)?)/g)]
       .map((m) => Number.parseFloat(m[1].replace(',', '.')))
@@ -131,7 +140,7 @@ export default function TrackerApp() {
   }, [])
 
   const getRemainingCooldownMs = useCallback((casino: CasinoWithClaim) => {
-    const endsAt = getCooldownEndsAt(casino.last_claimed_at)
+    const endsAt = getCooldownEndsAt(casino, casino.last_claimed_at)
     if (!endsAt) return 0
     return Math.max(0, endsAt.getTime() - now)
   }, [getCooldownEndsAt, now])
@@ -267,8 +276,20 @@ export default function TrackerApp() {
       ? (nowDate.getTime() - new Date(lastClaim.claimed_at).getTime()) / (1000 * 60 * 60)
       : null
 
+    const dayStartNow = new Date(nowDate)
+    dayStartNow.setHours(0, 0, 0, 0)
+    const dayStartLast = lastClaim?.claimed_at ? new Date(lastClaim.claimed_at) : null
+    if (dayStartLast) dayStartLast.setHours(0, 0, 0, 0)
+    const dayDiff = dayStartLast
+      ? Math.round((dayStartNow.getTime() - dayStartLast.getTime()) / (1000 * 60 * 60 * 24))
+      : null
+
     let newStreak = 1
-    if (hoursSinceLastClaim !== null && hoursSinceLastClaim >= 24 && hoursSinceLastClaim < 48) {
+    if (casino.reset_at_midnight) {
+      if (dayDiff === 1) {
+        newStreak = (lastClaim?.streak ?? 0) + 1
+      }
+    } else if (hoursSinceLastClaim !== null && hoursSinceLastClaim >= 24 && hoursSinceLastClaim < 48) {
       newStreak = (lastClaim?.streak ?? 0) + 1
     }
 
