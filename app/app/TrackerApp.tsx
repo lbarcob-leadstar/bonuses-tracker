@@ -16,7 +16,7 @@ export default function TrackerApp() {
   const [expandedCasinoIds, setExpandedCasinoIds] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'claimed' | 'unclaimed' | 'favorites'>('all')
-  const [sortBy, setSortBy] = useState<'highest-sc' | 'highest-gc' | 'a-z' | 'z-a' | 'next-available'>('next-available')
+  const [sortBy, setSortBy] = useState<'highest-sc' | 'highest-gc' | 'lowest-min-redemption' | 'longest-streak' | 'a-z' | 'z-a' | 'next-available'>('next-available')
   const [search, setSearch] = useState('')
   const [now, setNow] = useState(Date.now())
   const [logoGradients, setLogoGradients] = useState<Record<string, LogoGradient>>({})
@@ -46,6 +46,15 @@ export default function TrackerApp() {
 
   const getScValue = useCallback((casino: CasinoWithClaim) => Number(casino.sc_amount ?? 0), [])
   const getGcValue = useCallback((casino: CasinoWithClaim) => Number(casino.gc_amount ?? 0), [])
+  const getMinRedemptionValue = useCallback((casino: CasinoWithClaim) => {
+    const text = `${casino.bonus_description ?? ''} ${casino.welcome_offer_info ?? ''}`
+    const matches = [...text.matchAll(/\$\s*(\d+(?:[.,]\d+)?)/g)]
+      .map((m) => Number.parseFloat(m[1].replace(',', '.')))
+      .filter((n) => Number.isFinite(n) && n > 0)
+
+    if (matches.length === 0) return Number.POSITIVE_INFINITY
+    return Math.min(...matches)
+  }, [])
 
   const withAlpha = useCallback((rgb: string, alpha: number) => {
     const m = rgb.match(/\d+/g)
@@ -216,7 +225,35 @@ export default function TrackerApp() {
 
   const toggleClaim = async (casino: CasinoWithClaim) => {
     if (!user) return
-    if (isOnCooldown(casino)) return
+
+    if (isOnCooldown(casino)) {
+      if (!casino.last_claimed_at) return
+
+      await supabase
+        .from('user_claims')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('casino_id', casino.id)
+        .eq('claimed_at', casino.last_claimed_at)
+
+      const { data: previousClaim } = await supabase
+        .from('user_claims')
+        .select('claimed_at, streak')
+        .eq('user_id', user.id)
+        .eq('casino_id', casino.id)
+        .order('claimed_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+      setCasinos((prev) => prev.map((c) => c.id === casino.id
+        ? {
+          ...c,
+          last_claimed_at: previousClaim?.claimed_at ?? null,
+          streak: previousClaim?.streak ?? 0,
+        }
+        : c))
+      return
+    }
 
     const nowDate = new Date()
     const nowIso = nowDate.toISOString()
@@ -300,6 +337,16 @@ export default function TrackerApp() {
         if (diff !== 0) return diff
         return a.name.localeCompare(b.name)
       }
+      case 'lowest-min-redemption': {
+        const diff = getMinRedemptionValue(a) - getMinRedemptionValue(b)
+        if (diff !== 0) return diff
+        return a.name.localeCompare(b.name)
+      }
+      case 'longest-streak': {
+        const diff = b.streak - a.streak
+        if (diff !== 0) return diff
+        return a.name.localeCompare(b.name)
+      }
       case 'a-z':
         return a.name.localeCompare(b.name)
       case 'z-a':
@@ -319,21 +366,21 @@ export default function TrackerApp() {
     }
   })
 
-  const claimedCount = casinos.filter((c) => isOnCooldown(c)).length
-  const totalCount = casinos.length
+  const claimedCount = filtered.filter((c) => isOnCooldown(c)).length
+  const totalCount = filtered.length
   const progress = totalCount > 0 ? (claimedCount / totalCount) * 100 : 0
-  const totalScAvailable = casinos.reduce((sum, casino) => sum + (casino.sc_amount ?? 0), 0)
-  const totalGcAvailable = casinos.reduce((sum, casino) => sum + (casino.gc_amount ?? 0), 0)
-  const totalScClaimed = casinos
+  const totalScAvailable = filtered.reduce((sum, casino) => sum + (casino.sc_amount ?? 0), 0)
+  const totalGcAvailable = filtered.reduce((sum, casino) => sum + (casino.gc_amount ?? 0), 0)
+  const totalScClaimed = filtered
     .filter((casino) => isOnCooldown(casino))
     .reduce((sum, casino) => sum + (casino.sc_amount ?? 0), 0)
-  const totalGcClaimed = casinos
+  const totalGcClaimed = filtered
     .filter((casino) => isOnCooldown(casino))
     .reduce((sum, casino) => sum + (casino.gc_amount ?? 0), 0)
   const scProgress = totalScAvailable > 0 ? (totalScClaimed / totalScAvailable) * 100 : 0
   const gcProgress = totalGcAvailable > 0 ? (totalGcClaimed / totalGcAvailable) * 100 : 0
-  const activeStreaks = casinos.filter((casino) => isStreakActive(casino)).length
-  const favoriteCount = casinos.filter((casino) => casino.is_favorite).length
+  const activeStreaks = filtered.filter((casino) => isStreakActive(casino)).length
+  const favoriteCount = filtered.filter((casino) => casino.is_favorite).length
 
   if (loading) {
     return (
@@ -446,16 +493,18 @@ export default function TrackerApp() {
             className="flex-1 px-4 py-3 rounded-xl outline-none text-sm casino-control" />
           <select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as 'highest-sc' | 'highest-gc' | 'a-z' | 'z-a' | 'next-available')}
+            onChange={(e) => setSortBy(e.target.value as 'highest-sc' | 'highest-gc' | 'lowest-min-redemption' | 'longest-streak' | 'a-z' | 'z-a' | 'next-available')}
             className="px-4 py-3 rounded-xl outline-none text-sm casino-control">
             <option value="highest-sc">Sort: Highest SC</option>
             <option value="highest-gc">Sort: Highest GC</option>
+            <option value="lowest-min-redemption">Sort: Lowest min redemption</option>
+            <option value="longest-streak">Sort: Longest streak</option>
             <option value="a-z">Sort: A-Z</option>
             <option value="z-a">Sort: Z-A</option>
             <option value="next-available">Sort: Next available bonus</option>
           </select>
           <div className="flex gap-2">
-            {(['all', 'unclaimed', 'claimed', 'favorites'] as const).map((f) => (
+            {(['all', 'favorites', 'unclaimed', 'claimed'] as const).map((f) => (
               <button key={f} onClick={() => setFilter(f)}
                 className="px-4 py-3 rounded-xl text-sm font-semibold capitalize transition-all cursor-pointer"
                 style={{
@@ -542,14 +591,13 @@ export default function TrackerApp() {
                     <span style={{ color: casino.is_favorite ? '#E52D4B' : 'rgba(255,255,255,0.38)', fontSize: '0.95rem' }}>♥</span>
                   </button>
                   <button onClick={() => toggleClaim(casino)}
-                    disabled={claimed}
                     className="w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-105"
                     style={{
                       background: claimed ? '#E52D4B' : 'rgba(255,255,255,0.08)',
                       border: `2px solid ${claimed ? '#E52D4B' : 'rgba(255,255,255,0.2)'}`,
                       boxShadow: claimed ? '0 0 10px rgba(229,45,75,0.5)' : 'none',
-                      cursor: claimed ? 'not-allowed' : 'pointer',
-                      opacity: claimed ? 0.85 : 1,
+                      cursor: 'pointer',
+                      opacity: 1,
                     }}>
                     {claimed && (
                       <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
