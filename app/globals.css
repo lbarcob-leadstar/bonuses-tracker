@@ -92,6 +92,17 @@ body {
   box-shadow: 0 22px 36px rgba(5, 13, 24, 0.45);
 }
 
+.featured-bonus-card {
+  min-height: 132px;
+  box-shadow: 0 12px 24px rgba(8, 16, 27, 0.34);
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.featured-bonus-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 36px rgba(8, 16, 27, 0.46);
+}
+
 .claim-burst-overlay {
   position: absolute;
   inset: 0;

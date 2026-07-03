@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
 import type { User } from '@supabase/supabase-js'
-import type { CasinoWithClaim } from '@/types'
+import type { CasinoWithClaim, FeaturedBonus } from '@/types'
 
 type LogoGradient = { primary: string, secondary: string }
 
@@ -21,6 +21,7 @@ export default function TrackerApp() {
   const [now, setNow] = useState(Date.now())
   const [logoGradients, setLogoGradients] = useState<Record<string, LogoGradient>>({})
   const [claimFxByCasino, setClaimFxByCasino] = useState<Record<string, number>>({})
+  const [featuredBonuses, setFeaturedBonuses] = useState<FeaturedBonus[]>([])
 
   const triggerClaimFx = useCallback((casinoId: string) => {
     setClaimFxByCasino((prev) => ({ ...prev, [casinoId]: Date.now() }))
@@ -166,14 +167,17 @@ export default function TrackerApp() {
   }, [now, STREAK_ACTIVE_MS])
 
   const loadData = useCallback(async (userId: string) => {
-    const { data: casinoData } = await supabase.from('casinos').select('*').eq('is_active', true).order('sort_order')
-    const { data: claimsData } = await supabase
-      .from('user_claims')
-      .select('casino_id, streak, claimed_at, updated_at')
-      .eq('user_id', userId)
-      .order('claimed_at', { ascending: false })
-      .order('updated_at', { ascending: false })
-    const { data: favoritesData } = await supabase.from('user_favorites').select('casino_id').eq('user_id', userId)
+    const [{ data: casinoData }, { data: claimsData }, { data: favoritesData }, { data: featuredData }] = await Promise.all([
+      supabase.from('casinos').select('*').eq('is_active', true).order('sort_order'),
+      supabase
+        .from('user_claims')
+        .select('casino_id, streak, claimed_at, updated_at')
+        .eq('user_id', userId)
+        .order('claimed_at', { ascending: false })
+        .order('updated_at', { ascending: false }),
+      supabase.from('user_favorites').select('casino_id').eq('user_id', userId),
+      supabase.from('featured_bonuses').select('*').eq('is_active', true).order('sort_order'),
+    ])
     const claimMap = new Map<string, { streak: number | null, claimed_at: string, updated_at: string }>()
     for (const claim of claimsData ?? []) {
       const current = claimMap.get(claim.casino_id)
@@ -201,6 +205,7 @@ export default function TrackerApp() {
     })
     merged.sort((a, b) => a.sort_order - b.sort_order)
     setCasinos(merged)
+    setFeaturedBonuses(featuredData ?? [])
     setLoading(false)
   }, [supabase])
 
@@ -417,6 +422,7 @@ export default function TrackerApp() {
   const gcProgress = totalGcAvailable > 0 ? (totalGcClaimed / totalGcAvailable) * 100 : 0
   const activeStreaks = filtered.filter((casino) => isStreakActive(casino)).length
   const favoriteCount = filtered.filter((casino) => casino.is_favorite).length
+  const topFeaturedBonuses = featuredBonuses.slice(0, 3)
 
   if (loading) {
     return (
@@ -456,20 +462,53 @@ export default function TrackerApp() {
 
       <div className="max-w-6xl mx-auto px-4 py-8 relative z-10">
         <div className="casino-progress rounded-2xl p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
-            <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(255,255,255,0.14)', border: '1px solid rgba(255,255,255,0.2)' }}>
-              <p className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.72)' }}>Claimed Bonuses</p>
-              <p className="text-2xl font-black" style={{ color: '#ffffff' }}>{claimedCount}</p>
+          {topFeaturedBonuses.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
+              {topFeaturedBonuses.map((featured) => (
+                <div
+                  key={featured.id}
+                  className="featured-bonus-card rounded-xl px-4 py-3"
+                  style={{
+                    backgroundImage: featured.background_image_url
+                      ? `linear-gradient(128deg, rgba(21,31,46,0.76), rgba(48,40,60,0.7)), url(${featured.background_image_url})`
+                      : 'linear-gradient(128deg, rgba(73,148,201,0.26), rgba(229,45,75,0.3))',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    border: '1px solid rgba(255,255,255,0.24)',
+                  }}
+                >
+                  <p className="text-[1.85rem] font-black leading-tight truncate" style={{ color: '#f4f7ff' }}>{featured.title}</p>
+                  <p
+                    className="text-sm mt-1"
+                    style={{
+                      color: 'rgba(255,255,255,0.78)',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {featured.description}
+                  </p>
+                </div>
+              ))}
             </div>
-            <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(229,45,75,0.15)', border: '1px solid rgba(229,45,75,0.3)' }}>
-              <p className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.72)' }}>Active Streaks</p>
-              <p className="text-2xl font-black" style={{ color: '#ffdbe4' }}>{activeStreaks}</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
+              <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(255,255,255,0.14)', border: '1px solid rgba(255,255,255,0.2)' }}>
+                <p className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.72)' }}>Claimed Bonuses</p>
+                <p className="text-2xl font-black" style={{ color: '#ffffff' }}>{claimedCount}</p>
+              </div>
+              <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(229,45,75,0.15)', border: '1px solid rgba(229,45,75,0.3)' }}>
+                <p className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.72)' }}>Active Streaks</p>
+                <p className="text-2xl font-black" style={{ color: '#ffdbe4' }}>{activeStreaks}</p>
+              </div>
+              <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(73,148,201,0.2)', border: '1px solid rgba(73,148,201,0.34)' }}>
+                <p className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.72)' }}>Favorite Brands</p>
+                <p className="text-2xl font-black" style={{ color: '#d8f0ff' }}>{favoriteCount}</p>
+              </div>
             </div>
-            <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(73,148,201,0.2)', border: '1px solid rgba(73,148,201,0.34)' }}>
-              <p className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.72)' }}>Favorite Brands</p>
-              <p className="text-2xl font-black" style={{ color: '#d8f0ff' }}>{favoriteCount}</p>
-            </div>
-          </div>
+          )}
 
           <div className="flex items-center justify-between mb-3">
             <div>

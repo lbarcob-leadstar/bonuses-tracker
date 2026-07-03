@@ -43,6 +43,16 @@ export interface Profile {
   created_at: string
 }
 
+export interface FeaturedBonus {
+  id: string
+  title: string
+  description: string
+  background_image_url: string | null
+  is_active: boolean
+  sort_order: number
+  created_at: string
+}
+
 export interface CasinoWithClaim extends Casino {
   last_claimed_at: string | null
   streak: number

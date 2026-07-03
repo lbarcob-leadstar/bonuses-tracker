@@ -2,13 +2,15 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
-import type { Casino } from '@/types'
+import type { Casino, FeaturedBonus } from '@/types'
 
 export default function AdminPanel() {
   const supabase = createClient()
   const [casinos, setCasinos] = useState<Casino[]>([])
+  const [featuredBonuses, setFeaturedBonuses] = useState<FeaturedBonus[]>([])
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [editingFeaturedId, setEditingFeaturedId] = useState<string | null>(null)
   const [editForm, setEditForm] = useState({
     name: '',
     bonus_description: '',
@@ -36,6 +38,19 @@ export default function AdminPanel() {
     gc_amount: '',
   })
   const [showAdd, setShowAdd] = useState(false)
+  const [showAddFeatured, setShowAddFeatured] = useState(false)
+  const [editFeaturedForm, setEditFeaturedForm] = useState({
+    title: '',
+    description: '',
+    background_image_url: '',
+    is_active: true,
+  })
+  const [newFeaturedForm, setNewFeaturedForm] = useState({
+    title: '',
+    description: '',
+    background_image_url: '',
+    is_active: true,
+  })
 
   const parseNullableNumber = (value: string, label: string) => {
     const trimmed = value.trim()
@@ -64,14 +79,18 @@ export default function AdminPanel() {
       if (!session?.user) { window.location.href = '/'; return }
       const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', session.user.id).single()
       if (!profile?.is_admin) { window.location.href = '/app'; return }
-      loadCasinos()
+      loadAdminData()
     })
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const loadCasinos = async () => {
-    const { data } = await supabase.from('casinos').select('*').order('sort_order')
-    setCasinos(data ?? [])
+  const loadAdminData = async () => {
+    const [{ data: casinoData }, { data: featuredData }] = await Promise.all([
+      supabase.from('casinos').select('*').order('sort_order'),
+      supabase.from('featured_bonuses').select('*').order('sort_order'),
+    ])
+    setCasinos(casinoData ?? [])
+    setFeaturedBonuses(featuredData ?? [])
     setLoading(false)
   }
 
@@ -184,6 +203,61 @@ export default function AdminPanel() {
     setShowAdd(false)
   }
 
+  const toggleFeaturedActive = async (featured: FeaturedBonus) => {
+    await supabase.from('featured_bonuses').update({ is_active: !featured.is_active }).eq('id', featured.id)
+    setFeaturedBonuses((prev) => prev.map((f) => f.id === featured.id ? { ...f, is_active: !f.is_active } : f))
+  }
+
+  const startEditFeatured = (featured: FeaturedBonus) => {
+    setEditingFeaturedId(featured.id)
+    setEditFeaturedForm({
+      title: featured.title,
+      description: featured.description,
+      background_image_url: featured.background_image_url ?? '',
+      is_active: featured.is_active,
+    })
+  }
+
+  const saveEditFeatured = async (id: string) => {
+    if (!editFeaturedForm.title.trim() || !editFeaturedForm.description.trim()) return
+    const payload = {
+      title: editFeaturedForm.title.trim(),
+      description: editFeaturedForm.description.trim(),
+      background_image_url: editFeaturedForm.background_image_url.trim() ? editFeaturedForm.background_image_url.trim() : null,
+      is_active: editFeaturedForm.is_active,
+    }
+    await supabase.from('featured_bonuses').update(payload).eq('id', id)
+    setFeaturedBonuses((prev) => prev.map((f) => f.id === id ? { ...f, ...payload } : f))
+    setEditingFeaturedId(null)
+  }
+
+  const deleteFeatured = async (id: string) => {
+    if (!confirm('Delete this featured bonus card?')) return
+    await supabase.from('featured_bonuses').delete().eq('id', id)
+    setFeaturedBonuses((prev) => prev.filter((f) => f.id !== id))
+  }
+
+  const addFeatured = async () => {
+    if (!newFeaturedForm.title.trim() || !newFeaturedForm.description.trim()) return
+    const maxOrder = Math.max(...featuredBonuses.map((f) => f.sort_order), 0)
+    const payload = {
+      title: newFeaturedForm.title.trim(),
+      description: newFeaturedForm.description.trim(),
+      background_image_url: newFeaturedForm.background_image_url.trim() ? newFeaturedForm.background_image_url.trim() : null,
+      is_active: newFeaturedForm.is_active,
+      sort_order: maxOrder + 1,
+    }
+    const { data } = await supabase.from('featured_bonuses').insert(payload).select().single()
+    if (data) setFeaturedBonuses((prev) => [...prev, data])
+    setNewFeaturedForm({
+      title: '',
+      description: '',
+      background_image_url: '',
+      is_active: true,
+    })
+    setShowAddFeatured(false)
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: '#1e252e' }}>
@@ -200,7 +274,7 @@ export default function AdminPanel() {
             <span className="text-2xl">⚙️</span>
             <div>
               <h1 className="font-black text-lg" style={{ color: '#FFE799' }}>Admin Panel</h1>
-              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>{casinos.length} casinos total</p>
+              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>{casinos.length} casinos · {featuredBonuses.length} featured cards</p>
             </div>
           </div>
           <div className="flex gap-3">
@@ -219,6 +293,132 @@ export default function AdminPanel() {
       </header>
 
       <div className="max-w-5xl mx-auto px-4 py-8">
+        <div className="rounded-2xl p-6 mb-6"
+          style={{ background: '#2C343F', border: '1px solid rgba(73,148,201,0.35)', boxShadow: '0 0 20px rgba(73,148,201,0.12)' }}>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="font-bold" style={{ color: '#d8f0ff' }}>Featured Bonuses</h2>
+              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                Cards shown at the top of the tracker (name + short description + optional background image)
+              </p>
+            </div>
+            <button onClick={() => setShowAddFeatured(true)}
+              className="px-4 py-2 rounded-xl text-sm font-bold cursor-pointer"
+              style={{ background: '#4994C9', color: '#fff', boxShadow: '0 0 12px rgba(73,148,201,0.35)' }}>
+              + Add Featured Card
+            </button>
+          </div>
+
+          {showAddFeatured && (
+            <div className="rounded-xl p-4 mb-4"
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(73,148,201,0.35)' }}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                <input placeholder="Operator name (e.g. Ace.com)" value={newFeaturedForm.title}
+                  onChange={(e) => setNewFeaturedForm((p) => ({ ...p, title: e.target.value }))}
+                  className="px-3 py-2 rounded-xl text-sm outline-none"
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(73,148,201,0.35)', color: '#f0f0f0' }} />
+                <input placeholder="Background image URL (optional)" value={newFeaturedForm.background_image_url}
+                  onChange={(e) => setNewFeaturedForm((p) => ({ ...p, background_image_url: e.target.value }))}
+                  className="px-3 py-2 rounded-xl text-sm outline-none"
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(73,148,201,0.35)', color: '#f0f0f0' }} />
+              </div>
+              <textarea placeholder="Main description" value={newFeaturedForm.description}
+                onChange={(e) => setNewFeaturedForm((p) => ({ ...p, description: e.target.value }))}
+                className="w-full mb-3 px-3 py-2 rounded-xl text-sm outline-none resize-y min-h-[72px]"
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(73,148,201,0.35)', color: '#f0f0f0' }} />
+              <label className="mb-3 flex items-center gap-2 text-sm" style={{ color: 'rgba(255,255,255,0.78)' }}>
+                <input
+                  type="checkbox"
+                  checked={newFeaturedForm.is_active}
+                  onChange={(e) => setNewFeaturedForm((p) => ({ ...p, is_active: e.target.checked }))}
+                />
+                Visible in app
+              </label>
+              <div className="flex gap-2">
+                <button onClick={addFeatured} className="px-4 py-2 rounded-xl text-sm font-bold cursor-pointer"
+                  style={{ background: '#4994C9', color: '#fff' }}>Save card</button>
+                <button onClick={() => setShowAddFeatured(false)} className="px-4 py-2 rounded-xl text-sm cursor-pointer"
+                  style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.6)' }}>Cancel</button>
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-3">
+            {featuredBonuses.map((featured) => (
+              <div key={featured.id} className="rounded-xl p-3"
+                style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${featured.is_active ? 'rgba(73,148,201,0.3)' : 'rgba(229,45,75,0.25)'}`, opacity: featured.is_active ? 1 : 0.6 }}>
+                {editingFeaturedId === featured.id ? (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <input value={editFeaturedForm.title} onChange={(e) => setEditFeaturedForm((p) => ({ ...p, title: e.target.value }))}
+                        placeholder="Operator name"
+                        className="px-3 py-2 rounded-xl text-sm outline-none"
+                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(73,148,201,0.4)', color: '#f0f0f0' }} />
+                      <input value={editFeaturedForm.background_image_url} onChange={(e) => setEditFeaturedForm((p) => ({ ...p, background_image_url: e.target.value }))}
+                        placeholder="Background image URL"
+                        className="px-3 py-2 rounded-xl text-sm outline-none"
+                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(73,148,201,0.4)', color: '#f0f0f0' }} />
+                    </div>
+                    <textarea value={editFeaturedForm.description} onChange={(e) => setEditFeaturedForm((p) => ({ ...p, description: e.target.value }))}
+                      placeholder="Main description"
+                      className="w-full px-3 py-2 rounded-xl text-sm outline-none resize-y min-h-[72px]"
+                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(73,148,201,0.4)', color: '#f0f0f0' }} />
+                    <label className="flex items-center gap-2 text-sm" style={{ color: 'rgba(255,255,255,0.78)' }}>
+                      <input
+                        type="checkbox"
+                        checked={editFeaturedForm.is_active}
+                        onChange={(e) => setEditFeaturedForm((p) => ({ ...p, is_active: e.target.checked }))}
+                      />
+                      Visible in app
+                    </label>
+                    <div className="flex gap-2">
+                      <button onClick={() => saveEditFeatured(featured.id)} className="px-4 py-2 rounded-xl text-sm font-bold cursor-pointer"
+                        style={{ background: '#4994C9', color: '#fff' }}>Save</button>
+                      <button onClick={() => setEditingFeaturedId(null)} className="px-4 py-2 rounded-xl text-sm cursor-pointer"
+                        style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.6)' }}>Cancel</button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3">
+                    <div className="w-28 h-16 rounded-lg flex-shrink-0 overflow-hidden"
+                      style={{
+                        backgroundImage: featured.background_image_url
+                          ? `linear-gradient(130deg, rgba(28,36,49,0.66), rgba(28,36,49,0.55)), url(${featured.background_image_url})`
+                          : 'linear-gradient(130deg, rgba(73,148,201,0.35), rgba(229,45,75,0.35))',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        border: '1px solid rgba(255,255,255,0.15)',
+                      }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-sm" style={{ color: '#f0f0f0' }}>{featured.title}</span>
+                        {!featured.is_active && (
+                          <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(229,45,75,0.2)', color: '#E52D4B' }}>hidden</span>
+                        )}
+                      </div>
+                      <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.58)' }}>{featured.description}</p>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <button onClick={() => toggleFeaturedActive(featured)} className="px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer"
+                        style={{ background: featured.is_active ? 'rgba(255,255,255,0.05)' : 'rgba(229,45,75,0.2)', color: featured.is_active ? 'rgba(255,255,255,0.4)' : '#E52D4B', border: '1px solid rgba(255,255,255,0.1)' }}>
+                        {featured.is_active ? 'Hide' : 'Show'}
+                      </button>
+                      <button onClick={() => startEditFeatured(featured)} className="px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer"
+                        style={{ background: 'rgba(255,231,153,0.1)', color: '#FFE799', border: '1px solid rgba(255,231,153,0.2)' }}>Edit</button>
+                      <button onClick={() => deleteFeatured(featured.id)} className="px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer"
+                        style={{ background: 'rgba(229,45,75,0.1)', color: '#E52D4B', border: '1px solid rgba(229,45,75,0.2)' }}>Delete</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+            {featuredBonuses.length === 0 && (
+              <p className="text-sm" style={{ color: 'rgba(255,255,255,0.55)' }}>No featured cards yet. Add one to customize the top cards in the app.</p>
+            )}
+          </div>
+        </div>
+
         {showAdd && (
           <div className="rounded-2xl p-6 mb-6"
             style={{ background: '#2C343F', border: '1px solid rgba(229,45,75,0.4)', boxShadow: '0 0 20px rgba(229,45,75,0.15)' }}>
