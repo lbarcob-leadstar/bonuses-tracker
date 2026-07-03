@@ -32,7 +32,7 @@ export default function TrackerApp() {
         delete next[casinoId]
         return next
       })
-    }, 820)
+    }, 980)
   }, [])
 
   const getCooldownEndsAt = useCallback((casino: CasinoWithClaim, lastClaimedAt: string | null) => {
@@ -587,6 +587,7 @@ export default function TrackerApp() {
               {isClaimAnimating && (
                 <div className="claim-burst-overlay" key={`claim-fx-${claimFxByCasino[casino.id]}`}>
                   <div className="claim-burst-wash" />
+                  <div className="claim-burst-ring" />
                   <div className="claim-burst-check" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" className="claim-burst-check-icon">
                       <path d="M5 12.5 10 17.2 19 7.8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
