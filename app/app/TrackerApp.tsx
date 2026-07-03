@@ -478,6 +478,11 @@ export default function TrackerApp() {
                   }}
                 >
                   <p className="text-[1.85rem] font-black leading-tight truncate" style={{ color: '#f4f7ff' }}>{featured.title}</p>
+                  {featured.subtitle && (
+                    <p className="text-xs font-semibold uppercase tracking-[0.08em] mt-0.5" style={{ color: 'rgba(255,231,153,0.9)' }}>
+                      {featured.subtitle}
+                    </p>
+                  )}
                   <p
                     className="text-sm mt-1"
                     style={{

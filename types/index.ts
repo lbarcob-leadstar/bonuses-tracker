@@ -46,6 +46,7 @@ export interface Profile {
 export interface FeaturedBonus {
   id: string
   title: string
+  subtitle: string | null
   description: string
   background_image_url: string | null
   is_active: boolean

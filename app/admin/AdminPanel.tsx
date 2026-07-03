@@ -41,12 +41,14 @@ export default function AdminPanel() {
   const [showAddFeatured, setShowAddFeatured] = useState(false)
   const [editFeaturedForm, setEditFeaturedForm] = useState({
     title: '',
+    subtitle: '',
     description: '',
     background_image_url: '',
     is_active: true,
   })
   const [newFeaturedForm, setNewFeaturedForm] = useState({
     title: '',
+    subtitle: '',
     description: '',
     background_image_url: '',
     is_active: true,
@@ -212,6 +214,7 @@ export default function AdminPanel() {
     setEditingFeaturedId(featured.id)
     setEditFeaturedForm({
       title: featured.title,
+      subtitle: featured.subtitle ?? '',
       description: featured.description,
       background_image_url: featured.background_image_url ?? '',
       is_active: featured.is_active,
@@ -222,6 +225,7 @@ export default function AdminPanel() {
     if (!editFeaturedForm.title.trim() || !editFeaturedForm.description.trim()) return
     const payload = {
       title: editFeaturedForm.title.trim(),
+      subtitle: editFeaturedForm.subtitle.trim() ? editFeaturedForm.subtitle.trim() : null,
       description: editFeaturedForm.description.trim(),
       background_image_url: editFeaturedForm.background_image_url.trim() ? editFeaturedForm.background_image_url.trim() : null,
       is_active: editFeaturedForm.is_active,
@@ -242,6 +246,7 @@ export default function AdminPanel() {
     const maxOrder = Math.max(...featuredBonuses.map((f) => f.sort_order), 0)
     const payload = {
       title: newFeaturedForm.title.trim(),
+      subtitle: newFeaturedForm.subtitle.trim() ? newFeaturedForm.subtitle.trim() : null,
       description: newFeaturedForm.description.trim(),
       background_image_url: newFeaturedForm.background_image_url.trim() ? newFeaturedForm.background_image_url.trim() : null,
       is_active: newFeaturedForm.is_active,
@@ -251,6 +256,7 @@ export default function AdminPanel() {
     if (data) setFeaturedBonuses((prev) => [...prev, data])
     setNewFeaturedForm({
       title: '',
+      subtitle: '',
       description: '',
       background_image_url: '',
       is_active: true,
@@ -317,9 +323,13 @@ export default function AdminPanel() {
                   onChange={(e) => setNewFeaturedForm((p) => ({ ...p, title: e.target.value }))}
                   className="px-3 py-2 rounded-xl text-sm outline-none"
                   style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(73,148,201,0.35)', color: '#f0f0f0' }} />
+                <input placeholder="Subtitle (e.g. Fav of the week)" value={newFeaturedForm.subtitle}
+                  onChange={(e) => setNewFeaturedForm((p) => ({ ...p, subtitle: e.target.value }))}
+                  className="px-3 py-2 rounded-xl text-sm outline-none"
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(73,148,201,0.35)', color: '#f0f0f0' }} />
                 <input placeholder="Background image URL (optional)" value={newFeaturedForm.background_image_url}
                   onChange={(e) => setNewFeaturedForm((p) => ({ ...p, background_image_url: e.target.value }))}
-                  className="px-3 py-2 rounded-xl text-sm outline-none"
+                  className="px-3 py-2 rounded-xl text-sm outline-none md:col-span-2"
                   style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(73,148,201,0.35)', color: '#f0f0f0' }} />
               </div>
               <textarea placeholder="Main description" value={newFeaturedForm.description}
@@ -354,9 +364,13 @@ export default function AdminPanel() {
                         placeholder="Operator name"
                         className="px-3 py-2 rounded-xl text-sm outline-none"
                         style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(73,148,201,0.4)', color: '#f0f0f0' }} />
+                      <input value={editFeaturedForm.subtitle} onChange={(e) => setEditFeaturedForm((p) => ({ ...p, subtitle: e.target.value }))}
+                        placeholder="Subtitle (e.g. Fav of the week)"
+                        className="px-3 py-2 rounded-xl text-sm outline-none"
+                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(73,148,201,0.4)', color: '#f0f0f0' }} />
                       <input value={editFeaturedForm.background_image_url} onChange={(e) => setEditFeaturedForm((p) => ({ ...p, background_image_url: e.target.value }))}
                         placeholder="Background image URL"
-                        className="px-3 py-2 rounded-xl text-sm outline-none"
+                        className="px-3 py-2 rounded-xl text-sm outline-none md:col-span-2"
                         style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(73,148,201,0.4)', color: '#f0f0f0' }} />
                     </div>
                     <textarea value={editFeaturedForm.description} onChange={(e) => setEditFeaturedForm((p) => ({ ...p, description: e.target.value }))}
@@ -397,6 +411,9 @@ export default function AdminPanel() {
                           <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(229,45,75,0.2)', color: '#E52D4B' }}>hidden</span>
                         )}
                       </div>
+                      {featured.subtitle && (
+                        <p className="text-xs mt-0.5" style={{ color: 'rgba(255,231,153,0.85)' }}>{featured.subtitle}</p>
+                      )}
                       <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.58)' }}>{featured.description}</p>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
