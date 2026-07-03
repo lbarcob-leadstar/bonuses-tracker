@@ -92,6 +92,40 @@ body {
   box-shadow: 0 22px 36px rgba(5, 13, 24, 0.45);
 }
 
+.casino-card-claiming {
+  animation: casino-claim-pulse 820ms ease-out;
+}
+
+.claim-burst-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.claim-burst-wash {
+  position: absolute;
+  inset: -1px;
+  background:
+    linear-gradient(120deg, rgba(229, 45, 75, 0.82), rgba(255, 149, 182, 0.62) 45%, rgba(255, 231, 153, 0.58));
+  transform-origin: left center;
+  animation: casino-claim-wash 760ms cubic-bezier(0.2, 0.84, 0.16, 1);
+}
+
+.claim-burst-check {
+  position: relative;
+  z-index: 1;
+  font-size: 4rem;
+  line-height: 1;
+  font-weight: 900;
+  color: #ffffff;
+  text-shadow: 0 0 14px rgba(255, 255, 255, 0.7), 0 0 30px rgba(229, 45, 75, 0.7);
+  animation: casino-claim-check 760ms cubic-bezier(0.25, 0.9, 0.2, 1);
+}
+
 .casino-chip {
   display: inline-flex;
   align-items: center;
@@ -126,4 +160,48 @@ body {
 @keyframes pulse-glow {
   0%, 100% { box-shadow: 0 0 10px rgba(229, 45, 75, 0.4); }
   50% { box-shadow: 0 0 25px rgba(229, 45, 75, 0.8); }
+}
+
+@keyframes casino-claim-wash {
+  0% {
+    transform: scaleX(0.06);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.95;
+  }
+  100% {
+    transform: scaleX(1.08);
+    opacity: 0;
+  }
+}
+
+@keyframes casino-claim-check {
+  0% {
+    transform: scale(0.35) rotate(-14deg);
+    opacity: 0;
+  }
+  34% {
+    opacity: 1;
+  }
+  62% {
+    transform: scale(1.18) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0;
+  }
+}
+
+@keyframes casino-claim-pulse {
+  0% {
+    box-shadow: 0 14px 30px rgba(5, 13, 24, 0.35);
+  }
+  40% {
+    box-shadow: 0 0 0 2px rgba(255, 231, 153, 0.5), 0 0 34px rgba(229, 45, 75, 0.5);
+  }
+  100% {
+    box-shadow: 0 14px 30px rgba(5, 13, 24, 0.35);
+  }
 }

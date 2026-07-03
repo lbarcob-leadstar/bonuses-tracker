@@ -20,6 +20,20 @@ export default function TrackerApp() {
   const [search, setSearch] = useState('')
   const [now, setNow] = useState(Date.now())
   const [logoGradients, setLogoGradients] = useState<Record<string, LogoGradient>>({})
+  const [claimFxByCasino, setClaimFxByCasino] = useState<Record<string, number>>({})
+
+  const triggerClaimFx = useCallback((casinoId: string) => {
+    setClaimFxByCasino((prev) => ({ ...prev, [casinoId]: Date.now() }))
+
+    window.setTimeout(() => {
+      setClaimFxByCasino((prev) => {
+        if (!prev[casinoId]) return prev
+        const next = { ...prev }
+        delete next[casinoId]
+        return next
+      })
+    }, 820)
+  }, [])
 
   const getCooldownEndsAt = useCallback((casino: CasinoWithClaim, lastClaimedAt: string | null) => {
     if (!lastClaimedAt) return null
@@ -306,6 +320,7 @@ export default function TrackerApp() {
     setCasinos((prev) => prev.map((c) => c.id === casino.id
       ? { ...c, last_claimed_at: nowIso, streak: newStreak }
       : c))
+    triggerClaimFx(casino.id)
   }
 
   const handleSignOut = async () => {
@@ -544,6 +559,7 @@ export default function TrackerApp() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {sortedFiltered.map((casino) => {
             const claimed = isOnCooldown(casino)
+            const isClaimAnimating = !!claimFxByCasino[casino.id]
             const countdown = formatCountdown(casino)
             const scAmount = casino.sc_amount ?? 0
             const gcAmount = casino.gc_amount ?? 0
@@ -563,11 +579,17 @@ export default function TrackerApp() {
             return (
             <div
               key={casino.id}
-              className="casino-card p-4"
+              className={`casino-card p-4 relative overflow-hidden ${isClaimAnimating ? 'casino-card-claiming' : ''}`}
               style={{
                 background: cardBackground,
                 borderColor: claimed ? withAlpha(logoGradient.secondary, 0.5) : withAlpha(logoGradient.primary, 0.44),
               }}>
+              {isClaimAnimating && (
+                <div className="claim-burst-overlay" key={`claim-fx-${claimFxByCasino[casino.id]}`}>
+                  <div className="claim-burst-wash" />
+                  <div className="claim-burst-check">✓</div>
+                </div>
+              )}
               <div className="flex items-start justify-between gap-3 mb-2">
                 <div className="flex items-center gap-2 min-w-0">
                   {casino.logo_url ? (
