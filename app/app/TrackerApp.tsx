@@ -467,7 +467,7 @@ export default function TrackerApp() {
               {topFeaturedBonuses.map((featured) => (
                 <div
                   key={featured.id}
-                  className="featured-bonus-card rounded-xl px-4 py-3"
+                  className="featured-bonus-card rounded-xl px-4 py-3 flex flex-col"
                   style={{
                     backgroundImage: featured.background_image_url
                       ? `linear-gradient(128deg, rgba(21,31,46,0.76), rgba(48,40,60,0.7)), url(${featured.background_image_url})`
@@ -477,14 +477,16 @@ export default function TrackerApp() {
                     border: '1px solid rgba(255,255,255,0.24)',
                   }}
                 >
-                  <p className="text-[1.85rem] font-black leading-tight truncate" style={{ color: '#f4f7ff' }}>{featured.title}</p>
-                  {featured.subtitle && (
-                    <p className="text-xs font-semibold uppercase tracking-[0.08em] mt-0.5" style={{ color: 'rgba(255,231,153,0.9)' }}>
-                      {featured.subtitle}
-                    </p>
-                  )}
+                  <div>
+                    <p className="text-[1.85rem] font-black leading-tight truncate" style={{ color: '#f4f7ff' }}>{featured.title}</p>
+                    {featured.subtitle && (
+                      <p className="text-xs font-semibold uppercase tracking-[0.08em] mt-0.5" style={{ color: 'rgba(255,231,153,0.9)' }}>
+                        {featured.subtitle}
+                      </p>
+                    )}
+                  </div>
                   <p
-                    className="text-sm mt-1"
+                    className="text-sm mt-auto pt-2"
                     style={{
                       color: 'rgba(255,255,255,0.78)',
                       display: '-webkit-box',
