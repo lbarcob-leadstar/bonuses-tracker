@@ -579,7 +579,7 @@ export default function TrackerApp() {
             return (
             <div
               key={casino.id}
-              className={`casino-card p-4 relative overflow-hidden ${isClaimAnimating ? 'casino-card-claiming' : ''}`}
+              className="casino-card p-4 relative overflow-hidden"
               style={{
                 background: cardBackground,
                 borderColor: claimed ? withAlpha(logoGradient.secondary, 0.5) : withAlpha(logoGradient.primary, 0.44),
@@ -587,7 +587,11 @@ export default function TrackerApp() {
               {isClaimAnimating && (
                 <div className="claim-burst-overlay" key={`claim-fx-${claimFxByCasino[casino.id]}`}>
                   <div className="claim-burst-wash" />
-                  <div className="claim-burst-check">✓</div>
+                  <div className="claim-burst-check" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" className="claim-burst-check-icon">
+                      <path d="M5 12.5 10 17.2 19 7.8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
                 </div>
               )}
               <div className="flex items-start justify-between gap-3 mb-2">
