@@ -547,22 +547,30 @@ export default function TrackerApp() {
           <input type="text" placeholder="Search casinos..." value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="flex-1 px-4 py-3 rounded-xl outline-none text-sm casino-control" />
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as 'highest-sc' | 'highest-gc' | 'lowest-min-redemption' | 'longest-streak' | 'a-z' | 'z-a' | 'next-available')}
-            className="px-4 py-3 rounded-xl outline-none text-sm casino-control">
-            <option value="highest-sc">Sort: Highest SC</option>
-            <option value="highest-gc">Sort: Highest GC</option>
-            <option value="lowest-min-redemption">Sort: Lowest min redemption</option>
-            <option value="longest-streak">Sort: Longest streak</option>
-            <option value="a-z">Sort: A-Z</option>
-            <option value="z-a">Sort: Z-A</option>
-            <option value="next-available">Sort: Next available bonus</option>
-          </select>
-          <div className="flex gap-2">
+          <div className="relative">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as 'highest-sc' | 'highest-gc' | 'lowest-min-redemption' | 'longest-streak' | 'a-z' | 'z-a' | 'next-available')}
+              className="w-full px-4 py-3 pr-11 rounded-xl outline-none text-sm casino-control"
+              style={{ appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none' }}>
+              <option value="highest-sc">Sort: Highest SC</option>
+              <option value="highest-gc">Sort: Highest GC</option>
+              <option value="lowest-min-redemption">Sort: Lowest min redemption</option>
+              <option value="longest-streak">Sort: Longest streak</option>
+              <option value="a-z">Sort: A-Z</option>
+              <option value="z-a">Sort: Z-A</option>
+              <option value="next-available">Sort: Next available bonus</option>
+            </select>
+            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M3 5.25 7 9l4-3.75" stroke="rgba(255,255,255,0.78)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
+          </div>
+          <div className="grid grid-cols-2 gap-2 w-full md:flex md:w-auto">
             {(['all', 'favorites', 'unclaimed', 'claimed'] as const).map((f) => (
               <button key={f} onClick={() => setFilter(f)}
-                className="px-4 py-3 rounded-xl text-sm font-semibold capitalize transition-all cursor-pointer"
+                className="w-full md:w-auto px-4 py-3 rounded-xl text-sm font-semibold capitalize transition-all cursor-pointer"
                 style={{
                   background: filter === f ? '#E52D4B' : '#2C343F',
                   color: filter === f ? '#fff' : 'rgba(255,255,255,0.5)',
