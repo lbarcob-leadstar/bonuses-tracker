@@ -514,7 +514,7 @@ export default function TrackerApp() {
             <img
               src="/UG-logo.png"
               alt="UG logo"
-              className="w-9 h-9 object-contain flex-shrink-0"
+              className="w-14 h-14 object-contain flex-shrink-0"
             />
             <div>
               <h1 className="font-black text-lg leading-none" style={{ color: '#FFE799', textShadow: '0 0 10px rgba(255, 231, 153, 0.3)' }}>United Gamblers Daily Bonus Tracker</h1>
