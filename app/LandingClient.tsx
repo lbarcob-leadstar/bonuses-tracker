@@ -10,24 +10,34 @@ export default function LandingPage() {
   useEffect(() => {
     const start = 10
     const end = 100
-    const durationMs = 850
-    const startedAt = performance.now()
-    let rafId = 0
+    const durationMs = 2400
+    const tickMs = 55
+    const totalTicks = Math.ceil(durationMs / tickMs)
+    let tick = 0
+    let current = start
 
-    const tick = (now: number) => {
-      const elapsed = now - startedAt
-      const progress = Math.min(1, elapsed / durationMs)
-      const eased = 1 - Math.pow(1 - progress, 3)
-      const value = Math.round(start + (end - start) * eased)
-      setBonusCount(value)
+    const timerId = window.setInterval(() => {
+      tick += 1
+      const phase = tick / totalTicks
 
-      if (progress < 1) {
-        rafId = window.requestAnimationFrame(tick)
+      let increment = 1
+      if (phase < 0.65) {
+        increment = Math.max(2, Math.round(9 - phase * 9))
+      } else {
+        const remainingTicks = Math.max(1, totalTicks - tick)
+        increment = Math.max(1, Math.ceil((end - current) / remainingTicks))
       }
-    }
 
-    rafId = window.requestAnimationFrame(tick)
-    return () => window.cancelAnimationFrame(rafId)
+      current = Math.min(end, current + increment)
+      setBonusCount(current)
+
+      if (tick >= totalTicks || current >= end) {
+        setBonusCount(end)
+        window.clearInterval(timerId)
+      }
+    }, tickMs)
+
+    return () => window.clearInterval(timerId)
   }, [])
 
   const handleLogin = async () => {
@@ -40,7 +50,13 @@ export default function LandingPage() {
   }
 
   return (
-    <main className="min-h-screen casino-app-bg relative overflow-hidden flex flex-col">
+    <main
+      className="min-h-screen relative overflow-hidden flex flex-col"
+      style={{
+        background:
+          'linear-gradient(138deg, #101720 0%, #152131 40%, #1c1e2f 76%, #2a1f30 100%), radial-gradient(circle at 12% 10%, rgba(73,148,201,0.2), transparent 36%), radial-gradient(circle at 82% 18%, rgba(229,45,75,0.18), transparent 38%)',
+      }}
+    >
       <div className="casino-texture" />
 
       <header className="casino-header relative z-10">
@@ -66,7 +82,7 @@ export default function LandingPage() {
 
         <h2 className="text-5xl md:text-7xl font-black mb-4 leading-tight tracking-tight" style={{ color: '#f0f6ff' }}>
           Track{' '}
-          <span style={{ color: '#FFE799', textShadow: '0 0 22px rgba(255,231,153,0.45)' }}>
+          <span style={{ color: '#FFE799', textShadow: '0 0 22px rgba(255,231,153,0.45)', fontVariantNumeric: 'tabular-nums' }}>
             {bonusCount >= 100 ? '100+' : bonusCount}
           </span>{' '}
           daily casino bonuses
