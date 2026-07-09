@@ -511,9 +511,13 @@ export default function TrackerApp() {
       <header className="casino-header relative z-10">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-2xl">🎰</span>
+            <img
+              src="/UG-logo.png"
+              alt="UG logo"
+              className="w-9 h-9 object-contain flex-shrink-0"
+            />
             <div>
-              <h1 className="font-black text-lg leading-none" style={{ color: '#FFE799', textShadow: '0 0 10px rgba(255, 231, 153, 0.3)' }}>Bonus Tracker</h1>
+              <h1 className="font-black text-lg leading-none" style={{ color: '#FFE799', textShadow: '0 0 10px rgba(255, 231, 153, 0.3)' }}>United Gamblers Daily Bonus Tracker</h1>
               <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
                 {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
               </p>
