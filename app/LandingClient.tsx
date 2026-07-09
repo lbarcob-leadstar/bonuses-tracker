@@ -1,9 +1,34 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 
 export default function LandingPage() {
   const supabase = createClient()
+  const [bonusCount, setBonusCount] = useState(10)
+
+  useEffect(() => {
+    const start = 10
+    const end = 100
+    const durationMs = 850
+    const startedAt = performance.now()
+    let rafId = 0
+
+    const tick = (now: number) => {
+      const elapsed = now - startedAt
+      const progress = Math.min(1, elapsed / durationMs)
+      const eased = 1 - Math.pow(1 - progress, 3)
+      const value = Math.round(start + (end - start) * eased)
+      setBonusCount(value)
+
+      if (progress < 1) {
+        rafId = window.requestAnimationFrame(tick)
+      }
+    }
+
+    rafId = window.requestAnimationFrame(tick)
+    return () => window.cancelAnimationFrame(rafId)
+  }, [])
 
   const handleLogin = async () => {
     await supabase.auth.signInWithOAuth({
@@ -15,46 +40,66 @@ export default function LandingPage() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(135deg, #1e252e 0%, #2C343F 50%, #1e252e 100%)' }}>
-      <div className="flex-1 flex flex-col items-center justify-center px-4 text-center">
-        <div className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold"
-          style={{ background: 'rgba(229,45,75,0.15)', border: '1px solid rgba(229,45,75,0.4)', color: '#E52D4B' }}>
-          🎰 Daily Bonus Tracker
+    <main className="min-h-screen casino-app-bg relative overflow-hidden flex flex-col">
+      <div className="casino-texture" />
+
+      <header className="casino-header relative z-10">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3 min-w-0">
+            <img
+              src="/UG-logo.png"
+              alt="UG logo"
+              className="w-14 h-14 object-contain flex-shrink-0"
+            />
+            <h1 className="font-black text-lg md:text-xl leading-tight" style={{ color: '#FFE799', textShadow: '0 0 10px rgba(255, 231, 153, 0.3)' }}>
+              United Gamblers Daily Bonus Tracker
+            </h1>
+          </div>
         </div>
-        <h1 className="text-5xl md:text-7xl font-black mb-4 leading-tight tracking-tight">
-          Never Miss a{' '}
-          <span style={{ color: '#FFE799', textShadow: '0 0 30px rgba(255,231,153,0.5)' }}>
-            Daily Bonus
-          </span>
-          {' '}Again
-        </h1>
-        <p className="text-lg md:text-xl max-w-2xl mb-10" style={{ color: 'rgba(255,255,255,0.6)' }}>
-          Track all your sweepstakes casino daily bonuses in one place.
-          Check them off as you claim, build your streaks, and never leave free coins on the table.
+      </header>
+
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 text-center pt-10 pb-14">
+        <div className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold"
+          style={{ background: 'rgba(73,148,201,0.16)', border: '1px solid rgba(73,148,201,0.42)', color: '#d8f0ff' }}>
+          Built for daily bonus grinders
+        </div>
+
+        <h2 className="text-5xl md:text-7xl font-black mb-4 leading-tight tracking-tight" style={{ color: '#f0f6ff' }}>
+          Track{' '}
+          <span style={{ color: '#FFE799', textShadow: '0 0 22px rgba(255,231,153,0.45)' }}>
+            {bonusCount >= 100 ? '100+' : bonusCount}
+          </span>{' '}
+          daily casino bonuses
+        </h2>
+
+        <p className="text-lg md:text-xl max-w-3xl mb-10" style={{ color: 'rgba(255,255,255,0.68)' }}>
+          Claim faster, keep streaks alive, and get a single view of your daily progress across all major brands.
         </p>
+
         <button
           onClick={handleLogin}
           className="flex items-center gap-3 px-8 py-4 rounded-2xl text-lg font-bold transition-all duration-300 hover:scale-105 cursor-pointer"
-          style={{ background: '#E52D4B', boxShadow: '0 0 30px rgba(229,45,75,0.5)' }}
+          style={{ background: '#E52D4B', boxShadow: '0 0 30px rgba(229,45,75,0.5)', color: '#fff' }}
         >
           <GoogleIcon />
           Sign in with Google — It&apos;s Free
         </button>
-        <p className="mt-4 text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
+
+        <p className="mt-4 text-sm" style={{ color: 'rgba(255,255,255,0.45)' }}>
           No credit card required · Syncs across all your devices
         </p>
       </div>
-      <div className="w-full max-w-5xl mx-auto px-4 pb-20 grid grid-cols-1 md:grid-cols-3 gap-6">
+
+      <div className="relative z-10 w-full max-w-6xl mx-auto px-4 pb-14 grid grid-cols-1 md:grid-cols-3 gap-4">
         {[
-          { icon: '✅', title: '103 Casinos', desc: 'All major sweepstakes casinos tracked in one dashboard' },
-          { icon: '🔥', title: 'Streak Tracker', desc: 'See how many days in a row you\'ve claimed each bonus' },
-          { icon: '🔄', title: 'Auto-Reset', desc: 'Bonuses reset at midnight so you\'re always up to date' },
-        ].map((f) => (
-          <div key={f.title} className="rounded-2xl p-6 text-center"
-            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
-            <div className="text-4xl mb-3">{f.icon}</div>
-            <h3 className="font-bold text-lg mb-2" style={{ color: '#FFE799' }}>{f.title}</h3>
-            <p style={{ color: 'rgba(255,255,255,0.6)' }}>{f.desc}</p>
+          { icon: '🎯', title: 'Smart Claim Flow', desc: 'Claim, unclaim, and track cooldowns per casino without friction.' },
+          { icon: '🔥', title: 'Streak Momentum', desc: 'Build streaks every day and see progress at a glance.' },
+          { icon: '📊', title: 'Personal Stats', desc: 'Monitor total claims, top casinos, and activity trends over time.' },
+        ].map((feature) => (
+          <div key={feature.title} className="casino-panel rounded-2xl p-5 text-left">
+            <div className="text-2xl mb-2">{feature.icon}</div>
+            <h3 className="font-bold text-lg mb-1" style={{ color: '#FFE799' }}>{feature.title}</h3>
+            <p style={{ color: 'rgba(255,255,255,0.68)' }}>{feature.desc}</p>
           </div>
         ))}
       </div>
