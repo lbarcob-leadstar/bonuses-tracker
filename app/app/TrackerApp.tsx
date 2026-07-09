@@ -630,6 +630,7 @@ export default function TrackerApp() {
             </div>
           </div>
         ) : (
+        <>
         <div className="casino-progress rounded-2xl p-6 mb-8">
           {topFeaturedBonuses.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
@@ -915,6 +916,7 @@ export default function TrackerApp() {
             <p style={{ color: 'rgba(255,255,255,0.4)' }}>No casinos match your filter</p>
           </div>
         )}
+        </>
         )}
       </div>
     </div>
