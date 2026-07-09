@@ -608,9 +608,7 @@ export default function TrackerApp() {
                   <div className="claim-burst-wash" />
                   <div className="claim-burst-ring" />
                   <div className="claim-burst-check" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" className="claim-burst-check-icon">
-                      <path d="M5 12.5 10 17.2 19 7.8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
+                    🔥 {casino.streak} day streak
                   </div>
                 </div>
               )}
@@ -687,11 +685,6 @@ export default function TrackerApp() {
                       {isStreakActive(casino) && (
                         <span className={`streak-mini-badge ${isStreakAnimating ? 'streak-mini-badge-pop' : ''}`}>
                           🔥 {casino.streak}
-                        </span>
-                      )}
-                      {isStreakAnimating && (
-                        <span className="streak-claim-fly" aria-hidden="true">
-                          🔥 {casino.streak} day streak
                         </span>
                       )}
                     </div>
