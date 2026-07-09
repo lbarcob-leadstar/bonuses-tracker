@@ -21,6 +21,7 @@ export default function TrackerApp() {
   const [now, setNow] = useState(Date.now())
   const [logoGradients, setLogoGradients] = useState<Record<string, LogoGradient>>({})
   const [claimFxByCasino, setClaimFxByCasino] = useState<Record<string, number>>({})
+  const [streakFxByCasino, setStreakFxByCasino] = useState<Record<string, number>>({})
   const [featuredBonuses, setFeaturedBonuses] = useState<FeaturedBonus[]>([])
 
   const triggerClaimFx = useCallback((casinoId: string) => {
@@ -34,6 +35,19 @@ export default function TrackerApp() {
         return next
       })
     }, 980)
+  }, [])
+
+  const triggerStreakFx = useCallback((casinoId: string) => {
+    setStreakFxByCasino((prev) => ({ ...prev, [casinoId]: Date.now() }))
+
+    window.setTimeout(() => {
+      setStreakFxByCasino((prev) => {
+        if (!prev[casinoId]) return prev
+        const next = { ...prev }
+        delete next[casinoId]
+        return next
+      })
+    }, 1400)
   }, [])
 
   const getCooldownEndsAt = useCallback((casino: CasinoWithClaim, lastClaimedAt: string | null) => {
@@ -326,6 +340,7 @@ export default function TrackerApp() {
       ? { ...c, last_claimed_at: nowIso, streak: newStreak }
       : c))
     triggerClaimFx(casino.id)
+    triggerStreakFx(casino.id)
   }
 
   const handleSignOut = async () => {
@@ -410,16 +425,6 @@ export default function TrackerApp() {
   const claimedCount = filtered.filter((c) => isOnCooldown(c)).length
   const totalCount = filtered.length
   const progress = totalCount > 0 ? (claimedCount / totalCount) * 100 : 0
-  const totalScAvailable = filtered.reduce((sum, casino) => sum + (casino.sc_amount ?? 0), 0)
-  const totalGcAvailable = filtered.reduce((sum, casino) => sum + (casino.gc_amount ?? 0), 0)
-  const totalScClaimed = filtered
-    .filter((casino) => isOnCooldown(casino))
-    .reduce((sum, casino) => sum + (casino.sc_amount ?? 0), 0)
-  const totalGcClaimed = filtered
-    .filter((casino) => isOnCooldown(casino))
-    .reduce((sum, casino) => sum + (casino.gc_amount ?? 0), 0)
-  const scProgress = totalScAvailable > 0 ? (totalScClaimed / totalScAvailable) * 100 : 0
-  const gcProgress = totalGcAvailable > 0 ? (totalGcClaimed / totalGcAvailable) * 100 : 0
   const activeStreaks = filtered.filter((casino) => isStreakActive(casino)).length
   const favoriteCount = filtered.filter((casino) => casino.is_favorite).length
   const topFeaturedBonuses = featuredBonuses.slice(0, 3)
@@ -535,37 +540,6 @@ export default function TrackerApp() {
               style={{ width: `${progress}%`, background: 'linear-gradient(90deg, #E52D4B 0%, #ff6f98 40%, #FFE799 100%)', boxShadow: '0 0 14px rgba(229,45,75,0.56)' }} />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.75)' }}>Total SC claimed today</p>
-                <p className="text-xs font-bold" style={{ color: '#ffd7e1' }}>
-                  {totalScClaimed.toLocaleString()} / {totalScAvailable.toLocaleString()}
-                </p>
-              </div>
-              <div className="w-full h-2.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.14)' }}>
-                <div
-                  className="h-full rounded-full transition-all duration-500"
-                  style={{ width: `${scProgress}%`, background: 'linear-gradient(90deg, #E52D4B, #ff7ea5)', boxShadow: '0 0 10px rgba(229,45,75,0.45)' }}
-                />
-              </div>
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.75)' }}>Total GC claimed today</p>
-                <p className="text-xs font-bold" style={{ color: '#cfeeff' }}>
-                  {totalGcClaimed.toLocaleString()} / {totalGcAvailable.toLocaleString()}
-                </p>
-              </div>
-              <div className="w-full h-2.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.14)' }}>
-                <div
-                  className="h-full rounded-full transition-all duration-500"
-                  style={{ width: `${gcProgress}%`, background: 'linear-gradient(90deg, #4994C9, #7fd3ff)', boxShadow: '0 0 10px rgba(73,148,201,0.45)' }}
-                />
-              </div>
-            </div>
-          </div>
         </div>
 
         <div className="casino-panel p-4 mb-6">
@@ -606,9 +580,8 @@ export default function TrackerApp() {
           {sortedFiltered.map((casino) => {
             const claimed = isOnCooldown(casino)
             const isClaimAnimating = !!claimFxByCasino[casino.id]
+            const isStreakAnimating = !!streakFxByCasino[casino.id]
             const countdown = formatCountdown(casino)
-            const scAmount = casino.sc_amount ?? 0
-            const gcAmount = casino.gc_amount ?? 0
             const manualPrimary = hexToRgb(casino.logo_primary_color)
             const manualSecondary = hexToRgb(casino.logo_secondary_color)
             const manualGradient = manualPrimary && manualSecondary
@@ -671,45 +644,57 @@ export default function TrackerApp() {
                         {casino.name}
                       </h3>
                     )}
-                    <span
-                      onClick={() => toggleFavorite(casino)}
-                      onKeyDown={(event) => {
-                        if (event.key === 'Enter' || event.key === ' ') {
-                          event.preventDefault()
-                          void toggleFavorite(casino)
-                        }
-                      }}
-                      className="flex items-center justify-center transition-all duration-200 cursor-pointer hover:scale-110 flex-shrink-0 p-0"
-                      aria-label={casino.is_favorite ? `Remove ${casino.name} from favorites` : `Add ${casino.name} to favorites`}
-                      role="button"
-                      tabIndex={0}
-                      title={casino.is_favorite ? 'Remove from favorites' : 'Add to favorites'}
-                      style={{
-                        background: 'transparent',
-                        border: 'none',
-                        borderRadius: 0,
-                        boxShadow: 'none',
-                        outline: 'none',
-                        width: 'auto',
-                        height: 'auto',
-                      }}
-                    >
-                      <svg
-                        width="20"
-                        height="20"
-                        viewBox="0 0 20 20"
-                        fill="none"
-                        aria-hidden="true"
+                    <div className="relative flex items-center gap-2">
+                      <span
+                        onClick={() => toggleFavorite(casino)}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault()
+                            void toggleFavorite(casino)
+                          }
+                        }}
+                        className="flex items-center justify-center transition-all duration-200 cursor-pointer hover:scale-110 flex-shrink-0 p-0"
+                        aria-label={casino.is_favorite ? `Remove ${casino.name} from favorites` : `Add ${casino.name} to favorites`}
+                        role="button"
+                        tabIndex={0}
+                        title={casino.is_favorite ? 'Remove from favorites' : 'Add to favorites'}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          borderRadius: 0,
+                          boxShadow: 'none',
+                          outline: 'none',
+                          width: 'auto',
+                          height: 'auto',
+                        }}
                       >
-                        <path
-                          d="M10 17.25 8.84 16.2C4.7 12.45 2 9.99 2 6.98 2 4.52 3.93 2.75 6.4 2.75c1.39 0 2.73.64 3.6 1.64.87-1 2.21-1.64 3.6-1.64C16.07 2.75 18 4.52 18 6.98c0 3.01-2.7 5.47-6.84 9.22L10 17.25Z"
-                          fill={casino.is_favorite ? '#E52D4B' : 'transparent'}
-                          stroke={casino.is_favorite ? '#E52D4B' : 'rgba(255,255,255,0.42)'}
-                          strokeWidth="1.7"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </span>
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 20 20"
+                          fill="none"
+                          aria-hidden="true"
+                        >
+                          <path
+                            d="M10 17.25 8.84 16.2C4.7 12.45 2 9.99 2 6.98 2 4.52 3.93 2.75 6.4 2.75c1.39 0 2.73.64 3.6 1.64.87-1 2.21-1.64 3.6-1.64C16.07 2.75 18 4.52 18 6.98c0 3.01-2.7 5.47-6.84 9.22L10 17.25Z"
+                            fill={casino.is_favorite ? '#E52D4B' : 'transparent'}
+                            stroke={casino.is_favorite ? '#E52D4B' : 'rgba(255,255,255,0.42)'}
+                            strokeWidth="1.7"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </span>
+                      {isStreakActive(casino) && (
+                        <span className={`streak-mini-badge ${isStreakAnimating ? 'streak-mini-badge-pop' : ''}`}>
+                          🔥 {casino.streak}
+                        </span>
+                      )}
+                      {isStreakAnimating && (
+                        <span className="streak-claim-fly" aria-hidden="true">
+                          🔥 {casino.streak} day streak
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <div className="flex-shrink-0 flex items-center gap-2">
@@ -732,22 +717,10 @@ export default function TrackerApp() {
               </div>
               <p className="text-sm mb-2" style={{ color: 'rgba(255,255,255,0.62)' }}>{casino.bonus_description}</p>
               <div className="flex flex-wrap gap-2 mb-2">
-                {(scAmount > 0 || gcAmount > 0) && (
-                  <>
-                    {scAmount > 0 && <span className="casino-chip casino-chip-sc">SC {scAmount.toLocaleString()}</span>}
-                    {gcAmount > 0 && <span className="casino-chip casino-chip-gc">GC {gcAmount.toLocaleString()}</span>}
-                  </>
-                )}
                 {countdown && (
                   <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold"
                     style={{ background: 'rgba(229,45,75,0.2)', border: '1px solid rgba(229,45,75,0.3)', color: '#ff9bad' }}>
                     ⏳ Available in {countdown}
-                  </div>
-                )}
-                {isStreakActive(casino) && (
-                  <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold"
-                    style={{ background: 'rgba(255,231,153,0.14)', border: '1px solid rgba(255,231,153,0.28)', color: '#FFE799' }}>
-                    🔥 {casino.streak} day streak
                   </div>
                 )}
               </div>
