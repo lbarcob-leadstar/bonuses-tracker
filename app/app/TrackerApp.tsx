@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase'
 import type { User } from '@supabase/supabase-js'
 import type { CasinoWithClaim, FeaturedBonus } from '@/types'
@@ -16,6 +16,7 @@ export default function TrackerApp() {
   const [expandedCasinoIds, setExpandedCasinoIds] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'claimed' | 'unclaimed' | 'favorites'>('all')
+  const [dashboardView, setDashboardView] = useState<'tracker' | 'stats'>('tracker')
   const [sortBy, setSortBy] = useState<'highest-sc' | 'highest-gc' | 'lowest-min-redemption' | 'longest-streak' | 'a-z' | 'z-a' | 'next-available'>('next-available')
   const [search, setSearch] = useState('')
   const [now, setNow] = useState(Date.now())
@@ -23,6 +24,7 @@ export default function TrackerApp() {
   const [claimFxByCasino, setClaimFxByCasino] = useState<Record<string, number>>({})
   const [streakFxByCasino, setStreakFxByCasino] = useState<Record<string, number>>({})
   const [featuredBonuses, setFeaturedBonuses] = useState<FeaturedBonus[]>([])
+  const [claimHistory, setClaimHistory] = useState<Array<{ casino_id: string, claimed_at: string, streak: number | null }>>([])
 
   const triggerClaimFx = useCallback((casinoId: string) => {
     setClaimFxByCasino((prev) => ({ ...prev, [casinoId]: Date.now() }))
@@ -220,6 +222,11 @@ export default function TrackerApp() {
     merged.sort((a, b) => a.sort_order - b.sort_order)
     setCasinos(merged)
     setFeaturedBonuses(featuredData ?? [])
+    setClaimHistory((claimsData ?? []).map((claim) => ({
+      casino_id: claim.casino_id,
+      claimed_at: claim.claimed_at,
+      streak: claim.streak,
+    })))
     setLoading(false)
   }, [supabase])
 
@@ -429,6 +436,63 @@ export default function TrackerApp() {
   const favoriteCount = filtered.filter((casino) => casino.is_favorite).length
   const topFeaturedBonuses = featuredBonuses.slice(0, 3)
 
+  const stats = useMemo(() => {
+    const byCasinoId = new Map(casinos.map((casino) => [casino.id, casino]))
+    const totalClaims = claimHistory.length
+    const uniqueClaimedCount = new Set(claimHistory.map((claim) => claim.casino_id)).size
+    const totalScAccumulated = claimHistory.reduce((sum, claim) => sum + Number(byCasinoId.get(claim.casino_id)?.sc_amount ?? 0), 0)
+    const totalGcAccumulated = claimHistory.reduce((sum, claim) => sum + Number(byCasinoId.get(claim.casino_id)?.gc_amount ?? 0), 0)
+
+    const claimsByCasino = new Map<string, number>()
+    for (const claim of claimHistory) {
+      claimsByCasino.set(claim.casino_id, (claimsByCasino.get(claim.casino_id) ?? 0) + 1)
+    }
+
+    const topClaimedBonuses = [...claimsByCasino.entries()]
+      .map(([casinoId, count]) => ({
+        casinoId,
+        count,
+        name: byCasinoId.get(casinoId)?.name ?? 'Unknown Casino',
+      }))
+      .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
+      .slice(0, 5)
+
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const claimsPerDay = new Map<string, number>()
+
+    for (let i = 13; i >= 0; i -= 1) {
+      const d = new Date(today)
+      d.setDate(today.getDate() - i)
+      const key = d.toISOString().slice(0, 10)
+      claimsPerDay.set(key, 0)
+    }
+
+    for (const claim of claimHistory) {
+      const key = claim.claimed_at.slice(0, 10)
+      if (claimsPerDay.has(key)) {
+        claimsPerDay.set(key, (claimsPerDay.get(key) ?? 0) + 1)
+      }
+    }
+
+    const recentActivity = [...claimsPerDay.entries()].map(([date, count]) => ({ date, count }))
+    const maxDailyClaims = Math.max(1, ...recentActivity.map((item) => item.count))
+    const longestStreakAchieved = claimHistory.reduce((max, claim) => Math.max(max, claim.streak ?? 0), 0)
+    const claimsLast7Days = recentActivity.slice(-7).reduce((sum, item) => sum + item.count, 0)
+
+    return {
+      totalClaims,
+      uniqueClaimedCount,
+      totalScAccumulated,
+      totalGcAccumulated,
+      topClaimedBonuses,
+      recentActivity,
+      maxDailyClaims,
+      longestStreakAchieved,
+      claimsLast7Days,
+    }
+  }, [casinos, claimHistory])
+
   if (loading) {
     return (
       <div className="min-h-screen casino-app-bg flex items-center justify-center relative overflow-hidden">
@@ -466,6 +530,106 @@ export default function TrackerApp() {
       </header>
 
       <div className="max-w-6xl mx-auto px-4 py-8 relative z-10">
+        <div className="mb-5 flex items-center gap-2">
+          <button
+            onClick={() => setDashboardView('tracker')}
+            className="px-4 py-2 rounded-xl text-sm font-semibold cursor-pointer"
+            style={{
+              background: dashboardView === 'tracker' ? '#E52D4B' : 'rgba(44,52,63,0.88)',
+              color: dashboardView === 'tracker' ? '#fff' : 'rgba(255,255,255,0.7)',
+              border: `1px solid ${dashboardView === 'tracker' ? '#E52D4B' : 'rgba(255,255,255,0.12)'}`,
+            }}
+          >
+            Tracker
+          </button>
+          <button
+            onClick={() => setDashboardView('stats')}
+            className="px-4 py-2 rounded-xl text-sm font-semibold cursor-pointer"
+            style={{
+              background: dashboardView === 'stats' ? '#4994C9' : 'rgba(44,52,63,0.88)',
+              color: dashboardView === 'stats' ? '#fff' : 'rgba(255,255,255,0.7)',
+              border: `1px solid ${dashboardView === 'stats' ? '#4994C9' : 'rgba(255,255,255,0.12)'}`,
+            }}
+          >
+            My Stats
+          </button>
+        </div>
+
+        {dashboardView === 'stats' ? (
+          <div className="space-y-5">
+            <div className="casino-progress rounded-2xl p-5">
+              <h2 className="text-xl font-black mb-4" style={{ color: '#f4f7ff' }}>Usage Stats</h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.16)' }}>
+                  <p className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.65)' }}>Bonuses claimed</p>
+                  <p className="text-2xl font-black" style={{ color: '#ffffff' }}>{stats.totalClaims}</p>
+                </div>
+                <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.16)' }}>
+                  <p className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.65)' }}>Unique bonuses</p>
+                  <p className="text-2xl font-black" style={{ color: '#d8f0ff' }}>{stats.uniqueClaimedCount}</p>
+                </div>
+                <div className="rounded-xl p-3" style={{ background: 'rgba(229,45,75,0.14)', border: '1px solid rgba(229,45,75,0.34)' }}>
+                  <p className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.65)' }}>SC accumulated</p>
+                  <p className="text-2xl font-black" style={{ color: '#ffd6e0' }}>{stats.totalScAccumulated.toLocaleString()}</p>
+                </div>
+                <div className="rounded-xl p-3" style={{ background: 'rgba(73,148,201,0.2)', border: '1px solid rgba(73,148,201,0.34)' }}>
+                  <p className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.65)' }}>GC accumulated</p>
+                  <p className="text-2xl font-black" style={{ color: '#cfeeff' }}>{stats.totalGcAccumulated.toLocaleString()}</p>
+                </div>
+                <div className="rounded-xl p-3" style={{ background: 'rgba(255,231,153,0.14)', border: '1px solid rgba(255,231,153,0.34)' }}>
+                  <p className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.65)' }}>Longest streak</p>
+                  <p className="text-2xl font-black" style={{ color: '#FFE799' }}>🔥 {stats.longestStreakAchieved}</p>
+                </div>
+                <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.16)' }}>
+                  <p className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.65)' }}>Claims last 7d</p>
+                  <p className="text-2xl font-black" style={{ color: '#ffffff' }}>{stats.claimsLast7Days}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+              <div className="casino-panel rounded-2xl p-5">
+                <h3 className="text-lg font-black mb-4" style={{ color: '#f4f7ff' }}>Most Claimed Bonuses</h3>
+                {stats.topClaimedBonuses.length === 0 ? (
+                  <p style={{ color: 'rgba(255,255,255,0.55)' }}>No claims yet.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {stats.topClaimedBonuses.map((item, index) => (
+                      <div key={item.casinoId} className="rounded-xl p-3 flex items-center justify-between"
+                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                        <p className="text-sm font-semibold truncate" style={{ color: '#f4f7ff' }}>{index + 1}. {item.name}</p>
+                        <p className="text-xs font-bold" style={{ color: '#FFE799' }}>{item.count} claims</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="casino-panel rounded-2xl p-5">
+                <h3 className="text-lg font-black mb-4" style={{ color: '#f4f7ff' }}>Activity (last 14 days)</h3>
+                <div className="h-44 flex items-end gap-1.5">
+                  {stats.recentActivity.map((item) => {
+                    const barHeight = Math.max(8, Math.round((item.count / stats.maxDailyClaims) * 100))
+                    return (
+                      <div key={item.date} className="flex-1 flex flex-col items-center justify-end gap-1">
+                        <div
+                          className="w-full rounded-t-md"
+                          style={{
+                            height: `${barHeight}%`,
+                            background: 'linear-gradient(180deg, rgba(255,231,153,0.95), rgba(229,45,75,0.9))',
+                            boxShadow: '0 0 10px rgba(229,45,75,0.35)',
+                          }}
+                          title={`${item.date}: ${item.count} claims`}
+                        />
+                        <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.5)' }}>{item.date.slice(5)}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
         <div className="casino-progress rounded-2xl p-6 mb-8">
           {topFeaturedBonuses.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
@@ -750,6 +914,7 @@ export default function TrackerApp() {
             <div className="text-5xl mb-4">🎲</div>
             <p style={{ color: 'rgba(255,255,255,0.4)' }}>No casinos match your filter</p>
           </div>
+        )}
         )}
       </div>
     </div>
