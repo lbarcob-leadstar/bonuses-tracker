@@ -107,22 +107,24 @@ body {
   background: linear-gradient(145deg, rgba(17, 30, 49, 0.92), rgba(12, 24, 41, 0.84));
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 10px 24px rgba(6, 13, 24, 0.24);
+  min-height: 206px;
 }
 
 .tracker-hero-icon {
-  width: 4rem;
-  height: 4rem;
+  width: auto;
+  height: auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.12);
   flex-shrink: 0;
+  font-size: 2.7rem;
+  line-height: 1;
+  text-shadow: 0 0 18px currentColor;
 }
 
 .tracker-progress-ring {
-  width: 4rem;
-  height: 4rem;
+  width: 4.7rem;
+  height: 4.7rem;
   border-radius: 999px;
   display: inline-flex;
   align-items: center;
@@ -149,16 +151,17 @@ body {
   color: rgba(255,255,255,0.64);
   text-transform: uppercase;
   letter-spacing: 0.08em;
+  min-height: 2rem;
 }
 
 .tracker-hero-value {
   line-height: 1;
-  margin-top: 0.45rem;
+  margin-top: -0.1rem;
 }
 
 .tracker-hero-sub {
   color: rgba(255,255,255,0.52);
-  margin-top: 0.55rem;
+  margin-top: 0.1rem;
 }
 
 .tracker-insight-chip {
