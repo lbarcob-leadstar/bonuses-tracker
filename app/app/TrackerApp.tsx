@@ -435,6 +435,56 @@ export default function TrackerApp() {
   const activeStreaks = filtered.filter((casino) => isStreakActive(casino)).length
   const favoriteCount = filtered.filter((casino) => casino.is_favorite).length
   const topFeaturedBonuses = featuredBonuses.slice(0, 3)
+  const overallClaimedCount = casinos.filter((casino) => isOnCooldown(casino)).length
+  const overallTotalCount = casinos.length
+  const overallProgress = overallTotalCount > 0 ? (overallClaimedCount / overallTotalCount) * 100 : 0
+  const currentBestActiveStreak = casinos.reduce((max, casino) => isStreakActive(casino) ? Math.max(max, casino.streak) : max, 0)
+  const favoriteCasinos = casinos.filter((casino) => casino.is_favorite)
+  const favoriteClaimedCount = favoriteCasinos.filter((casino) => isOnCooldown(casino)).length
+  const nextResetMs = casinos
+    .filter((casino) => isOnCooldown(casino))
+    .reduce((min, casino) => {
+      const remaining = getRemainingCooldownMs(casino)
+      if (remaining <= 0) return min
+      return min === null ? remaining : Math.min(min, remaining)
+    }, null as number | null)
+
+  const formatCompactDuration = useCallback((ms: number | null) => {
+    if (!ms || ms <= 0) return 'Now'
+    const totalSeconds = Math.floor(ms / 1000)
+    const hours = Math.floor(totalSeconds / 3600)
+    const minutes = Math.floor((totalSeconds % 3600) / 60)
+    return `${hours}h ${minutes.toString().padStart(2, '0')}m`
+  }, [])
+
+  const trackerInsights = useMemo(() => {
+    const remainingBonuses = Math.max(0, overallTotalCount - overallClaimedCount)
+    const favoriteRemaining = Math.max(0, favoriteCasinos.length - favoriteClaimedCount)
+    const topBonus = stats.topClaimedBonuses[0]
+
+    return [
+      {
+        label: 'Current streak',
+        value: currentBestActiveStreak > 0 ? `🔥 ${currentBestActiveStreak} days` : 'No active streak',
+        tone: '#FFE799',
+      },
+      {
+        label: 'Bonuses remaining',
+        value: `${remainingBonuses} left to claim today`,
+        tone: '#7fd3ff',
+      },
+      {
+        label: 'Favorites still open',
+        value: favoriteCasinos.length > 0 ? `${favoriteRemaining} favorite bonuses left` : 'No favorites tracked yet',
+        tone: '#ff9bad',
+      },
+      {
+        label: 'Most claimed brand',
+        value: topBonus ? `${topBonus.name} · ${topBonus.count} claims` : 'No claim history yet',
+        tone: '#9f7cff',
+      },
+    ]
+  }, [currentBestActiveStreak, favoriteCasinos.length, favoriteClaimedCount, overallClaimedCount, overallTotalCount, stats.topClaimedBonuses])
 
   const stats = useMemo(() => {
     const byCasinoId = new Map(casinos.map((casino) => [casino.id, casino]))
@@ -636,6 +686,59 @@ export default function TrackerApp() {
         ) : (
         <>
         <div className="casino-progress rounded-2xl p-6 mb-8">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-5">
+            <div className="tracker-hero-stat rounded-2xl p-4">
+              <p className="text-[11px] font-semibold tracker-hero-label">Current Streak</p>
+              <p className="text-3xl font-black tracker-hero-value" style={{ color: '#FFE799' }}>{currentBestActiveStreak}</p>
+              <p className="text-sm tracker-hero-sub">Best: {stats.longestStreakAchieved} days</p>
+            </div>
+            <div className="tracker-hero-stat rounded-2xl p-4">
+              <p className="text-[11px] font-semibold tracker-hero-label">Bonuses Claimed</p>
+              <p className="text-3xl font-black tracker-hero-value" style={{ color: '#d8f0ff' }}>{overallClaimedCount} / {overallTotalCount}</p>
+              <p className="text-sm tracker-hero-sub">{Math.max(0, overallTotalCount - overallClaimedCount)} remaining today</p>
+            </div>
+            <div className="tracker-hero-stat rounded-2xl p-4">
+              <p className="text-[11px] font-semibold tracker-hero-label">Completion Rate</p>
+              <p className="text-3xl font-black tracker-hero-value" style={{ color: '#9f7cff' }}>{Math.round(overallProgress)}%</p>
+              <p className="text-sm tracker-hero-sub">Across all active bonuses</p>
+            </div>
+            <div className="tracker-hero-stat rounded-2xl p-4">
+              <p className="text-[11px] font-semibold tracker-hero-label">Next Reset</p>
+              <p className="text-3xl font-black tracker-hero-value" style={{ color: '#7fd3ff' }}>{formatCompactDuration(nextResetMs)}</p>
+              <p className="text-sm tracker-hero-sub">Soonest bonus available again</p>
+            </div>
+            <div className="tracker-hero-stat rounded-2xl p-4">
+              <p className="text-[11px] font-semibold tracker-hero-label">Favorite Progress</p>
+              <p className="text-3xl font-black tracker-hero-value" style={{ color: '#FFD06A' }}>{favoriteClaimedCount} / {favoriteCasinos.length}</p>
+              <p className="text-sm tracker-hero-sub">Favorites claimed today</p>
+            </div>
+          </div>
+
+          <div className="flex flex-col lg:flex-row gap-3 lg:items-center lg:justify-between mb-4">
+            <div>
+              <p className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.6)' }}>Today&apos;s Progress</p>
+              <p className="text-3xl font-black">
+                <span style={{ color: '#FFE799' }}>{overallClaimedCount}</span>
+                <span style={{ color: 'rgba(255,255,255,0.3)' }}> / {overallTotalCount}</span>
+              </p>
+            </div>
+            <div className="flex items-center gap-2 self-start lg:self-auto">
+              <div className="rounded-full px-4 py-2 text-sm font-semibold"
+                style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.76)' }}>
+                {overallClaimedCount} claimed
+              </div>
+              <div className="rounded-full px-4 py-2 text-sm font-semibold"
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.56)' }}>
+                {Math.max(0, overallTotalCount - overallClaimedCount)} remaining
+              </div>
+            </div>
+          </div>
+
+          <div className="w-full h-4 rounded-full overflow-hidden mb-5" style={{ background: 'rgba(255,255,255,0.1)' }}>
+            <div className="h-full rounded-full transition-all duration-500"
+              style={{ width: `${overallProgress}%`, background: 'linear-gradient(90deg, #59d87a 0%, #63d4de 55%, #7fd3ff 100%)', boxShadow: '0 0 16px rgba(99,212,222,0.45)' }} />
+          </div>
+
           {topFeaturedBonuses.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
               {topFeaturedBonuses.map((featured) => (
@@ -691,24 +794,15 @@ export default function TrackerApp() {
             </div>
           )}
 
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <p className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.6)' }}>Today&apos;s Progress</p>
-              <p className="text-3xl font-black">
-                <span style={{ color: '#FFE799' }}>{claimedCount}</span>
-                <span style={{ color: 'rgba(255,255,255,0.3)' }}> / {totalCount}</span>
-              </p>
-            </div>
-            <div className="text-right">
-              <p className="text-4xl font-black" style={{ color: '#E52D4B' }}>{Math.round(progress)}%</p>
-              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>bonuses claimed</p>
-            </div>
-          </div>
-          <div className="w-full h-3 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.12)' }}>
-            <div className="h-full rounded-full transition-all duration-500"
-              style={{ width: `${progress}%`, background: 'linear-gradient(90deg, #E52D4B 0%, #ff6f98 40%, #FFE799 100%)', boxShadow: '0 0 14px rgba(229,45,75,0.56)' }} />
-          </div>
+        </div>
 
+        <div className="tracker-insights-strip mb-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+          {trackerInsights.map((insight) => (
+            <div key={insight.label} className="tracker-insight-chip rounded-2xl px-4 py-3">
+              <p className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.54)' }}>{insight.label}</p>
+              <p className="text-sm font-semibold mt-1" style={{ color: insight.tone }}>{insight.value}</p>
+            </div>
+          ))}
         </div>
 
         <div className="casino-panel p-4 mb-6">
