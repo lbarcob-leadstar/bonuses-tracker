@@ -457,35 +457,6 @@ export default function TrackerApp() {
     return `${hours}h ${minutes.toString().padStart(2, '0')}m`
   }, [])
 
-  const trackerInsights = useMemo(() => {
-    const remainingBonuses = Math.max(0, overallTotalCount - overallClaimedCount)
-    const favoriteRemaining = Math.max(0, favoriteCasinos.length - favoriteClaimedCount)
-    const topBonus = stats.topClaimedBonuses[0]
-
-    return [
-      {
-        label: 'Current streak',
-        value: currentBestActiveStreak > 0 ? `🔥 ${currentBestActiveStreak} days` : 'No active streak',
-        tone: '#FFE799',
-      },
-      {
-        label: 'Bonuses remaining',
-        value: `${remainingBonuses} left to claim today`,
-        tone: '#7fd3ff',
-      },
-      {
-        label: 'Favorites still open',
-        value: favoriteCasinos.length > 0 ? `${favoriteRemaining} favorite bonuses left` : 'No favorites tracked yet',
-        tone: '#ff9bad',
-      },
-      {
-        label: 'Most claimed brand',
-        value: topBonus ? `${topBonus.name} · ${topBonus.count} claims` : 'No claim history yet',
-        tone: '#9f7cff',
-      },
-    ]
-  }, [currentBestActiveStreak, favoriteCasinos.length, favoriteClaimedCount, overallClaimedCount, overallTotalCount, stats.topClaimedBonuses])
-
   const stats = useMemo(() => {
     const byCasinoId = new Map(casinos.map((casino) => [casino.id, casino]))
     const totalClaims = claimHistory.length
@@ -542,6 +513,35 @@ export default function TrackerApp() {
       claimsLast7Days,
     }
   }, [casinos, claimHistory])
+
+  const trackerInsights = useMemo(() => {
+    const remainingBonuses = Math.max(0, overallTotalCount - overallClaimedCount)
+    const favoriteRemaining = Math.max(0, favoriteCasinos.length - favoriteClaimedCount)
+    const topBonus = stats.topClaimedBonuses[0]
+
+    return [
+      {
+        label: 'Current streak',
+        value: currentBestActiveStreak > 0 ? `🔥 ${currentBestActiveStreak} days` : 'No active streak',
+        tone: '#FFE799',
+      },
+      {
+        label: 'Bonuses remaining',
+        value: `${remainingBonuses} left to claim today`,
+        tone: '#7fd3ff',
+      },
+      {
+        label: 'Favorites still open',
+        value: favoriteCasinos.length > 0 ? `${favoriteRemaining} favorite bonuses left` : 'No favorites tracked yet',
+        tone: '#ff9bad',
+      },
+      {
+        label: 'Most claimed brand',
+        value: topBonus ? `${topBonus.name} · ${topBonus.count} claims` : 'No claim history yet',
+        tone: '#9f7cff',
+      },
+    ]
+  }, [currentBestActiveStreak, favoriteCasinos.length, favoriteClaimedCount, overallClaimedCount, overallTotalCount, stats.topClaimedBonuses])
 
   if (loading) {
     return (
