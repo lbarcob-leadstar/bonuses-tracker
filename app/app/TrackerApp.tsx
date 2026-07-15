@@ -26,6 +26,76 @@ export default function TrackerApp() {
   const [featuredBonuses, setFeaturedBonuses] = useState<FeaturedBonus[]>([])
   const [claimHistory, setClaimHistory] = useState<Array<{ casino_id: string, claimed_at: string, streak: number | null }>>([])
 
+
+type HeroMetricIconName = 'streak' | 'claimed' | 'completion' | 'reset' | 'favorite'
+
+function HeroMetricCard({
+  icon,
+  title,
+  value,
+  subValue,
+  accent,
+  ringValue,
+}: {
+  icon: HeroMetricIconName
+  title: string
+  value: string
+  subValue: string
+  accent: string
+  ringValue?: number
+}) {
+  return (
+    <div className="tracker-hero-stat rounded-2xl p-4">
+      <div className="flex items-start gap-3">
+        {ringValue !== undefined ? (
+          <div className="tracker-progress-ring" style={{ background: `conic-gradient(${accent} ${Math.max(0, Math.min(100, ringValue))}%, rgba(255,255,255,0.08) 0)` }}>
+            <div className="tracker-progress-ring-inner">
+              <span>{Math.round(ringValue)}%</span>
+            </div>
+          </div>
+        ) : (
+          <div className="tracker-hero-icon" style={{ color: accent, borderColor: `${accent}33`, background: `${accent}12`, boxShadow: `0 0 24px ${accent}22` }}>
+            <HeroMetricIcon icon={icon} />
+          </div>
+        )}
+        <div className="min-w-0 flex-1">
+          <p className="text-[11px] font-semibold tracker-hero-label">{title}</p>
+          <p className="text-3xl font-black tracker-hero-value" style={{ color: accent }}>{value}</p>
+          <p className="text-sm tracker-hero-sub">{subValue}</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
+  switch (icon) {
+    case 'streak':
+      return <span className="text-3xl leading-none">🔥</span>
+    case 'claimed':
+      return (
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+          <circle cx="13" cy="13" r="11" stroke="currentColor" strokeWidth="2" opacity="0.8" />
+          <path d="M7.5 13.3 11.2 17 18.7 9.2" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      )
+    case 'completion':
+      return null
+    case 'reset':
+      return (
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+          <circle cx="13" cy="13" r="10.5" stroke="currentColor" strokeWidth="2" opacity="0.85" />
+          <path d="M13 7.5V13l4 2.4" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      )
+    case 'favorite':
+      return (
+        <svg width="28" height="28" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path d="M10 17.25 8.84 16.2C4.7 12.45 2 9.99 2 6.98 2 4.52 3.93 2.75 6.4 2.75c1.39 0 2.73.64 3.6 1.64.87-1 2.21-1.64 3.6-1.64C16.07 2.75 18 4.52 18 6.98c0 3.01-2.7 5.47-6.84 9.22L10 17.25Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
+        </svg>
+      )
+  }
+}
   const triggerClaimFx = useCallback((casinoId: string) => {
     setClaimFxByCasino((prev) => ({ ...prev, [casinoId]: Date.now() }))
 
@@ -687,31 +757,42 @@ export default function TrackerApp() {
         <>
         <div className="casino-progress rounded-2xl p-6 mb-8">
           <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-5">
-            <div className="tracker-hero-stat rounded-2xl p-4">
-              <p className="text-[11px] font-semibold tracker-hero-label">Current Streak</p>
-              <p className="text-3xl font-black tracker-hero-value" style={{ color: '#FFE799' }}>{currentBestActiveStreak}</p>
-              <p className="text-sm tracker-hero-sub">Best: {stats.longestStreakAchieved} days</p>
-            </div>
-            <div className="tracker-hero-stat rounded-2xl p-4">
-              <p className="text-[11px] font-semibold tracker-hero-label">Bonuses Claimed</p>
-              <p className="text-3xl font-black tracker-hero-value" style={{ color: '#d8f0ff' }}>{overallClaimedCount} / {overallTotalCount}</p>
-              <p className="text-sm tracker-hero-sub">{Math.max(0, overallTotalCount - overallClaimedCount)} remaining today</p>
-            </div>
-            <div className="tracker-hero-stat rounded-2xl p-4">
-              <p className="text-[11px] font-semibold tracker-hero-label">Completion Rate</p>
-              <p className="text-3xl font-black tracker-hero-value" style={{ color: '#9f7cff' }}>{Math.round(overallProgress)}%</p>
-              <p className="text-sm tracker-hero-sub">Across all active bonuses</p>
-            </div>
-            <div className="tracker-hero-stat rounded-2xl p-4">
-              <p className="text-[11px] font-semibold tracker-hero-label">Next Reset</p>
-              <p className="text-3xl font-black tracker-hero-value" style={{ color: '#7fd3ff' }}>{formatCompactDuration(nextResetMs)}</p>
-              <p className="text-sm tracker-hero-sub">Soonest bonus available again</p>
-            </div>
-            <div className="tracker-hero-stat rounded-2xl p-4">
-              <p className="text-[11px] font-semibold tracker-hero-label">Favorite Progress</p>
-              <p className="text-3xl font-black tracker-hero-value" style={{ color: '#FFD06A' }}>{favoriteClaimedCount} / {favoriteCasinos.length}</p>
-              <p className="text-sm tracker-hero-sub">Favorites claimed today</p>
-            </div>
+            <HeroMetricCard
+              icon="streak"
+              title="Current Streak"
+              accent="#FFE799"
+              value={String(currentBestActiveStreak)}
+              subValue={`Best: ${stats.longestStreakAchieved} days`}
+            />
+            <HeroMetricCard
+              icon="claimed"
+              title="Bonuses Claimed"
+              accent="#C8E8FF"
+              value={`${overallClaimedCount} / ${overallTotalCount}`}
+              subValue={`${Math.max(0, overallTotalCount - overallClaimedCount)} remaining today`}
+            />
+            <HeroMetricCard
+              icon="completion"
+              title="Completion Rate"
+              accent="#9F7CFF"
+              value={`${Math.round(overallProgress)}%`}
+              subValue="Across all active bonuses"
+              ringValue={overallProgress}
+            />
+            <HeroMetricCard
+              icon="reset"
+              title="Next Reset"
+              accent="#52BCFF"
+              value={formatCompactDuration(nextResetMs)}
+              subValue="Soonest bonus available again"
+            />
+            <HeroMetricCard
+              icon="favorite"
+              title="Favorite Progress"
+              accent="#FFD06A"
+              value={`${favoriteClaimedCount} / ${favoriteCasinos.length}`}
+              subValue="Favorites claimed today"
+            />
           </div>
 
           <div className="flex flex-col lg:flex-row gap-3 lg:items-center lg:justify-between mb-4">
