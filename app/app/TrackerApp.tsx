@@ -46,7 +46,7 @@ function HeroMetricCard({
 }) {
   return (
     <div className="tracker-hero-stat rounded-2xl p-4">
-      <div className="flex flex-col items-center text-center gap-3 h-full">
+      <div className="flex items-center gap-3 h-full">
         {ringValue !== undefined ? (
           <div className="tracker-progress-ring" style={{ background: `conic-gradient(${accent} ${Math.max(0, Math.min(100, ringValue))}%, rgba(255,255,255,0.08) 0)` }}>
             <div className="tracker-progress-ring-inner">
@@ -58,9 +58,11 @@ function HeroMetricCard({
             <HeroMetricIcon icon={icon} />
           </div>
         )}
-        <p className="text-[11px] font-semibold tracker-hero-label">{title}</p>
-        <p className="text-3xl font-black tracker-hero-value" style={{ color: accent }}>{value}</p>
-        <p className="text-sm tracker-hero-sub max-w-[12rem]">{subValue}</p>
+        <div className="min-w-0 flex-1">
+          <p className="text-[11px] font-semibold tracker-hero-label">{title}</p>
+          <p className="text-3xl font-black tracker-hero-value" style={{ color: accent }}>{value}</p>
+          <p className="text-sm tracker-hero-sub">{subValue}</p>
+        </div>
       </div>
     </div>
   )
