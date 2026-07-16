@@ -1057,15 +1057,26 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
                   </button>
                 </div>
               </div>
-              <p className="text-sm mb-2" style={{ color: 'rgba(255,255,255,0.62)' }}>{casino.bonus_description}</p>
-              <div className="flex flex-wrap gap-2 mb-2">
+                <div className="casino-highlight-box mb-2 rounded-2xl px-3 py-2.5">
+                  <p className="text-[1.02rem] sm:text-sm md:text-[1.05rem] font-extrabold leading-snug casino-highlight-text">
+                    {casino.bonus_description}
+                  </p>
+                </div>
                 {countdown && (
-                  <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold"
-                    style={{ background: 'rgba(229,45,75,0.2)', border: '1px solid rgba(229,45,75,0.3)', color: '#ff9bad' }}>
-                    ⏳ Available in {countdown}
+                  <div className="casino-countdown-row mb-2 rounded-2xl px-3 py-2.5 flex items-center gap-3">
+                    <div className="casino-countdown-icon flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full">
+                      ⏳
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] casino-countdown-label">
+                        Next available
+                      </p>
+                      <p className="text-[0.95rem] sm:text-sm font-black leading-none casino-countdown-value">
+                        {countdown}
+                      </p>
+                    </div>
                   </div>
                 )}
-              </div>
               {casino.welcome_offer_info && (
                 <div>
                   <button
