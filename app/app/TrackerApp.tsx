@@ -755,8 +755,8 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
           </div>
         ) : (
         <>
-        <div className="casino-progress rounded-2xl p-6 mb-8">
-          <div className="grid grid-cols-2 gap-3 mb-5">
+        <div className="tracker-hero-shell rounded-2xl p-4 md:p-5 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
             <HeroMetricCard
               icon="streak"
               title="Current Streak"
@@ -788,31 +788,31 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
             />
           </div>
 
-          <div className="flex flex-col lg:flex-row gap-3 lg:items-center lg:justify-between mb-4">
-            <div>
+          <div className="tracker-hero-summary flex flex-col lg:flex-row gap-3 lg:items-center lg:justify-between mb-4">
+            <div className="min-w-0">
               <p className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.6)' }}>Today&apos;s Progress</p>
               <p className="text-3xl font-black">
                 <span style={{ color: '#FFE799' }}>{overallClaimedCount}</span>
                 <span style={{ color: 'rgba(255,255,255,0.3)' }}> / {overallTotalCount}</span>
               </p>
             </div>
-            <div className="flex items-center gap-2 self-start lg:self-auto">
-              <div className="rounded-full px-4 py-2 text-sm font-semibold"
+            <div className="flex flex-wrap items-center gap-2 self-start lg:self-auto">
+              <div className="rounded-full px-3.5 py-2 text-sm font-semibold"
                 style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.76)' }}>
                 {overallClaimedCount} claimed
               </div>
-              <div className="rounded-full px-4 py-2 text-sm font-semibold"
+              <div className="rounded-full px-3.5 py-2 text-sm font-semibold"
                 style={{ background: 'rgba(255,208,106,0.08)', border: '1px solid rgba(255,208,106,0.18)', color: '#FFD06A' }}>
                 ★ {favoriteClaimedCount} / {favoriteCasinos.length} favorites
               </div>
-              <div className="rounded-full px-4 py-2 text-sm font-semibold"
+              <div className="rounded-full px-3.5 py-2 text-sm font-semibold"
                 style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.56)' }}>
                 {Math.max(0, overallTotalCount - overallClaimedCount)} remaining
               </div>
             </div>
           </div>
 
-          <div className="w-full h-4 rounded-full overflow-hidden mb-5" style={{ background: 'rgba(255,255,255,0.1)' }}>
+          <div className="w-full h-3 rounded-full overflow-hidden mb-4" style={{ background: 'rgba(255,255,255,0.1)' }}>
             <div className="h-full rounded-full transition-all duration-500"
               style={{ width: `${overallProgress}%`, background: 'linear-gradient(90deg, #59d87a 0%, #63d4de 55%, #7fd3ff 100%)', boxShadow: '0 0 16px rgba(99,212,222,0.45)' }} />
           </div>
