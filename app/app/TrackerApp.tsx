@@ -59,9 +59,9 @@ function HeroMetricCard({
           </div>
         )}
           <div className="min-w-0 flex-1 pt-0.5">
-            <p className="text-[9px] sm:text-[11px] font-semibold tracker-hero-label">{title}</p>
-            <p className="text-[1.2rem] sm:text-[1.9rem] md:text-3xl font-black tracker-hero-value" style={{ color: accent }}>{value}</p>
-            <p className="text-[9px] sm:text-xs md:text-sm tracker-hero-sub">{subValue}</p>
+            <p className="text-[10px] sm:text-[11px] font-semibold tracker-hero-label">{title}</p>
+            <p className="text-[1.35rem] sm:text-[1.95rem] md:text-3xl font-black tracker-hero-value" style={{ color: accent }}>{value}</p>
+            <p className="text-[10px] sm:text-xs md:text-sm tracker-hero-sub">{subValue}</p>
           </div>
       </div>
     </div>
