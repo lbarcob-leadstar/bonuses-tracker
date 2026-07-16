@@ -45,8 +45,8 @@ function HeroMetricCard({
   ringValue?: number
 }) {
   return (
-      <div className="tracker-hero-stat aspect-[1.28] rounded-2xl p-2 sm:aspect-auto md:p-4">
-        <div className="flex h-full flex-col items-center justify-center gap-1.5 text-center sm:flex-row sm:items-center sm:justify-start sm:text-left sm:gap-2.5 md:gap-3">
+      <div className="tracker-hero-stat min-h-[90px] rounded-2xl p-2.5 md:p-4">
+        <div className="flex h-full items-start gap-2.5 text-left md:items-center md:gap-3">
         {ringValue !== undefined ? (
           <div className="tracker-progress-ring" style={{ background: `conic-gradient(${accent} ${Math.max(0, Math.min(100, ringValue))}%, rgba(255,255,255,0.08) 0)` }}>
             <div className="tracker-progress-ring-inner">
@@ -54,15 +54,15 @@ function HeroMetricCard({
             </div>
           </div>
         ) : (
-          <div className="tracker-hero-icon" style={{ color: accent }}>
+            <div className="tracker-hero-icon mt-0.5 md:mt-0" style={{ color: accent }}>
             <HeroMetricIcon icon={icon} />
           </div>
         )}
-          <div className="min-w-0 flex-1">
+          <div className="min-w-0 flex-1 pt-0.5">
             <p className="text-[9px] sm:text-[11px] font-semibold tracker-hero-label">{title}</p>
-            <p className="text-[1.35rem] sm:text-[1.9rem] md:text-3xl font-black tracker-hero-value" style={{ color: accent }}>{value}</p>
+            <p className="text-[1.2rem] sm:text-[1.9rem] md:text-3xl font-black tracker-hero-value" style={{ color: accent }}>{value}</p>
             <p className="text-[9px] sm:text-xs md:text-sm tracker-hero-sub">{subValue}</p>
-        </div>
+          </div>
       </div>
     </div>
   )
