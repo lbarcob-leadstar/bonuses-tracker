@@ -45,8 +45,8 @@ function HeroMetricCard({
   ringValue?: number
 }) {
   return (
-    <div className="tracker-hero-stat rounded-2xl p-3 md:p-4">
-      <div className="flex items-center gap-2.5 md:gap-3 h-full">
+      <div className="tracker-hero-stat aspect-square rounded-2xl p-2.5 sm:aspect-auto md:p-4">
+        <div className="flex h-full flex-col items-center justify-center gap-2 text-center sm:flex-row sm:items-center sm:justify-start sm:text-left sm:gap-2.5 md:gap-3">
         {ringValue !== undefined ? (
           <div className="tracker-progress-ring" style={{ background: `conic-gradient(${accent} ${Math.max(0, Math.min(100, ringValue))}%, rgba(255,255,255,0.08) 0)` }}>
             <div className="tracker-progress-ring-inner">
@@ -58,10 +58,10 @@ function HeroMetricCard({
             <HeroMetricIcon icon={icon} />
           </div>
         )}
-        <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-semibold tracker-hero-label">{title}</p>
-          <p className="text-[2rem] md:text-3xl font-black tracker-hero-value" style={{ color: accent }}>{value}</p>
-          <p className="text-xs md:text-sm tracker-hero-sub">{subValue}</p>
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] sm:text-[11px] font-semibold tracker-hero-label">{title}</p>
+            <p className="text-[1.65rem] sm:text-[1.9rem] md:text-3xl font-black tracker-hero-value" style={{ color: accent }}>{value}</p>
+            <p className="text-[10px] sm:text-xs md:text-sm tracker-hero-sub">{subValue}</p>
         </div>
       </div>
     </div>
@@ -756,7 +756,7 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
         ) : (
         <>
         <div className="tracker-hero-shell rounded-2xl p-4 md:p-5 mb-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-4 lg:grid-cols-4">
             <HeroMetricCard
               icon="streak"
               title="Current Streak"
