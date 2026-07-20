@@ -119,6 +119,26 @@ export default function LandingPage() {
           </div>
         ))}
       </div>
+
+      <footer className="relative z-10 pb-8 px-4">
+        <div className="mx-auto max-w-6xl flex flex-wrap items-center justify-center gap-4 text-sm">
+          <a
+            href="/privacy-policy"
+            className="font-semibold transition-opacity duration-200 hover:opacity-100"
+            style={{ color: 'rgba(255,255,255,0.72)', opacity: 0.88 }}
+          >
+            Privacy Policy
+          </a>
+          <span style={{ color: 'rgba(255,255,255,0.3)' }}>•</span>
+          <a
+            href="/terms-of-service"
+            className="font-semibold transition-opacity duration-200 hover:opacity-100"
+            style={{ color: 'rgba(255,255,255,0.72)', opacity: 0.88 }}
+          >
+            Terms of Service
+          </a>
+        </div>
+      </footer>
     </main>
   )
 }
