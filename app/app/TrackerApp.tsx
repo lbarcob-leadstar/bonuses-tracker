@@ -613,15 +613,12 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
       <div className="casino-texture" />
       <header className="casino-header relative z-10">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center">
             <img
-              src="/UG-logo.png"
-              alt="UG logo"
-              className="w-14 h-14 object-contain flex-shrink-0"
+              src="/DBT-logo.png"
+              alt="Daily Bonus Tracker"
+              className="h-12 sm:h-14 md:h-16 w-auto object-contain flex-shrink-0"
             />
-            <div>
-              <h1 className="font-black text-lg leading-none" style={{ color: '#FFE799', textShadow: '0 0 10px rgba(255, 231, 153, 0.3)' }}>United Gamblers Daily Bonus Tracker</h1>
-            </div>
           </div>
           <div className="flex items-center gap-4">
             <span className="text-sm hidden md:block" style={{ color: 'rgba(255,255,255,0.5)' }}>{user?.email}</span>
