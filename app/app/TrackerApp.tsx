@@ -837,7 +837,7 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
             const isClaimAnimating = !!claimFxByCasino[casino.id]
             const isStreakAnimating = !!streakFxByCasino[casino.id]
             const countdown = formatCountdown(casino)
-            const cardBackground = '#0F1B2D'
+            const cardBackground = '#1C2837'
 
             return (
             <div
