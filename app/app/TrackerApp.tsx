@@ -609,9 +609,6 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
             />
             <div>
               <h1 className="font-black text-lg leading-none" style={{ color: '#FFE799', textShadow: '0 0 10px rgba(255, 231, 153, 0.3)' }}>United Gamblers Daily Bonus Tracker</h1>
-              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-              </p>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -625,29 +622,34 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
       </header>
 
       <div className="max-w-6xl mx-auto px-4 py-8 relative z-10">
-        <div className="mb-5 flex items-center gap-2">
-          <button
-            onClick={() => setDashboardView('tracker')}
-            className="px-4 py-2 rounded-xl text-sm font-semibold cursor-pointer"
-            style={{
-              background: dashboardView === 'tracker' ? '#E52D4B' : 'rgba(44,52,63,0.88)',
-              color: dashboardView === 'tracker' ? '#fff' : 'rgba(255,255,255,0.7)',
-              border: `1px solid ${dashboardView === 'tracker' ? '#E52D4B' : 'rgba(255,255,255,0.12)'}`,
-            }}
-          >
-            Tracker
-          </button>
-          <button
-            onClick={() => setDashboardView('stats')}
-            className="px-4 py-2 rounded-xl text-sm font-semibold cursor-pointer"
-            style={{
-              background: dashboardView === 'stats' ? '#4994C9' : 'rgba(44,52,63,0.88)',
-              color: dashboardView === 'stats' ? '#fff' : 'rgba(255,255,255,0.7)',
-              border: `1px solid ${dashboardView === 'stats' ? '#4994C9' : 'rgba(255,255,255,0.12)'}`,
-            }}
-          >
-            My Stats
-          </button>
+        <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setDashboardView('tracker')}
+              className="px-4 py-2 rounded-xl text-sm font-semibold cursor-pointer"
+              style={{
+                background: dashboardView === 'tracker' ? '#E52D4B' : 'rgba(44,52,63,0.88)',
+                color: dashboardView === 'tracker' ? '#fff' : 'rgba(255,255,255,0.7)',
+                border: `1px solid ${dashboardView === 'tracker' ? '#E52D4B' : 'rgba(255,255,255,0.12)'}`,
+              }}
+            >
+              Tracker
+            </button>
+            <button
+              onClick={() => setDashboardView('stats')}
+              className="px-4 py-2 rounded-xl text-sm font-semibold cursor-pointer"
+              style={{
+                background: dashboardView === 'stats' ? '#4994C9' : 'rgba(44,52,63,0.88)',
+                color: dashboardView === 'stats' ? '#fff' : 'rgba(255,255,255,0.7)',
+                border: `1px solid ${dashboardView === 'stats' ? '#4994C9' : 'rgba(255,255,255,0.12)'}`,
+              }}
+            >
+              My Stats
+            </button>
+          </div>
+          <div className="rounded-full px-4 py-2 text-sm font-semibold self-start md:self-auto" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.66)' }}>
+            {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+          </div>
         </div>
 
         {dashboardView === 'stats' ? (
