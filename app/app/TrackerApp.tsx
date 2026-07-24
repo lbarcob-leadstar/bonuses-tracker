@@ -1042,7 +1042,7 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
           })}
         </div>
         ) : (
-        <div className="casino-panel rounded-2xl overflow-hidden mb-1">
+        <div className="casino-panel rounded-2xl overflow-hidden mb-1" style={{ background: '#1B2736' }}>
           {sortedFiltered.map((casino, index) => {
             const claimed = isOnCooldown(casino)
             const countdown = formatCountdown(casino)
