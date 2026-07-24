@@ -1051,7 +1051,8 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
               <div key={casino.id}
                 className="px-3 md:px-4 py-3 flex flex-col gap-2 md:flex-row md:items-center md:gap-3"
                 style={{ borderBottom: index < sortedFiltered.length - 1 ? '1px solid rgba(255,255,255,0.08)' : 'none' }}>
-                <div className="flex items-start md:items-center gap-3 min-w-0 w-full md:w-auto">
+                <div className="flex items-start justify-between gap-3 min-w-0 w-full">
+                  <div className="flex items-start md:items-center gap-3 min-w-0 flex-1">
                   <div className="text-sm font-black w-6 md:w-8 text-right flex-shrink-0" style={{ color: 'rgba(255,255,255,0.46)' }}>
                     {index + 1}
                   </div>
@@ -1078,21 +1079,8 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
                     <p className="text-xs truncate mt-0.5" style={{ color: 'rgba(255,255,255,0.64)' }}>
                       {casino.bonus_description}
                     </p>
-                    {countdown && (
-                      <div className="mt-1 inline-flex md:hidden text-[11px] font-semibold px-2.5 py-1 rounded-lg"
-                        style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.72)', border: '1px solid rgba(255,255,255,0.12)' }}>
-                        {countdown}
-                      </div>
-                    )}
                   </div>
                 </div>
-                <div className="flex items-center justify-between md:justify-end gap-2 flex-shrink-0 w-full md:w-auto">
-                  {countdown && (
-                    <div className="hidden md:block text-xs font-semibold px-2.5 py-1 rounded-lg"
-                      style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.72)', border: '1px solid rgba(255,255,255,0.12)' }}>
-                      {countdown}
-                    </div>
-                  )}
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <span
                       onClick={() => toggleFavorite(casino)}
@@ -1133,6 +1121,18 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
                     </button>
                   </div>
                 </div>
+                {countdown && (
+                  <div className="inline-flex md:hidden text-[11px] font-semibold px-2.5 py-1 rounded-lg ml-[42px]"
+                    style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.72)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                    {countdown}
+                  </div>
+                )}
+                {countdown && (
+                  <div className="hidden md:block text-xs font-semibold px-2.5 py-1 rounded-lg self-end"
+                    style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.72)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                    {countdown}
+                  </div>
+                )}
               </div>
             )
           })}
