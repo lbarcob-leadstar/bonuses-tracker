@@ -852,10 +852,10 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
                 }}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <rect x="3" y="3" width="7" height="7" rx="1.5" stroke={viewMode === 'grid' ? '#9F7CFF' : 'rgba(255,255,255,0.55)'} strokeWidth="2" />
-                  <rect x="14" y="3" width="7" height="7" rx="1.5" stroke={viewMode === 'grid' ? '#9F7CFF' : 'rgba(255,255,255,0.55)'} strokeWidth="2" />
-                  <rect x="3" y="14" width="7" height="7" rx="1.5" stroke={viewMode === 'grid' ? '#9F7CFF' : 'rgba(255,255,255,0.55)'} strokeWidth="2" />
-                  <rect x="14" y="14" width="7" height="7" rx="1.5" stroke={viewMode === 'grid' ? '#9F7CFF' : 'rgba(255,255,255,0.55)'} strokeWidth="2" />
+                  <rect x="3" y="3" width="7" height="7" rx="1.5" stroke={viewMode === 'grid' ? '#1C2837' : 'rgba(28,40,55,0.55)'} strokeWidth="2" />
+                  <rect x="14" y="3" width="7" height="7" rx="1.5" stroke={viewMode === 'grid' ? '#1C2837' : 'rgba(28,40,55,0.55)'} strokeWidth="2" />
+                  <rect x="3" y="14" width="7" height="7" rx="1.5" stroke={viewMode === 'grid' ? '#1C2837' : 'rgba(28,40,55,0.55)'} strokeWidth="2" />
+                  <rect x="14" y="14" width="7" height="7" rx="1.5" stroke={viewMode === 'grid' ? '#1C2837' : 'rgba(28,40,55,0.55)'} strokeWidth="2" />
                 </svg>
               </button>
               <button
@@ -870,10 +870,10 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
                 }}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <circle cx="4" cy="6" r="1.5" fill={viewMode === 'list' ? '#BFD9FF' : 'rgba(255,255,255,0.55)'} />
-                  <circle cx="4" cy="12" r="1.5" fill={viewMode === 'list' ? '#BFD9FF' : 'rgba(255,255,255,0.55)'} />
-                  <circle cx="4" cy="18" r="1.5" fill={viewMode === 'list' ? '#BFD9FF' : 'rgba(255,255,255,0.55)'} />
-                  <path d="M8 6h12M8 12h12M8 18h12" stroke={viewMode === 'list' ? '#BFD9FF' : 'rgba(255,255,255,0.55)'} strokeWidth="2" strokeLinecap="round" />
+                  <circle cx="4" cy="6" r="1.5" fill={viewMode === 'list' ? '#1C2837' : 'rgba(28,40,55,0.55)'} />
+                  <circle cx="4" cy="12" r="1.5" fill={viewMode === 'list' ? '#1C2837' : 'rgba(28,40,55,0.55)'} />
+                  <circle cx="4" cy="18" r="1.5" fill={viewMode === 'list' ? '#1C2837' : 'rgba(28,40,55,0.55)'} />
+                  <path d="M8 6h12M8 12h12M8 18h12" stroke={viewMode === 'list' ? '#1C2837' : 'rgba(28,40,55,0.55)'} strokeWidth="2" strokeLinecap="round" />
                 </svg>
               </button>
           </div>
