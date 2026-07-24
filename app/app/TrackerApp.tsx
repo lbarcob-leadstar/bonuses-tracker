@@ -647,7 +647,7 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
               My Stats
             </button>
           </div>
-          <div className="rounded-full px-4 py-2 text-sm font-semibold self-start md:self-auto" style={{ background: 'rgba(10, 16, 24, 0.96)', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.82)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03), 0 8px 18px rgba(0,0,0,0.18)' }}>
+          <div className="rounded-full px-4 py-2 text-sm font-semibold self-start md:self-auto" style={{ background: 'rgba(244, 249, 255, 0.66)', border: '1px solid rgba(255,255,255,0.55)', color: '#1C2836', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.75), 0 8px 18px rgba(17, 29, 45, 0.15)', backdropFilter: 'blur(8px)' }}>
             {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
           </div>
         </div>
