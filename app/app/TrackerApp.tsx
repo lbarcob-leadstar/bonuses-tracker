@@ -796,75 +796,93 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
 
         </div>
 
-        <div className="casino-panel p-4 mb-6">
-          <div className="flex flex-col md:flex-row gap-4">
-          <input type="text" placeholder="Search casinos..." value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="flex-1 px-4 py-3 rounded-xl outline-none text-sm casino-control" />
-          <div className="relative">
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as 'highest-sc' | 'highest-gc' | 'lowest-min-redemption' | 'longest-streak' | 'a-z' | 'z-a' | 'next-available')}
-              className="w-full px-4 py-3 pr-11 rounded-xl outline-none text-sm casino-control"
-              style={{ appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none' }}>
-              <option value="highest-sc">Sort: Highest SC</option>
-              <option value="highest-gc">Sort: Highest GC</option>
-              <option value="lowest-min-redemption">Sort: Lowest min redemption</option>
-              <option value="longest-streak">Sort: Longest streak</option>
-              <option value="a-z">Sort: A-Z</option>
-              <option value="z-a">Sort: Z-A</option>
-              <option value="next-available">Sort: Next available bonus</option>
-            </select>
-            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2" aria-hidden="true">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path d="M3 5.25 7 9l4-3.75" stroke="rgba(255,255,255,0.78)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </span>
+        <div className="mb-6 flex flex-col xl:flex-row gap-3 xl:items-center">
+          <div className="casino-panel p-4 flex-1">
+            <div className="flex flex-col md:flex-row gap-4">
+              <input type="text" placeholder="Search casinos..." value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="flex-1 px-4 py-3 rounded-xl outline-none text-sm casino-control" />
+              <div className="relative">
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as 'highest-sc' | 'highest-gc' | 'lowest-min-redemption' | 'longest-streak' | 'a-z' | 'z-a' | 'next-available')}
+                  className="w-full px-4 py-3 pr-11 rounded-xl outline-none text-sm casino-control"
+                  style={{ appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none' }}>
+                  <option value="highest-sc">Sort: Highest SC</option>
+                  <option value="highest-gc">Sort: Highest GC</option>
+                  <option value="lowest-min-redemption">Sort: Lowest min redemption</option>
+                  <option value="longest-streak">Sort: Longest streak</option>
+                  <option value="a-z">Sort: A-Z</option>
+                  <option value="z-a">Sort: Z-A</option>
+                  <option value="next-available">Sort: Next available bonus</option>
+                </select>
+                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2" aria-hidden="true">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <path d="M3 5.25 7 9l4-3.75" stroke="rgba(255,255,255,0.78)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-2 w-full md:flex md:w-auto">
+                {(['all', 'favorites', 'unclaimed', 'claimed'] as const).map((f) => (
+                  <button key={f} onClick={() => setFilter(f)}
+                    className="w-full md:w-auto px-4 py-3 rounded-xl text-sm font-semibold capitalize transition-all cursor-pointer"
+                    style={{
+                      background: filter === f ? '#E52D4B' : '#2C343F',
+                      color: filter === f ? '#fff' : 'rgba(255,255,255,0.5)',
+                      border: `1px solid ${filter === f ? '#E52D4B' : 'rgba(255,255,255,0.1)'}`,
+                      boxShadow: filter === f ? '0 0 15px rgba(229,45,75,0.4)' : 'none',
+                    }}>
+                    {f}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
-          <div className="grid grid-cols-2 gap-2 w-full md:flex md:w-auto">
-            {(['all', 'favorites', 'unclaimed', 'claimed'] as const).map((f) => (
-              <button key={f} onClick={() => setFilter(f)}
-                className="w-full md:w-auto px-4 py-3 rounded-xl text-sm font-semibold capitalize transition-all cursor-pointer"
+
+          <div className="casino-panel p-2.5 self-start xl:self-auto" style={{ minWidth: '190px' }}>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setViewMode('grid')}
+                aria-label="Grid view"
+                title="Grid view"
+                className="h-16 w-20 rounded-2xl flex items-center justify-center transition-all cursor-pointer"
                 style={{
-                  background: filter === f ? '#E52D4B' : '#2C343F',
-                  color: filter === f ? '#fff' : 'rgba(255,255,255,0.5)',
-                  border: `1px solid ${filter === f ? '#E52D4B' : 'rgba(255,255,255,0.1)'}`,
-                  boxShadow: filter === f ? '0 0 15px rgba(229,45,75,0.4)' : 'none',
-                }}>
-                {f}
+                  background: viewMode === 'grid' ? 'rgba(27, 43, 67, 0.95)' : 'rgba(255,255,255,0.04)',
+                  border: `1px solid ${viewMode === 'grid' ? 'rgba(73,148,201,0.65)' : 'rgba(255,255,255,0.1)'}`,
+                  boxShadow: viewMode === 'grid' ? '0 0 18px rgba(73,148,201,0.3), inset 0 0 0 1px rgba(73,148,201,0.2)' : 'none',
+                }}
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <rect x="3" y="3" width="7" height="7" rx="1.5" stroke={viewMode === 'grid' ? '#9F7CFF' : 'rgba(255,255,255,0.55)'} strokeWidth="2" />
+                  <rect x="14" y="3" width="7" height="7" rx="1.5" stroke={viewMode === 'grid' ? '#9F7CFF' : 'rgba(255,255,255,0.55)'} strokeWidth="2" />
+                  <rect x="3" y="14" width="7" height="7" rx="1.5" stroke={viewMode === 'grid' ? '#9F7CFF' : 'rgba(255,255,255,0.55)'} strokeWidth="2" />
+                  <rect x="14" y="14" width="7" height="7" rx="1.5" stroke={viewMode === 'grid' ? '#9F7CFF' : 'rgba(255,255,255,0.55)'} strokeWidth="2" />
+                </svg>
               </button>
-            ))}
-          </div>
-          <div className="grid grid-cols-2 gap-2 w-full md:flex md:w-auto">
-            <button
-              onClick={() => setViewMode('grid')}
-              className="w-full md:w-auto px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer"
-              style={{
-                background: viewMode === 'grid' ? '#4994C9' : '#2C343F',
-                color: viewMode === 'grid' ? '#fff' : 'rgba(255,255,255,0.55)',
-                border: `1px solid ${viewMode === 'grid' ? '#4994C9' : 'rgba(255,255,255,0.1)'}`,
-                boxShadow: viewMode === 'grid' ? '0 0 15px rgba(73,148,201,0.35)' : 'none',
-              }}
-            >
-              Grid
-            </button>
-            <button
-              onClick={() => setViewMode('list')}
-              className="w-full md:w-auto px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer"
-              style={{
-                background: viewMode === 'list' ? '#4994C9' : '#2C343F',
-                color: viewMode === 'list' ? '#fff' : 'rgba(255,255,255,0.55)',
-                border: `1px solid ${viewMode === 'list' ? '#4994C9' : 'rgba(255,255,255,0.1)'}`,
-                boxShadow: viewMode === 'list' ? '0 0 15px rgba(73,148,201,0.35)' : 'none',
-              }}
-            >
-              List
-            </button>
-          </div>
+              <button
+                onClick={() => setViewMode('list')}
+                aria-label="List view"
+                title="List view"
+                className="h-16 w-20 rounded-2xl flex items-center justify-center transition-all cursor-pointer"
+                style={{
+                  background: viewMode === 'list' ? 'rgba(27, 43, 67, 0.95)' : 'rgba(255,255,255,0.04)',
+                  border: `1px solid ${viewMode === 'list' ? 'rgba(73,148,201,0.65)' : 'rgba(255,255,255,0.1)'}`,
+                  boxShadow: viewMode === 'list' ? '0 0 18px rgba(73,148,201,0.3), inset 0 0 0 1px rgba(73,148,201,0.2)' : 'none',
+                }}
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <circle cx="4" cy="6" r="1.5" fill={viewMode === 'list' ? '#BFD9FF' : 'rgba(255,255,255,0.55)'} />
+                  <circle cx="4" cy="12" r="1.5" fill={viewMode === 'list' ? '#BFD9FF' : 'rgba(255,255,255,0.55)'} />
+                  <circle cx="4" cy="18" r="1.5" fill={viewMode === 'list' ? '#BFD9FF' : 'rgba(255,255,255,0.55)'} />
+                  <path d="M8 6h12M8 12h12M8 18h12" stroke={viewMode === 'list' ? '#BFD9FF' : 'rgba(255,255,255,0.55)'} strokeWidth="2" strokeLinecap="round" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
 
-        <div className={`grid gap-4 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
+        {viewMode === 'grid' ? (
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {sortedFiltered.map((casino) => {
             const claimed = isOnCooldown(casino)
             const isClaimAnimating = !!claimFxByCasino[casino.id]
@@ -1025,6 +1043,93 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
             )
           })}
         </div>
+        ) : (
+        <div className="casino-panel rounded-2xl overflow-hidden mb-1">
+          {sortedFiltered.map((casino, index) => {
+            const claimed = isOnCooldown(casino)
+            const countdown = formatCountdown(casino)
+
+            return (
+              <div key={casino.id}
+                className="px-3 md:px-4 py-3 flex items-center gap-3"
+                style={{ borderBottom: index < sortedFiltered.length - 1 ? '1px solid rgba(255,255,255,0.08)' : 'none' }}>
+                <div className="text-sm font-black w-8 text-right" style={{ color: 'rgba(255,255,255,0.46)' }}>
+                  {index + 1}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 min-w-0">
+                    {casino.logo_url ? (
+                      <img src={casino.logo_url} alt={`${casino.name} logo`} className="w-6 h-6 rounded object-cover flex-shrink-0" />
+                    ) : (
+                      <div className="w-6 h-6 rounded flex-shrink-0" style={{ background: 'rgba(255,255,255,0.1)' }} />
+                    )}
+                    {casino.casino_url ? (
+                      <a href={casino.casino_url} target="_blank" rel="noreferrer" className="font-bold text-sm truncate" style={{ color: claimed ? '#FFE799' : '#f0f0f0' }}>
+                        {casino.name}
+                      </a>
+                    ) : (
+                      <p className="font-bold text-sm truncate" style={{ color: claimed ? '#FFE799' : '#f0f0f0' }}>
+                        {casino.name}
+                      </p>
+                    )}
+                    {isStreakActive(casino) && (
+                      <span className="streak-mini-badge">🔥 {casino.streak}</span>
+                    )}
+                  </div>
+                  <p className="text-xs truncate mt-0.5" style={{ color: 'rgba(255,255,255,0.64)' }}>
+                    {casino.bonus_description}
+                  </p>
+                </div>
+                {countdown && (
+                  <div className="hidden md:block text-xs font-semibold px-2.5 py-1 rounded-lg"
+                    style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.72)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                    {countdown}
+                  </div>
+                )}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <span
+                    onClick={() => toggleFavorite(casino)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault()
+                        void toggleFavorite(casino)
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    className="cursor-pointer"
+                    style={{ lineHeight: 0 }}
+                    aria-label={casino.is_favorite ? `Remove ${casino.name} from favorites` : `Add ${casino.name} to favorites`}>
+                    <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                      <path
+                        d="M10 17.25 8.84 16.2C4.7 12.45 2 9.99 2 6.98 2 4.52 3.93 2.75 6.4 2.75c1.39 0 2.73.64 3.6 1.64.87-1 2.21-1.64 3.6-1.64C16.07 2.75 18 4.52 18 6.98c0 3.01-2.7 5.47-6.84 9.22L10 17.25Z"
+                        fill={casino.is_favorite ? '#E52D4B' : 'transparent'}
+                        stroke={casino.is_favorite ? '#E52D4B' : 'rgba(255,255,255,0.42)'}
+                        strokeWidth="1.7"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </span>
+                  <button onClick={() => toggleClaim(casino)}
+                    className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200"
+                    style={{
+                      background: claimed ? '#E52D4B' : 'rgba(255,255,255,0.08)',
+                      border: `2px solid ${claimed ? '#E52D4B' : 'rgba(255,255,255,0.2)'}`,
+                      boxShadow: claimed ? '0 0 10px rgba(229,45,75,0.5)' : 'none',
+                      cursor: 'pointer',
+                    }}>
+                    {claimed && (
+                      <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+                        <path d="M2 7l3.5 3.5L12 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+        )}
         {filtered.length === 0 && (
           <div className="text-center py-20">
             <div className="text-5xl mb-4">🎲</div>
