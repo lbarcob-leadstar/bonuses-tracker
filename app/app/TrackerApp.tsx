@@ -500,9 +500,15 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
   })
 
   const topFeaturedBonuses = featuredBonuses.slice(0, 3)
-  const overallClaimedCount = casinos.filter((casino) => isOnCooldown(casino)).length
-  const overallTotalCount = casinos.length
-  const overallProgress = overallTotalCount > 0 ? (overallClaimedCount / overallTotalCount) * 100 : 0
+  const scopedCasinos = casinos.filter((casino) => {
+    if (filter === 'claimed') return isOnCooldown(casino)
+    if (filter === 'unclaimed') return !isOnCooldown(casino)
+    if (filter === 'favorites') return casino.is_favorite
+    return true
+  })
+  const scopedClaimedCount = scopedCasinos.filter((casino) => isOnCooldown(casino)).length
+  const scopedTotalCount = scopedCasinos.length
+  const scopedProgress = scopedTotalCount > 0 ? (scopedClaimedCount / scopedTotalCount) * 100 : 0
   const currentBestActiveStreak = casinos.reduce((max, casino) => isStreakActive(casino) ? Math.max(max, casino.streak) : max, 0)
   const favoriteCasinos = casinos.filter((casino) => casino.is_favorite)
   const favoriteClaimedCount = favoriteCasinos.filter((casino) => isOnCooldown(casino)).length
@@ -706,16 +712,16 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
               icon="claimed"
               title="Bonuses Claimed"
               accent="#C8E8FF"
-              value={`${overallClaimedCount} / ${overallTotalCount}`}
-              subValue={`${Math.max(0, overallTotalCount - overallClaimedCount)} remaining today`}
+              value={`${scopedClaimedCount} / ${scopedTotalCount}`}
+              subValue={`${Math.max(0, scopedTotalCount - scopedClaimedCount)} remaining in this view`}
             />
             <HeroMetricCard
               icon="completion"
               title="Completion Rate"
               accent="#9F7CFF"
-              value={`${Math.round(overallProgress)}%`}
+              value={`${Math.round(scopedProgress)}%`}
               subValue="Across all active bonuses"
-              ringValue={overallProgress}
+              ringValue={scopedProgress}
             />
             <HeroMetricCard
               icon="reset"
@@ -730,8 +736,8 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
             <div className="min-w-0">
               <p className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.6)' }}>Today&apos;s Progress</p>
               <p className="text-3xl font-black">
-                <span style={{ color: '#FFE799' }}>{overallClaimedCount}</span>
-                <span style={{ color: 'rgba(255,255,255,0.3)' }}> / {overallTotalCount}</span>
+                <span style={{ color: '#FFE799' }}>{scopedClaimedCount}</span>
+                <span style={{ color: 'rgba(255,255,255,0.3)' }}> / {scopedTotalCount}</span>
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2 self-start lg:self-auto">
@@ -744,7 +750,7 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
 
           <div className="w-full h-3 rounded-full overflow-hidden mb-4" style={{ background: 'rgba(255,255,255,0.1)' }}>
             <div className="h-full rounded-full transition-all duration-500"
-              style={{ width: `${overallProgress}%`, background: 'linear-gradient(90deg, #59d87a 0%, #63d4de 55%, #7fd3ff 100%)', boxShadow: '0 0 16px rgba(99,212,222,0.45)' }} />
+              style={{ width: `${scopedProgress}%`, background: 'linear-gradient(90deg, #59d87a 0%, #63d4de 55%, #7fd3ff 100%)', boxShadow: '0 0 16px rgba(99,212,222,0.45)' }} />
           </div>
 
           {topFeaturedBonuses.length > 0 ? (
