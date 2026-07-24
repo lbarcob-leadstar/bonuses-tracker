@@ -839,20 +839,19 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
             </div>
           </div>
 
-          <div className="casino-panel p-2.5 self-start xl:self-auto" style={{ minWidth: '190px' }}>
-            <div className="flex items-center gap-2">
+          <div className="self-start xl:self-auto flex items-center gap-1.5 px-1">
               <button
                 onClick={() => setViewMode('grid')}
                 aria-label="Grid view"
                 title="Grid view"
-                className="h-16 w-20 rounded-2xl flex items-center justify-center transition-all cursor-pointer"
+                className="h-11 w-11 rounded-xl flex items-center justify-center transition-all cursor-pointer"
                 style={{
-                  background: viewMode === 'grid' ? 'rgba(27, 43, 67, 0.95)' : 'rgba(255,255,255,0.04)',
-                  border: `1px solid ${viewMode === 'grid' ? 'rgba(73,148,201,0.65)' : 'rgba(255,255,255,0.1)'}`,
-                  boxShadow: viewMode === 'grid' ? '0 0 18px rgba(73,148,201,0.3), inset 0 0 0 1px rgba(73,148,201,0.2)' : 'none',
+                  background: viewMode === 'grid' ? 'rgba(255,255,255,0.06)' : 'transparent',
+                  border: `1px solid ${viewMode === 'grid' ? 'rgba(73,148,201,0.55)' : 'rgba(255,255,255,0.08)'}`,
+                  boxShadow: viewMode === 'grid' ? '0 0 12px rgba(73,148,201,0.25)' : 'none',
                 }}
               >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <rect x="3" y="3" width="7" height="7" rx="1.5" stroke={viewMode === 'grid' ? '#9F7CFF' : 'rgba(255,255,255,0.55)'} strokeWidth="2" />
                   <rect x="14" y="3" width="7" height="7" rx="1.5" stroke={viewMode === 'grid' ? '#9F7CFF' : 'rgba(255,255,255,0.55)'} strokeWidth="2" />
                   <rect x="3" y="14" width="7" height="7" rx="1.5" stroke={viewMode === 'grid' ? '#9F7CFF' : 'rgba(255,255,255,0.55)'} strokeWidth="2" />
@@ -863,21 +862,20 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
                 onClick={() => setViewMode('list')}
                 aria-label="List view"
                 title="List view"
-                className="h-16 w-20 rounded-2xl flex items-center justify-center transition-all cursor-pointer"
+                className="h-11 w-11 rounded-xl flex items-center justify-center transition-all cursor-pointer"
                 style={{
-                  background: viewMode === 'list' ? 'rgba(27, 43, 67, 0.95)' : 'rgba(255,255,255,0.04)',
-                  border: `1px solid ${viewMode === 'list' ? 'rgba(73,148,201,0.65)' : 'rgba(255,255,255,0.1)'}`,
-                  boxShadow: viewMode === 'list' ? '0 0 18px rgba(73,148,201,0.3), inset 0 0 0 1px rgba(73,148,201,0.2)' : 'none',
+                  background: viewMode === 'list' ? 'rgba(255,255,255,0.06)' : 'transparent',
+                  border: `1px solid ${viewMode === 'list' ? 'rgba(73,148,201,0.55)' : 'rgba(255,255,255,0.08)'}`,
+                  boxShadow: viewMode === 'list' ? '0 0 12px rgba(73,148,201,0.25)' : 'none',
                 }}
               >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <circle cx="4" cy="6" r="1.5" fill={viewMode === 'list' ? '#BFD9FF' : 'rgba(255,255,255,0.55)'} />
                   <circle cx="4" cy="12" r="1.5" fill={viewMode === 'list' ? '#BFD9FF' : 'rgba(255,255,255,0.55)'} />
                   <circle cx="4" cy="18" r="1.5" fill={viewMode === 'list' ? '#BFD9FF' : 'rgba(255,255,255,0.55)'} />
                   <path d="M8 6h12M8 12h12M8 18h12" stroke={viewMode === 'list' ? '#BFD9FF' : 'rgba(255,255,255,0.55)'} strokeWidth="2" strokeLinecap="round" />
                 </svg>
               </button>
-            </div>
           </div>
         </div>
 
