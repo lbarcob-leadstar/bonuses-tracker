@@ -151,6 +151,16 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
   }, [getCooldownEndsAt, now])
 
+  const getCountdownProgress = useCallback((casino: CasinoWithClaim) => {
+    const endsAt = getCooldownEndsAt(casino, casino.last_claimed_at)
+    if (!endsAt || !casino.last_claimed_at) return 0
+
+    const remaining = endsAt.getTime() - now
+    const total = Math.max(1, endsAt.getTime() - new Date(casino.last_claimed_at).getTime())
+    const elapsed = Math.max(0, total - Math.max(0, remaining))
+    return Math.max(0, Math.min(100, (elapsed / total) * 100))
+  }, [getCooldownEndsAt, now])
+
   const getScValue = useCallback((casino: CasinoWithClaim) => Number(casino.sc_amount ?? 0), [])
   const getGcValue = useCallback((casino: CasinoWithClaim) => Number(casino.gc_amount ?? 0), [])
   const getMinRedemptionValue = useCallback((casino: CasinoWithClaim) => {
@@ -1122,14 +1132,31 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
                   </div>
                 </div>
                 {countdown && (
-                  <div className="inline-flex md:hidden text-[11px] font-semibold px-2.5 py-1 rounded-lg ml-[42px]"
-                    style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.72)', border: '1px solid rgba(255,255,255,0.12)' }}>
-                    {countdown}
+                  <div className="md:hidden ml-[42px] rounded-2xl px-3 py-2.5 flex items-center gap-3 relative overflow-hidden"
+                    style={{ background: '#1B2736', border: '1px solid rgba(255,255,255,0.12)' }}>
+                    <div
+                      className="absolute inset-y-0 left-0"
+                      style={{
+                        width: `${getCountdownProgress(casino)}%`,
+                        background: 'linear-gradient(90deg, rgba(73,148,201,0.30) 0%, rgba(159,124,255,0.28) 100%)',
+                      }}
+                    />
+                    <div className="relative z-10 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: '#FFD8A1' }}>
+                      ⏳
+                    </div>
+                    <div className="relative z-10 min-w-0 flex-1">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.14em]" style={{ color: 'rgba(255,255,255,0.58)' }}>
+                        Next available
+                      </p>
+                      <p className="text-[0.95rem] font-black leading-none" style={{ color: '#FFD0DB' }}>
+                        {countdown}
+                      </p>
+                    </div>
                   </div>
                 )}
                 {countdown && (
                   <div className="hidden md:block text-xs font-semibold px-2.5 py-1 rounded-lg self-end"
-                    style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.72)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                    style={{ background: `linear-gradient(90deg, rgba(73,148,201,0.30) 0%, rgba(73,148,201,0.30) ${getCountdownProgress(casino)}%, rgba(255,255,255,0.06) ${getCountdownProgress(casino)}%, rgba(255,255,255,0.06) 100%)`, color: 'rgba(255,255,255,0.72)', border: '1px solid rgba(255,255,255,0.12)' }}>
                     {countdown}
                   </div>
                 )}
