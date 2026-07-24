@@ -1097,25 +1097,26 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
                       {casino.bonus_description}
                     </p>
                     {countdown && (
-                      <div className="mt-1 rounded-2xl px-3 py-2.5 flex items-center gap-3 relative overflow-hidden"
-                        style={{ background: '#1B2736', border: '1px solid rgba(255,255,255,0.12)' }}>
+                      <div className="mt-1 rounded-xl px-2.5 py-1.5 flex items-center gap-2 relative overflow-hidden"
+                        style={{ background: '#1B2736', border: '1px solid rgba(255,255,255,0.10)' }}>
                         <div
                           className="absolute inset-y-0 left-0"
                           style={{
                             width: `${getCountdownProgress(casino)}%`,
-                            background: 'linear-gradient(90deg, rgba(73,148,201,0.30) 0%, rgba(159,124,255,0.28) 100%)',
+                            background: 'linear-gradient(90deg, rgba(73,148,201,0.22) 0%, rgba(159,124,255,0.20) 100%)',
                           }}
                         />
-                        <div className="relative z-10 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: '#FFD8A1' }}>
+                        <div className="relative z-10 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.10)', color: '#FFD8A1', fontSize: '0.72rem' }}>
                           ⏳
                         </div>
-                        <div className="relative z-10 min-w-0 flex-1">
-                          <p className="text-[10px] font-semibold uppercase tracking-[0.14em]" style={{ color: 'rgba(255,255,255,0.58)' }}>
+                        <div className="relative z-10 min-w-0 flex-1 flex items-center gap-1.5 text-xs whitespace-nowrap">
+                          <span className="font-semibold uppercase tracking-[0.1em]" style={{ color: 'rgba(255,255,255,0.52)' }}>
                             Next available
-                          </p>
-                          <p className="text-[0.95rem] font-black leading-none" style={{ color: '#FFD0DB' }}>
+                          </span>
+                          <span style={{ color: 'rgba(255,255,255,0.38)' }}>•</span>
+                          <span className="font-bold" style={{ color: '#FFD0DB' }}>
                             {countdown}
-                          </p>
+                          </span>
                         </div>
                       </div>
                     )}
