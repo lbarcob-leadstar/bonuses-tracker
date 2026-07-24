@@ -1049,79 +1049,89 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
 
             return (
               <div key={casino.id}
-                className="px-3 md:px-4 py-3 flex items-center gap-3"
+                className="px-3 md:px-4 py-3 flex flex-col gap-2 md:flex-row md:items-center md:gap-3"
                 style={{ borderBottom: index < sortedFiltered.length - 1 ? '1px solid rgba(255,255,255,0.08)' : 'none' }}>
-                <div className="text-sm font-black w-8 text-right" style={{ color: 'rgba(255,255,255,0.46)' }}>
-                  {index + 1}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 min-w-0">
-                    {casino.logo_url ? (
-                      <img src={casino.logo_url} alt={`${casino.name} logo`} className="w-6 h-6 rounded object-cover flex-shrink-0" />
-                    ) : (
-                      <div className="w-6 h-6 rounded flex-shrink-0" style={{ background: 'rgba(255,255,255,0.1)' }} />
-                    )}
-                    {casino.casino_url ? (
-                      <a href={casino.casino_url} target="_blank" rel="noreferrer" className="font-bold text-sm truncate" style={{ color: claimed ? '#FFE799' : '#f0f0f0' }}>
-                        {casino.name}
-                      </a>
-                    ) : (
-                      <p className="font-bold text-sm truncate" style={{ color: claimed ? '#FFE799' : '#f0f0f0' }}>
-                        {casino.name}
-                      </p>
-                    )}
-                    {isStreakActive(casino) && (
-                      <span className="streak-mini-badge">🔥 {casino.streak}</span>
+                <div className="flex items-start md:items-center gap-3 min-w-0 w-full md:w-auto">
+                  <div className="text-sm font-black w-6 md:w-8 text-right flex-shrink-0" style={{ color: 'rgba(255,255,255,0.46)' }}>
+                    {index + 1}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 min-w-0">
+                      {casino.logo_url ? (
+                        <img src={casino.logo_url} alt={`${casino.name} logo`} className="w-6 h-6 rounded object-cover flex-shrink-0" />
+                      ) : (
+                        <div className="w-6 h-6 rounded flex-shrink-0" style={{ background: 'rgba(255,255,255,0.1)' }} />
+                      )}
+                      {casino.casino_url ? (
+                        <a href={casino.casino_url} target="_blank" rel="noreferrer" className="font-bold text-sm truncate" style={{ color: claimed ? '#FFE799' : '#f0f0f0' }}>
+                          {casino.name}
+                        </a>
+                      ) : (
+                        <p className="font-bold text-sm truncate" style={{ color: claimed ? '#FFE799' : '#f0f0f0' }}>
+                          {casino.name}
+                        </p>
+                      )}
+                      {isStreakActive(casino) && (
+                        <span className="streak-mini-badge">🔥 {casino.streak}</span>
+                      )}
+                    </div>
+                    <p className="text-xs truncate mt-0.5" style={{ color: 'rgba(255,255,255,0.64)' }}>
+                      {casino.bonus_description}
+                    </p>
+                    {countdown && (
+                      <div className="mt-1 inline-flex md:hidden text-[11px] font-semibold px-2.5 py-1 rounded-lg"
+                        style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.72)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                        {countdown}
+                      </div>
                     )}
                   </div>
-                  <p className="text-xs truncate mt-0.5" style={{ color: 'rgba(255,255,255,0.64)' }}>
-                    {casino.bonus_description}
-                  </p>
                 </div>
-                {countdown && (
-                  <div className="hidden md:block text-xs font-semibold px-2.5 py-1 rounded-lg"
-                    style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.72)', border: '1px solid rgba(255,255,255,0.12)' }}>
-                    {countdown}
-                  </div>
-                )}
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <span
-                    onClick={() => toggleFavorite(casino)}
-                    onKeyDown={(event) => {
-                      if (event.key === 'Enter' || event.key === ' ') {
-                        event.preventDefault()
-                        void toggleFavorite(casino)
-                      }
-                    }}
-                    role="button"
-                    tabIndex={0}
-                    className="cursor-pointer"
-                    style={{ lineHeight: 0 }}
-                    aria-label={casino.is_favorite ? `Remove ${casino.name} from favorites` : `Add ${casino.name} to favorites`}>
-                    <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                      <path
-                        d="M10 17.25 8.84 16.2C4.7 12.45 2 9.99 2 6.98 2 4.52 3.93 2.75 6.4 2.75c1.39 0 2.73.64 3.6 1.64.87-1 2.21-1.64 3.6-1.64C16.07 2.75 18 4.52 18 6.98c0 3.01-2.7 5.47-6.84 9.22L10 17.25Z"
-                        fill={casino.is_favorite ? '#E52D4B' : 'transparent'}
-                        stroke={casino.is_favorite ? '#E52D4B' : 'rgba(255,255,255,0.42)'}
-                        strokeWidth="1.7"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </span>
-                  <button onClick={() => toggleClaim(casino)}
-                    className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200"
-                    style={{
-                      background: claimed ? '#E52D4B' : 'rgba(255,255,255,0.08)',
-                      border: `2px solid ${claimed ? '#E52D4B' : 'rgba(255,255,255,0.2)'}`,
-                      boxShadow: claimed ? '0 0 10px rgba(229,45,75,0.5)' : 'none',
-                      cursor: 'pointer',
-                    }}>
-                    {claimed && (
-                      <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
-                        <path d="M2 7l3.5 3.5L12 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <div className="flex items-center justify-between md:justify-end gap-2 flex-shrink-0 w-full md:w-auto">
+                  {countdown && (
+                    <div className="hidden md:block text-xs font-semibold px-2.5 py-1 rounded-lg"
+                      style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.72)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                      {countdown}
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <span
+                      onClick={() => toggleFavorite(casino)}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault()
+                          void toggleFavorite(casino)
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      className="cursor-pointer"
+                      style={{ lineHeight: 0 }}
+                      aria-label={casino.is_favorite ? `Remove ${casino.name} from favorites` : `Add ${casino.name} to favorites`}>
+                      <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                        <path
+                          d="M10 17.25 8.84 16.2C4.7 12.45 2 9.99 2 6.98 2 4.52 3.93 2.75 6.4 2.75c1.39 0 2.73.64 3.6 1.64.87-1 2.21-1.64 3.6-1.64C16.07 2.75 18 4.52 18 6.98c0 3.01-2.7 5.47-6.84 9.22L10 17.25Z"
+                          fill={casino.is_favorite ? '#E52D4B' : 'transparent'}
+                          stroke={casino.is_favorite ? '#E52D4B' : 'rgba(255,255,255,0.42)'}
+                          strokeWidth="1.7"
+                          strokeLinejoin="round"
+                        />
                       </svg>
-                    )}
-                  </button>
+                    </span>
+                    <button onClick={() => toggleClaim(casino)}
+                      className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200"
+                      style={{
+                        background: claimed ? '#E52D4B' : 'rgba(255,255,255,0.08)',
+                        border: `2px solid ${claimed ? '#E52D4B' : 'rgba(255,255,255,0.2)'}`,
+                        boxShadow: claimed ? '0 0 10px rgba(229,45,75,0.5)' : 'none',
+                        cursor: 'pointer',
+                      }}>
+                      {claimed && (
+                        <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+                          <path d="M2 7l3.5 3.5L12 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
             )
