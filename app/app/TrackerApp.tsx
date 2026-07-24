@@ -584,35 +584,6 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
     }
   }, [casinos, claimHistory])
 
-  const trackerInsights = useMemo(() => {
-    const remainingBonuses = Math.max(0, overallTotalCount - overallClaimedCount)
-    const favoriteRemaining = Math.max(0, favoriteCasinos.length - favoriteClaimedCount)
-    const topBonus = stats.topClaimedBonuses[0]
-
-    return [
-      {
-        label: 'Current streak',
-        value: currentBestActiveStreak > 0 ? `🔥 ${currentBestActiveStreak} days` : 'No active streak',
-        tone: '#FFE799',
-      },
-      {
-        label: 'Bonuses remaining',
-        value: `${remainingBonuses} left to claim today`,
-        tone: '#7fd3ff',
-      },
-      {
-        label: 'Favorites still open',
-        value: favoriteCasinos.length > 0 ? `${favoriteRemaining} favorite bonuses left` : 'No favorites tracked yet',
-        tone: '#ff9bad',
-      },
-      {
-        label: 'Most claimed brand',
-        value: topBonus ? `${topBonus.name} · ${topBonus.count} claims` : 'No claim history yet',
-        tone: '#9f7cff',
-      },
-    ]
-  }, [currentBestActiveStreak, favoriteCasinos.length, favoriteClaimedCount, overallClaimedCount, overallTotalCount, stats.topClaimedBonuses])
-
   if (loading) {
     return (
       <div className="min-h-screen casino-app-bg flex items-center justify-center relative overflow-hidden">
@@ -681,36 +652,6 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
 
         {dashboardView === 'stats' ? (
           <div className="space-y-5">
-            <div className="casino-progress rounded-2xl p-5">
-              <h2 className="text-xl font-black mb-4" style={{ color: '#f4f7ff' }}>Usage Stats</h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.16)' }}>
-                  <p className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.65)' }}>Bonuses claimed</p>
-                  <p className="text-2xl font-black" style={{ color: '#ffffff' }}>{stats.totalClaims}</p>
-                </div>
-                <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.16)' }}>
-                  <p className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.65)' }}>Unique bonuses</p>
-                  <p className="text-2xl font-black" style={{ color: '#d8f0ff' }}>{stats.uniqueClaimedCount}</p>
-                </div>
-                <div className="rounded-xl p-3" style={{ background: 'rgba(229,45,75,0.14)', border: '1px solid rgba(229,45,75,0.34)' }}>
-                  <p className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.65)' }}>SC accumulated</p>
-                  <p className="text-2xl font-black" style={{ color: '#ffd6e0' }}>{stats.totalScAccumulated.toLocaleString()}</p>
-                </div>
-                <div className="rounded-xl p-3" style={{ background: 'rgba(73,148,201,0.2)', border: '1px solid rgba(73,148,201,0.34)' }}>
-                  <p className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.65)' }}>GC accumulated</p>
-                  <p className="text-2xl font-black" style={{ color: '#cfeeff' }}>{stats.totalGcAccumulated.toLocaleString()}</p>
-                </div>
-                <div className="rounded-xl p-3" style={{ background: 'rgba(255,231,153,0.14)', border: '1px solid rgba(255,231,153,0.34)' }}>
-                  <p className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.65)' }}>Longest streak</p>
-                  <p className="text-2xl font-black" style={{ color: '#FFE799' }}>🔥 {stats.longestStreakAchieved}</p>
-                </div>
-                <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.16)' }}>
-                  <p className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.65)' }}>Claims last 7d</p>
-                  <p className="text-2xl font-black" style={{ color: '#ffffff' }}>{stats.claimsLast7Days}</p>
-                </div>
-              </div>
-            </div>
-
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
               <div className="casino-panel rounded-2xl p-5">
                 <h3 className="text-lg font-black mb-4" style={{ color: '#f4f7ff' }}>Most Claimed Bonuses</h3>
@@ -872,15 +813,6 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
             </div>
           )}
 
-        </div>
-
-        <div className="tracker-insights-strip mb-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
-          {trackerInsights.map((insight) => (
-            <div key={insight.label} className="tracker-insight-chip rounded-2xl px-4 py-3">
-              <p className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.54)' }}>{insight.label}</p>
-              <p className="text-sm font-semibold mt-1" style={{ color: insight.tone }}>{insight.value}</p>
-            </div>
-          ))}
         </div>
 
         <div className="casino-panel p-4 mb-6">
