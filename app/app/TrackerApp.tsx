@@ -837,18 +837,7 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
             const isClaimAnimating = !!claimFxByCasino[casino.id]
             const isStreakAnimating = !!streakFxByCasino[casino.id]
             const countdown = formatCountdown(casino)
-            const manualPrimary = hexToRgb(casino.logo_primary_color)
-            const manualSecondary = hexToRgb(casino.logo_secondary_color)
-            const manualGradient = manualPrimary && manualSecondary
-              ? { primary: manualPrimary, secondary: manualSecondary }
-              : null
-            const autoGradient = (casino.logo_url && logoGradients[casino.logo_url])
-              ? logoGradients[casino.logo_url]
-              : null
-            const logoGradient = manualGradient ?? autoGradient ?? { primary: 'rgb(73, 148, 201)', secondary: 'rgb(229, 45, 75)' }
-            const cardBackground = claimed
-              ? `linear-gradient(135deg, ${withAlpha(logoGradient.primary, 0.22)}, ${withAlpha(logoGradient.secondary, 0.28)}), linear-gradient(140deg, rgba(67, 42, 58, 0.95), rgba(49, 41, 63, 0.95))`
-              : `linear-gradient(135deg, ${withAlpha(logoGradient.primary, 0.27)}, ${withAlpha(logoGradient.secondary, 0.23)}), linear-gradient(140deg, rgba(45, 61, 83, 0.96), rgba(35, 51, 73, 0.96))`
+            const cardBackground = '#0F1B2D'
 
             return (
             <div
@@ -856,7 +845,7 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
               className="casino-card p-4 relative overflow-hidden"
               style={{
                 background: cardBackground,
-                borderColor: claimed ? withAlpha(logoGradient.secondary, 0.5) : withAlpha(logoGradient.primary, 0.44),
+                borderColor: claimed ? 'rgba(229,45,75,0.45)' : 'rgba(255,255,255,0.14)',
               }}>
               {isClaimAnimating && (
                 <div className="claim-burst-overlay" key={`claim-fx-${claimFxByCasino[casino.id]}`}>
