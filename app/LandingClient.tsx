@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase'
 export default function LandingPage() {
   const supabase = createClient()
   const [bonusCount, setBonusCount] = useState(10)
+  const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '')
 
   useEffect(() => {
     const start = 10
@@ -44,7 +45,7 @@ export default function LandingPage() {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${appBaseUrl ?? window.location.origin}/auth/callback`,
       },
     })
   }
