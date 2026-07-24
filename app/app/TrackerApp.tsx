@@ -16,6 +16,7 @@ export default function TrackerApp() {
   const [expandedCasinoIds, setExpandedCasinoIds] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'claimed' | 'unclaimed' | 'favorites'>('all')
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [dashboardView, setDashboardView] = useState<'tracker' | 'stats'>('tracker')
   const [sortBy, setSortBy] = useState<'highest-sc' | 'highest-gc' | 'lowest-min-redemption' | 'longest-streak' | 'a-z' | 'z-a' | 'next-available'>('next-available')
   const [search, setSearch] = useState('')
@@ -834,10 +835,36 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
               </button>
             ))}
           </div>
+          <div className="grid grid-cols-2 gap-2 w-full md:flex md:w-auto">
+            <button
+              onClick={() => setViewMode('grid')}
+              className="w-full md:w-auto px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer"
+              style={{
+                background: viewMode === 'grid' ? '#4994C9' : '#2C343F',
+                color: viewMode === 'grid' ? '#fff' : 'rgba(255,255,255,0.55)',
+                border: `1px solid ${viewMode === 'grid' ? '#4994C9' : 'rgba(255,255,255,0.1)'}`,
+                boxShadow: viewMode === 'grid' ? '0 0 15px rgba(73,148,201,0.35)' : 'none',
+              }}
+            >
+              Grid
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className="w-full md:w-auto px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer"
+              style={{
+                background: viewMode === 'list' ? '#4994C9' : '#2C343F',
+                color: viewMode === 'list' ? '#fff' : 'rgba(255,255,255,0.55)',
+                border: `1px solid ${viewMode === 'list' ? '#4994C9' : 'rgba(255,255,255,0.1)'}`,
+                boxShadow: viewMode === 'list' ? '0 0 15px rgba(73,148,201,0.35)' : 'none',
+              }}
+            >
+              List
+            </button>
+          </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className={`grid gap-4 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
           {sortedFiltered.map((casino) => {
             const claimed = isOnCooldown(casino)
             const isClaimAnimating = !!claimFxByCasino[casino.id]
