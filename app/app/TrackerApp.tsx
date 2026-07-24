@@ -499,11 +499,6 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
     }
   })
 
-  const claimedCount = filtered.filter((c) => isOnCooldown(c)).length
-  const totalCount = filtered.length
-  const progress = totalCount > 0 ? (claimedCount / totalCount) * 100 : 0
-  const activeStreaks = filtered.filter((casino) => isStreakActive(casino)).length
-  const favoriteCount = filtered.filter((casino) => casino.is_favorite).length
   const topFeaturedBonuses = featuredBonuses.slice(0, 3)
   const overallClaimedCount = casinos.filter((casino) => isOnCooldown(casino)).length
   const overallTotalCount = casinos.length
@@ -741,16 +736,8 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
             </div>
             <div className="flex flex-wrap items-center gap-2 self-start lg:self-auto">
               <div className="rounded-full px-3.5 py-2 text-sm font-semibold"
-                style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.76)' }}>
-                {overallClaimedCount} claimed
-              </div>
-              <div className="rounded-full px-3.5 py-2 text-sm font-semibold"
                 style={{ background: 'rgba(255,208,106,0.08)', border: '1px solid rgba(255,208,106,0.18)', color: '#FFD06A' }}>
                 ★ {favoriteClaimedCount} / {favoriteCasinos.length} favorites
-              </div>
-              <div className="rounded-full px-3.5 py-2 text-sm font-semibold"
-                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.56)' }}>
-                {Math.max(0, overallTotalCount - overallClaimedCount)} remaining
               </div>
             </div>
           </div>
@@ -798,22 +785,7 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
                 </div>
               ))}
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
-              <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(255,255,255,0.14)', border: '1px solid rgba(255,255,255,0.2)' }}>
-                <p className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.72)' }}>Claimed Bonuses</p>
-                <p className="text-2xl font-black" style={{ color: '#ffffff' }}>{claimedCount}</p>
-              </div>
-              <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(229,45,75,0.15)', border: '1px solid rgba(229,45,75,0.3)' }}>
-                <p className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.72)' }}>Active Streaks</p>
-                <p className="text-2xl font-black" style={{ color: '#ffdbe4' }}>{activeStreaks}</p>
-              </div>
-              <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(73,148,201,0.2)', border: '1px solid rgba(73,148,201,0.34)' }}>
-                <p className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.72)' }}>Favorite Brands</p>
-                <p className="text-2xl font-black" style={{ color: '#d8f0ff' }}>{favoriteCount}</p>
-              </div>
-            </div>
-          )}
+          ) : null}
 
         </div>
 
