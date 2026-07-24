@@ -1093,9 +1093,11 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
                         <span className="streak-mini-badge">🔥 {casino.streak}</span>
                       )}
                     </div>
-                    <p className="text-xs truncate mt-0.5" style={{ color: 'rgba(255,255,255,0.64)' }}>
-                      {casino.bonus_description}
-                    </p>
+                    <div className="casino-highlight-box mt-1 rounded-xl px-2.5 py-1.5">
+                      <p className="text-[0.92rem] font-extrabold leading-snug casino-highlight-text">
+                        {casino.bonus_description}
+                      </p>
+                    </div>
                     {countdown && (
                       <div className="mt-1 rounded-xl px-2.5 py-1.5 flex items-center gap-2 relative overflow-hidden"
                         style={{ background: '#1B2736', border: '1px solid rgba(255,255,255,0.10)' }}>
