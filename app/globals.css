@@ -131,6 +131,33 @@ body {
   margin: 0;
 }
 
+.rich-text-content strong,
+.rich-text-content b {
+  font-weight: 800;
+  color: #f8fbff;
+}
+
+.rich-text-content em,
+.rich-text-content i {
+  font-style: italic;
+}
+
+.rich-text-content a {
+  color: #ffe799;
+  text-decoration: underline;
+  text-underline-offset: 0.14em;
+}
+
+.rich-text-content ul,
+.rich-text-content ol {
+  margin: 0.35rem 0 0;
+  padding-left: 1rem;
+}
+
+.rich-text-content p {
+  margin: 0;
+}
+
 .casino-highlight-box {
   background: linear-gradient(135deg, rgba(214, 229, 247, 0.2), rgba(166, 196, 224, 0.14));
   border: 1px solid rgba(230, 241, 255, 0.3);

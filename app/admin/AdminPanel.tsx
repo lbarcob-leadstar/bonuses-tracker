@@ -45,6 +45,9 @@ export default function AdminPanel() {
     name: '',
     bonus_description: '',
     welcome_offer_info: '',
+    welcome_offer_show_cta: false,
+    welcome_offer_cta_text: '',
+    welcome_offer_cta_url: '',
     logo_url: '',
     casino_url: '',
     logo_primary_color: '',
@@ -58,6 +61,9 @@ export default function AdminPanel() {
     name: '',
     bonus_description: '',
     welcome_offer_info: '',
+    welcome_offer_show_cta: false,
+    welcome_offer_cta_text: '',
+    welcome_offer_cta_url: '',
     logo_url: '',
     casino_url: '',
     logo_primary_color: '',
@@ -91,6 +97,8 @@ export default function AdminPanel() {
   })
   const newFeaturedDescriptionRef = useRef<HTMLTextAreaElement | null>(null)
   const editFeaturedDescriptionRef = useRef<HTMLTextAreaElement | null>(null)
+  const newWelcomeOfferRef = useRef<HTMLTextAreaElement | null>(null)
+  const editWelcomeOfferRef = useRef<HTMLTextAreaElement | null>(null)
 
   const applyHtmlSnippet = (
     textarea: HTMLTextAreaElement | null,
@@ -168,6 +176,9 @@ export default function AdminPanel() {
       name: casino.name,
       bonus_description: casino.bonus_description,
       welcome_offer_info: casino.welcome_offer_info ?? '',
+      welcome_offer_show_cta: casino.welcome_offer_show_cta,
+      welcome_offer_cta_text: casino.welcome_offer_cta_text ?? '',
+      welcome_offer_cta_url: casino.welcome_offer_cta_url ?? '',
       logo_url: casino.logo_url ?? '',
       casino_url: casino.casino_url ?? '',
       logo_primary_color: casino.logo_primary_color ?? '',
@@ -195,6 +206,9 @@ export default function AdminPanel() {
       name: editForm.name,
       bonus_description: editForm.bonus_description,
       welcome_offer_info: editForm.welcome_offer_info.trim() ? editForm.welcome_offer_info : null,
+      welcome_offer_show_cta: editForm.welcome_offer_show_cta && !!editForm.welcome_offer_cta_text.trim() && !!editForm.welcome_offer_cta_url.trim(),
+      welcome_offer_cta_text: editForm.welcome_offer_show_cta && editForm.welcome_offer_cta_text.trim() ? editForm.welcome_offer_cta_text.trim() : null,
+      welcome_offer_cta_url: editForm.welcome_offer_show_cta && editForm.welcome_offer_cta_url.trim() ? editForm.welcome_offer_cta_url.trim() : null,
       logo_url: editForm.logo_url.trim() ? editForm.logo_url : null,
       casino_url: editForm.casino_url.trim() ? editForm.casino_url : null,
       logo_primary_color: primaryColor.value,
@@ -233,6 +247,9 @@ export default function AdminPanel() {
       name: newForm.name,
       bonus_description: newForm.bonus_description,
       welcome_offer_info: newForm.welcome_offer_info.trim() ? newForm.welcome_offer_info : null,
+      welcome_offer_show_cta: newForm.welcome_offer_show_cta && !!newForm.welcome_offer_cta_text.trim() && !!newForm.welcome_offer_cta_url.trim(),
+      welcome_offer_cta_text: newForm.welcome_offer_show_cta && newForm.welcome_offer_cta_text.trim() ? newForm.welcome_offer_cta_text.trim() : null,
+      welcome_offer_cta_url: newForm.welcome_offer_show_cta && newForm.welcome_offer_cta_url.trim() ? newForm.welcome_offer_cta_url.trim() : null,
       logo_url: newForm.logo_url.trim() ? newForm.logo_url : null,
       casino_url: newForm.casino_url.trim() ? newForm.casino_url : null,
       logo_primary_color: primaryColor.value,
@@ -254,6 +271,9 @@ export default function AdminPanel() {
       name: '',
       bonus_description: '',
       welcome_offer_info: '',
+      welcome_offer_show_cta: false,
+      welcome_offer_cta_text: '',
+      welcome_offer_cta_url: '',
       logo_url: '',
       casino_url: '',
       logo_primary_color: '',
@@ -630,10 +650,40 @@ export default function AdminPanel() {
               />
               Set timer reset to midnight (instead of 24h cooldown)
             </label>
-            <textarea placeholder="Welcome offer info (expanded details shown in app)" value={newForm.welcome_offer_info}
+            <FeaturedHtmlToolbar
+              onBold={() => applyHtmlSnippet(newWelcomeOfferRef.current, newForm.welcome_offer_info, (welcome_offer_info) => setNewForm((p) => ({ ...p, welcome_offer_info })), '<strong>', '</strong>')}
+              onItalic={() => applyHtmlSnippet(newWelcomeOfferRef.current, newForm.welcome_offer_info, (welcome_offer_info) => setNewForm((p) => ({ ...p, welcome_offer_info })), '<em>', '</em>')}
+              onLink={() => applyHtmlSnippet(newWelcomeOfferRef.current, newForm.welcome_offer_info, (welcome_offer_info) => setNewForm((p) => ({ ...p, welcome_offer_info })), '<a href="https://">', '</a>', 'link text')}
+              onBreak={() => applyHtmlSnippet(newWelcomeOfferRef.current, newForm.welcome_offer_info, (welcome_offer_info) => setNewForm((p) => ({ ...p, welcome_offer_info })), '<br />', '', '')}
+              onList={() => applyHtmlSnippet(newWelcomeOfferRef.current, newForm.welcome_offer_info, (welcome_offer_info) => setNewForm((p) => ({ ...p, welcome_offer_info })), '<ul>\n  <li>', '</li>\n</ul>', 'List item')}
+            />
+            <textarea ref={newWelcomeOfferRef} placeholder="Welcome offer info (expanded details shown in app)" value={newForm.welcome_offer_info}
               onChange={(e) => setNewForm((p) => ({ ...p, welcome_offer_info: e.target.value }))}
               className="w-full mb-4 px-4 py-3 rounded-xl outline-none text-sm resize-y min-h-[96px]"
               style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#f0f0f0' }} />
+            <p className="mb-3 text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>
+              HTML allowed here: &lt;strong&gt;, &lt;em&gt;, &lt;a href&gt;, &lt;br /&gt;, &lt;ul&gt;, &lt;li&gt;
+            </p>
+            <label className="mb-3 flex items-center gap-2 text-sm" style={{ color: 'rgba(255,255,255,0.78)' }}>
+              <input
+                type="checkbox"
+                checked={newForm.welcome_offer_show_cta}
+                onChange={(e) => setNewForm((p) => ({ ...p, welcome_offer_show_cta: e.target.checked }))}
+              />
+              Show CTA button in welcome offer
+            </label>
+            {newForm.welcome_offer_show_cta && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <input placeholder="CTA text (e.g. Claim now)" value={newForm.welcome_offer_cta_text}
+                  onChange={(e) => setNewForm((p) => ({ ...p, welcome_offer_cta_text: e.target.value }))}
+                  className="px-4 py-3 rounded-xl outline-none text-sm"
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#f0f0f0' }} />
+                <input placeholder="CTA link (https://...)" value={newForm.welcome_offer_cta_url}
+                  onChange={(e) => setNewForm((p) => ({ ...p, welcome_offer_cta_url: e.target.value }))}
+                  className="px-4 py-3 rounded-xl outline-none text-sm"
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#f0f0f0' }} />
+              </div>
+            )}
             <div className="flex gap-3">
               <button onClick={addCasino} className="px-6 py-2 rounded-xl text-sm font-bold cursor-pointer"
                 style={{ background: '#E52D4B', color: '#fff' }}>Save</button>
@@ -699,10 +749,40 @@ export default function AdminPanel() {
                     />
                     Set timer reset to midnight (instead of 24h cooldown)
                   </label>
-                  <textarea value={editForm.welcome_offer_info} onChange={(e) => setEditForm((p) => ({ ...p, welcome_offer_info: e.target.value }))}
+                  <FeaturedHtmlToolbar
+                    onBold={() => applyHtmlSnippet(editWelcomeOfferRef.current, editForm.welcome_offer_info, (welcome_offer_info) => setEditForm((p) => ({ ...p, welcome_offer_info })), '<strong>', '</strong>')}
+                    onItalic={() => applyHtmlSnippet(editWelcomeOfferRef.current, editForm.welcome_offer_info, (welcome_offer_info) => setEditForm((p) => ({ ...p, welcome_offer_info })), '<em>', '</em>')}
+                    onLink={() => applyHtmlSnippet(editWelcomeOfferRef.current, editForm.welcome_offer_info, (welcome_offer_info) => setEditForm((p) => ({ ...p, welcome_offer_info })), '<a href="https://">', '</a>', 'link text')}
+                    onBreak={() => applyHtmlSnippet(editWelcomeOfferRef.current, editForm.welcome_offer_info, (welcome_offer_info) => setEditForm((p) => ({ ...p, welcome_offer_info })), '<br />', '', '')}
+                    onList={() => applyHtmlSnippet(editWelcomeOfferRef.current, editForm.welcome_offer_info, (welcome_offer_info) => setEditForm((p) => ({ ...p, welcome_offer_info })), '<ul>\n  <li>', '</li>\n</ul>', 'List item')}
+                  />
+                  <textarea ref={editWelcomeOfferRef} value={editForm.welcome_offer_info} onChange={(e) => setEditForm((p) => ({ ...p, welcome_offer_info: e.target.value }))}
                     placeholder="Welcome offer info"
                     className="w-full px-3 py-2 rounded-xl text-sm outline-none resize-y min-h-[88px]"
                     style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,231,153,0.4)', color: '#f0f0f0' }} />
+                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                    HTML allowed here: &lt;strong&gt;, &lt;em&gt;, &lt;a href&gt;, &lt;br /&gt;, &lt;ul&gt;, &lt;li&gt;
+                  </p>
+                  <label className="flex items-center gap-2 text-sm" style={{ color: 'rgba(255,255,255,0.78)' }}>
+                    <input
+                      type="checkbox"
+                      checked={editForm.welcome_offer_show_cta}
+                      onChange={(e) => setEditForm((p) => ({ ...p, welcome_offer_show_cta: e.target.checked }))}
+                    />
+                    Show CTA button in welcome offer
+                  </label>
+                  {editForm.welcome_offer_show_cta && (
+                    <div className="flex flex-col md:flex-row gap-3">
+                      <input value={editForm.welcome_offer_cta_text} onChange={(e) => setEditForm((p) => ({ ...p, welcome_offer_cta_text: e.target.value }))}
+                        placeholder="CTA text"
+                        className="flex-1 px-3 py-2 rounded-xl text-sm outline-none"
+                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,231,153,0.4)', color: '#f0f0f0' }} />
+                      <input value={editForm.welcome_offer_cta_url} onChange={(e) => setEditForm((p) => ({ ...p, welcome_offer_cta_url: e.target.value }))}
+                        placeholder="CTA link (https://...)"
+                        className="flex-1 px-3 py-2 rounded-xl text-sm outline-none"
+                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,231,153,0.4)', color: '#f0f0f0' }} />
+                    </div>
+                  )}
                   <div className="flex gap-2">
                     <button onClick={() => saveEdit(casino.id)} className="px-4 py-2 rounded-xl text-sm font-bold cursor-pointer"
                       style={{ background: '#E52D4B', color: '#fff' }}>Save</button>
@@ -740,8 +820,11 @@ export default function AdminPanel() {
                       </p>
                     )}
                     {casino.welcome_offer_info && (
-                      <p className="text-xs mt-1" style={{ color: 'rgba(255,231,153,0.75)' }}>
-                        Welcome offer: {casino.welcome_offer_info}
+                      <div className="text-xs mt-1 rich-text-content" style={{ color: 'rgba(255,231,153,0.75)' }} dangerouslySetInnerHTML={{ __html: casino.welcome_offer_info }} />
+                    )}
+                    {casino.welcome_offer_show_cta && casino.welcome_offer_cta_text && casino.welcome_offer_cta_url && (
+                      <p className="text-xs mt-1" style={{ color: '#CFE8FF' }}>
+                        Welcome CTA: {casino.welcome_offer_cta_text} {'->'} {casino.welcome_offer_cta_url}
                       </p>
                     )}
                     <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>

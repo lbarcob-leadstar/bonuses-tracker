@@ -1061,9 +1061,20 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
                     {expandedCasinoIds.has(casino.id) ? 'Hide welcome offer info ▲' : 'Show welcome offer info ▼'}
                   </button>
                   {expandedCasinoIds.has(casino.id) && (
-                    <div className="mt-2 p-3 rounded-lg text-xs leading-relaxed"
+                    <div className="mt-2 p-3 rounded-lg text-xs leading-relaxed rich-text-content"
                       style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.75)' }}>
-                      {casino.welcome_offer_info}
+                      <div dangerouslySetInnerHTML={{ __html: casino.welcome_offer_info }} />
+                      {casino.welcome_offer_show_cta && casino.welcome_offer_cta_text && casino.welcome_offer_cta_url && (
+                        <a
+                          href={casino.welcome_offer_cta_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mt-3 inline-flex items-center justify-center rounded-xl px-3 py-2 text-[11px] font-black uppercase tracking-[0.08em] transition-transform duration-200 hover:-translate-y-px"
+                          style={{ background: '#FFE799', color: '#1C2837', boxShadow: '0 10px 18px rgba(255,231,153,0.24)' }}
+                        >
+                          {casino.welcome_offer_cta_text}
+                        </a>
+                      )}
                     </div>
                   )}
                 </div>
@@ -1145,9 +1156,20 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
                           {expandedCasinoIds.has(casino.id) ? 'Hide welcome offer info ▲' : 'Show welcome offer info ▼'}
                         </button>
                         {expandedCasinoIds.has(casino.id) && (
-                          <div className="mt-2 p-3 rounded-lg text-xs leading-relaxed"
+                          <div className="mt-2 p-3 rounded-lg text-xs leading-relaxed rich-text-content"
                             style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.75)' }}>
-                            {casino.welcome_offer_info}
+                            <div dangerouslySetInnerHTML={{ __html: casino.welcome_offer_info }} />
+                            {casino.welcome_offer_show_cta && casino.welcome_offer_cta_text && casino.welcome_offer_cta_url && (
+                              <a
+                                href={casino.welcome_offer_cta_url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="mt-3 inline-flex items-center justify-center rounded-xl px-3 py-2 text-[11px] font-black uppercase tracking-[0.08em] transition-transform duration-200 hover:-translate-y-px"
+                                style={{ background: '#FFE799', color: '#1C2837', boxShadow: '0 10px 18px rgba(255,231,153,0.24)' }}
+                              >
+                                {casino.welcome_offer_cta_text}
+                              </a>
+                            )}
                           </div>
                         )}
                       </div>

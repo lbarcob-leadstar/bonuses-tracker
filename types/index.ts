@@ -5,6 +5,9 @@ export interface Casino {
   name: string
   bonus_description: string
   welcome_offer_info: string | null
+  welcome_offer_show_cta: boolean
+  welcome_offer_cta_text: string | null
+  welcome_offer_cta_url: string | null
   logo_url: string | null
   casino_url: string | null
   logo_primary_color: string | null
