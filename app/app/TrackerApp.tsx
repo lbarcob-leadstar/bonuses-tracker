@@ -1074,16 +1074,16 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
                 style={{ borderBottom: index < sortedFiltered.length - 1 ? '1px solid rgba(255,255,255,0.08)' : 'none' }}>
                 <div className="flex items-start justify-between gap-3 min-w-0 w-full">
                   <div className="flex items-start md:items-center gap-3 min-w-0 flex-1">
-                  <div className="text-sm font-black w-6 md:w-8 text-right flex-shrink-0" style={{ color: 'rgba(255,255,255,0.46)' }}>
-                    {index + 1}
+                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center"
+                    style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                    {casino.logo_url ? (
+                      <img src={casino.logo_url} alt={`${casino.name} logo`} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full" style={{ background: 'rgba(255,255,255,0.1)' }} />
+                    )}
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 min-w-0">
-                      {casino.logo_url ? (
-                        <img src={casino.logo_url} alt={`${casino.name} logo`} className="w-6 h-6 rounded object-cover flex-shrink-0" />
-                      ) : (
-                        <div className="w-6 h-6 rounded flex-shrink-0" style={{ background: 'rgba(255,255,255,0.1)' }} />
-                      )}
                       {casino.casino_url ? (
                         <a href={casino.casino_url} target="_blank" rel="noreferrer" className="font-bold text-sm truncate" style={{ color: claimed ? '#FFE799' : '#f0f0f0' }}>
                           {casino.name}
@@ -1124,6 +1124,22 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
                             {countdown}
                           </span>
                         </div>
+                      </div>
+                    )}
+                    {casino.welcome_offer_info && (
+                      <div className="mt-2">
+                        <button
+                          onClick={() => toggleWelcomeOfferInfo(casino.id)}
+                          className="text-xs font-semibold cursor-pointer"
+                          style={{ color: '#FFE799' }}>
+                          {expandedCasinoIds.has(casino.id) ? 'Hide welcome offer info ▲' : 'Show welcome offer info ▼'}
+                        </button>
+                        {expandedCasinoIds.has(casino.id) && (
+                          <div className="mt-2 p-3 rounded-lg text-xs leading-relaxed"
+                            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.75)' }}>
+                            {casino.welcome_offer_info}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
