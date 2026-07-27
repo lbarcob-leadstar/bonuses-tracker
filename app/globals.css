@@ -28,6 +28,12 @@ body {
 
 .casino-app-bg {
   background-color: #85b2d3;
+  background-image:
+    radial-gradient(rgba(255, 255, 255, 0.16) 0.8px, transparent 0.8px),
+    radial-gradient(rgba(28, 45, 67, 0.08) 0.8px, transparent 0.8px),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0 2px, transparent 2px 12px);
+  background-size: 24px 24px, 24px 24px, 36px 36px;
+  background-position: 0 0, 12px 12px, 0 0;
 }
 
 .casino-texture {
