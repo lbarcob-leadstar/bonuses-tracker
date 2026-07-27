@@ -1073,8 +1073,8 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
                 className="px-3 md:px-4 py-3 flex flex-col gap-2 md:flex-row md:items-center md:gap-3"
                 style={{ borderBottom: index < sortedFiltered.length - 1 ? '1px solid rgba(255,255,255,0.08)' : 'none' }}>
                 <div className="flex items-start justify-between gap-3 min-w-0 w-full">
-                  <div className="flex items-start md:items-center gap-3 min-w-0 flex-1">
-                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center"
+                  <div className="flex items-start gap-3 min-w-0 flex-1">
+                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center self-start"
                     style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
                     {casino.logo_url ? (
                       <img src={casino.logo_url} alt={`${casino.name} logo`} className="w-full h-full object-cover" />
