@@ -550,7 +550,7 @@ export default function AdminPanel() {
                       <div className="text-xs mt-1 featured-bonus-copy" style={{ color: 'rgba(255,255,255,0.58)' }} dangerouslySetInnerHTML={{ __html: featured.description }} />
                       {featured.show_cta && featured.cta_text && featured.cta_url && (
                         <p className="text-xs mt-2" style={{ color: '#CFE8FF' }}>
-                          CTA: {featured.cta_text} -> {featured.cta_url}
+                          CTA: {featured.cta_text} {'->'} {featured.cta_url}
                         </p>
                       )}
                     </div>
