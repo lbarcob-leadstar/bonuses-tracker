@@ -631,11 +631,11 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
       </header>
 
       <div className="max-w-6xl mx-auto px-4 py-8 relative z-10">
-        <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-2">
+        <div className="mb-5 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
             <button
               onClick={() => setDashboardView('tracker')}
-              className="px-4 py-2 rounded-xl text-sm font-semibold cursor-pointer"
+              className="px-3 sm:px-4 py-2 rounded-xl text-sm font-semibold cursor-pointer whitespace-nowrap"
               style={{
                 background: dashboardView === 'tracker' ? '#E52D4B' : 'rgba(44,52,63,0.88)',
                 color: dashboardView === 'tracker' ? '#fff' : 'rgba(255,255,255,0.7)',
@@ -646,7 +646,7 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
             </button>
             <button
               onClick={() => setDashboardView('stats')}
-              className="px-4 py-2 rounded-xl text-sm font-semibold cursor-pointer"
+              className="px-3 sm:px-4 py-2 rounded-xl text-sm font-semibold cursor-pointer whitespace-nowrap"
               style={{
                 background: dashboardView === 'stats' ? '#4994C9' : 'rgba(44,52,63,0.88)',
                 color: dashboardView === 'stats' ? '#fff' : 'rgba(255,255,255,0.7)',
@@ -656,7 +656,7 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
               My Stats
             </button>
           </div>
-          <div className="rounded-full px-4 py-2 text-sm font-semibold self-start md:self-auto" style={{ background: 'rgba(244, 249, 255, 0.66)', border: '1px solid rgba(255,255,255,0.55)', color: '#1C2836', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.75), 0 8px 18px rgba(17, 29, 45, 0.15)', backdropFilter: 'blur(8px)' }}>
+          <div className="rounded-full px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold whitespace-nowrap" style={{ background: 'rgba(244, 249, 255, 0.66)', border: '1px solid rgba(255,255,255,0.55)', color: '#1C2836', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.75), 0 8px 18px rgba(17, 29, 45, 0.15)', backdropFilter: 'blur(8px)' }}>
             {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
           </div>
         </div>
