@@ -520,6 +520,13 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
   const scopedClaimedCount = scopedCasinos.filter((casino) => isOnCooldown(casino)).length
   const scopedTotalCount = scopedCasinos.length
   const scopedProgress = scopedTotalCount > 0 ? (scopedClaimedCount / scopedTotalCount) * 100 : 0
+  const scopedClaimedScTotal = scopedCasinos
+    .filter((casino) => isOnCooldown(casino))
+    .reduce((sum, casino) => sum + getScValue(casino), 0)
+  const scopedClaimedScValue = scopedClaimedScTotal.toLocaleString('en-US', {
+    minimumFractionDigits: scopedClaimedScTotal % 1 === 0 ? 0 : 2,
+    maximumFractionDigits: 2,
+  })
   const currentBestActiveStreak = casinos.reduce((max, casino) => isStreakActive(casino) ? Math.max(max, casino.streak) : max, 0)
   const favoriteCasinos = casinos.filter((casino) => casino.is_favorite)
   const favoriteClaimedCount = favoriteCasinos.filter((casino) => isOnCooldown(casino)).length
@@ -718,10 +725,10 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
             />
             <HeroMetricCard
               icon="claimed"
-              title="Bonuses Claimed"
+              title="SC Claimed"
               accent="#C8E8FF"
-              value={`${scopedClaimedCount} / ${scopedTotalCount}`}
-              subValue={`${Math.max(0, scopedTotalCount - scopedClaimedCount)} remaining in this view`}
+              value={`${scopedClaimedScValue} SC`}
+              subValue={`${scopedClaimedCount} bonuses claimed in this view`}
             />
             <HeroMetricCard
               icon="completion"
@@ -742,7 +749,7 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
 
           <div className="tracker-hero-summary flex flex-col lg:flex-row gap-3 lg:items-center lg:justify-between mb-4">
             <div className="min-w-0">
-              <p className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.6)' }}>Today&apos;s Progress</p>
+              <p className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.6)' }}>Bonuses claimed today</p>
               <p className="text-3xl font-black">
                 <span style={{ color: '#FFE799' }}>{scopedClaimedCount}</span>
                 <span style={{ color: 'rgba(255,255,255,0.3)' }}> / {scopedTotalCount}</span>
