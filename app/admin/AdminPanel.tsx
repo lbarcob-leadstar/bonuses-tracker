@@ -145,6 +145,12 @@ export default function AdminPanel() {
     return { ok: true as const, value: normalized.toUpperCase() }
   }
 
+  const assertNoSupabaseError = (error: { message: string } | null, context: string) => {
+    if (!error) return true
+    alert(`${context}: ${error.message}`)
+    return false
+  }
+
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!session?.user) { window.location.href = '/'; return }
@@ -166,7 +172,8 @@ export default function AdminPanel() {
   }
 
   const toggleActive = async (casino: Casino) => {
-    await supabase.from('casinos').update({ is_active: !casino.is_active }).eq('id', casino.id)
+    const { error } = await supabase.from('casinos').update({ is_active: !casino.is_active }).eq('id', casino.id)
+    if (!assertNoSupabaseError(error, 'Could not update casino visibility')) return
     setCasinos((prev) => prev.map((c) => c.id === casino.id ? { ...c, is_active: !c.is_active } : c))
   }
 
@@ -218,14 +225,16 @@ export default function AdminPanel() {
       sc_amount: scAmount.value,
       gc_amount: gcAmount.value,
     }
-    await supabase.from('casinos').update(payload).eq('id', id)
+    const { error } = await supabase.from('casinos').update(payload).eq('id', id)
+    if (!assertNoSupabaseError(error, 'Could not save casino changes')) return
     setCasinos((prev) => prev.map((c) => c.id === id ? { ...c, ...payload } : c))
     setEditingId(null)
   }
 
   const deleteCasino = async (id: string) => {
     if (!confirm('Delete this casino?')) return
-    await supabase.from('casinos').delete().eq('id', id)
+    const { error } = await supabase.from('casinos').delete().eq('id', id)
+    if (!assertNoSupabaseError(error, 'Could not delete casino')) return
     setCasinos((prev) => prev.filter((c) => c.id !== id))
   }
 
@@ -261,11 +270,12 @@ export default function AdminPanel() {
       is_active: true,
       sort_order: maxOrder + 1,
     }
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('casinos')
       .insert(payload)
       .select()
       .single()
+    if (!assertNoSupabaseError(error, 'Could not create casino')) return
     if (data) setCasinos((prev) => [...prev, data])
     setNewForm({
       name: '',
@@ -287,7 +297,8 @@ export default function AdminPanel() {
   }
 
   const toggleFeaturedActive = async (featured: FeaturedBonus) => {
-    await supabase.from('featured_bonuses').update({ is_active: !featured.is_active }).eq('id', featured.id)
+    const { error } = await supabase.from('featured_bonuses').update({ is_active: !featured.is_active }).eq('id', featured.id)
+    if (!assertNoSupabaseError(error, 'Could not update featured card visibility')) return
     setFeaturedBonuses((prev) => prev.map((f) => f.id === featured.id ? { ...f, is_active: !f.is_active } : f))
   }
 
@@ -317,14 +328,16 @@ export default function AdminPanel() {
       background_image_url: editFeaturedForm.background_image_url.trim() ? editFeaturedForm.background_image_url.trim() : null,
       is_active: editFeaturedForm.is_active,
     }
-    await supabase.from('featured_bonuses').update(payload).eq('id', id)
+    const { error } = await supabase.from('featured_bonuses').update(payload).eq('id', id)
+    if (!assertNoSupabaseError(error, 'Could not save featured card changes')) return
     setFeaturedBonuses((prev) => prev.map((f) => f.id === id ? { ...f, ...payload } : f))
     setEditingFeaturedId(null)
   }
 
   const deleteFeatured = async (id: string) => {
     if (!confirm('Delete this featured bonus card?')) return
-    await supabase.from('featured_bonuses').delete().eq('id', id)
+    const { error } = await supabase.from('featured_bonuses').delete().eq('id', id)
+    if (!assertNoSupabaseError(error, 'Could not delete featured card')) return
     setFeaturedBonuses((prev) => prev.filter((f) => f.id !== id))
   }
 
@@ -342,7 +355,8 @@ export default function AdminPanel() {
       is_active: newFeaturedForm.is_active,
       sort_order: maxOrder + 1,
     }
-    const { data } = await supabase.from('featured_bonuses').insert(payload).select().single()
+    const { data, error } = await supabase.from('featured_bonuses').insert(payload).select().single()
+    if (!assertNoSupabaseError(error, 'Could not create featured card')) return
     if (data) setFeaturedBonuses((prev) => [...prev, data])
     setNewFeaturedForm({
       title: '',
