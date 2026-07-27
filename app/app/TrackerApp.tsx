@@ -694,7 +694,7 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
                   {stats.recentActivity.map((item) => {
                     const barHeight = Math.max(8, Math.round((item.count / stats.maxDailyClaims) * 100))
                     return (
-                      <div key={item.date} className="flex-1 flex flex-col items-center justify-end gap-1">
+                      <div key={item.date} className="flex-1 h-full flex flex-col items-center justify-end gap-1">
                         <div
                           className="w-full rounded-t-md"
                           style={{
