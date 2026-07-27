@@ -792,7 +792,7 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
                     )}
                   </div>
                   <p
-                    className="text-sm mt-auto pt-2"
+                    className="text-sm mt-auto pt-2 featured-bonus-copy"
                     style={{
                       color: 'rgba(255,255,255,0.78)',
                       display: '-webkit-box',
@@ -800,9 +800,19 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
                       WebkitBoxOrient: 'vertical',
                       overflow: 'hidden',
                     }}
-                  >
-                    {featured.description}
-                  </p>
+                    dangerouslySetInnerHTML={{ __html: featured.description }}
+                  />
+                  {featured.show_cta && featured.cta_text && featured.cta_url && (
+                    <a
+                      href={featured.cta_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-3 inline-flex items-center justify-center self-start rounded-xl px-3 py-2 text-xs font-black uppercase tracking-[0.08em] transition-transform duration-200 hover:-translate-y-px"
+                      style={{ background: '#FFE799', color: '#1C2837', boxShadow: '0 10px 18px rgba(255,231,153,0.24)' }}
+                    >
+                      {featured.cta_text}
+                    </a>
+                  )}
                 </div>
               ))}
             </div>

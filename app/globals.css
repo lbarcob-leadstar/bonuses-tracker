@@ -104,6 +104,33 @@ body {
   box-shadow: 0 20px 36px rgba(8, 16, 27, 0.46);
 }
 
+.featured-bonus-copy strong,
+.featured-bonus-copy b {
+  font-weight: 800;
+  color: #f8fbff;
+}
+
+.featured-bonus-copy em,
+.featured-bonus-copy i {
+  font-style: italic;
+}
+
+.featured-bonus-copy a {
+  color: #ffe799;
+  text-decoration: underline;
+  text-underline-offset: 0.14em;
+}
+
+.featured-bonus-copy ul,
+.featured-bonus-copy ol {
+  margin: 0.35rem 0 0;
+  padding-left: 1rem;
+}
+
+.featured-bonus-copy p {
+  margin: 0;
+}
+
 .casino-highlight-box {
   background: linear-gradient(135deg, rgba(214, 229, 247, 0.2), rgba(166, 196, 224, 0.14));
   border: 1px solid rgba(230, 241, 255, 0.3);

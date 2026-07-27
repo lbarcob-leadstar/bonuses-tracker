@@ -1,8 +1,38 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import type { Casino, FeaturedBonus } from '@/types'
+
+function FeaturedHtmlToolbar({
+  onBold,
+  onItalic,
+  onLink,
+  onBreak,
+  onList,
+}: {
+  onBold: () => void
+  onItalic: () => void
+  onLink: () => void
+  onBreak: () => void
+  onList: () => void
+}) {
+  const buttonStyle = {
+    background: 'rgba(255,255,255,0.06)',
+    color: 'rgba(255,255,255,0.78)',
+    border: '1px solid rgba(255,255,255,0.14)',
+  }
+
+  return (
+    <div className="mb-2 flex flex-wrap gap-2">
+      <button type="button" onClick={onBold} className="px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer" style={buttonStyle}>Bold</button>
+      <button type="button" onClick={onItalic} className="px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer" style={buttonStyle}>Italic</button>
+      <button type="button" onClick={onLink} className="px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer" style={buttonStyle}>Link</button>
+      <button type="button" onClick={onBreak} className="px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer" style={buttonStyle}>Line break</button>
+      <button type="button" onClick={onList} className="px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer" style={buttonStyle}>Bullet list</button>
+    </div>
+  )
+}
 
 export default function AdminPanel() {
   const supabase = createClient()
@@ -43,6 +73,9 @@ export default function AdminPanel() {
     title: '',
     subtitle: '',
     description: '',
+    show_cta: false,
+    cta_text: '',
+    cta_url: '',
     background_image_url: '',
     is_active: true,
   })
@@ -50,9 +83,37 @@ export default function AdminPanel() {
     title: '',
     subtitle: '',
     description: '',
+    show_cta: false,
+    cta_text: '',
+    cta_url: '',
     background_image_url: '',
     is_active: true,
   })
+  const newFeaturedDescriptionRef = useRef<HTMLTextAreaElement | null>(null)
+  const editFeaturedDescriptionRef = useRef<HTMLTextAreaElement | null>(null)
+
+  const applyHtmlSnippet = (
+    textarea: HTMLTextAreaElement | null,
+    value: string,
+    onChange: (nextValue: string) => void,
+    before: string,
+    after = '',
+    placeholder = 'text'
+  ) => {
+    const start = textarea?.selectionStart ?? value.length
+    const end = textarea?.selectionEnd ?? value.length
+    const selectedText = value.slice(start, end) || placeholder
+    const nextValue = `${value.slice(0, start)}${before}${selectedText}${after}${value.slice(end)}`
+    onChange(nextValue)
+
+    if (!textarea) return
+    const selectionStart = start + before.length
+    const selectionEnd = selectionStart + selectedText.length
+    window.requestAnimationFrame(() => {
+      textarea.focus()
+      textarea.setSelectionRange(selectionStart, selectionEnd)
+    })
+  }
 
   const parseNullableNumber = (value: string, label: string) => {
     const trimmed = value.trim()
@@ -216,6 +277,9 @@ export default function AdminPanel() {
       title: featured.title,
       subtitle: featured.subtitle ?? '',
       description: featured.description,
+      show_cta: featured.show_cta,
+      cta_text: featured.cta_text ?? '',
+      cta_url: featured.cta_url ?? '',
       background_image_url: featured.background_image_url ?? '',
       is_active: featured.is_active,
     })
@@ -227,6 +291,9 @@ export default function AdminPanel() {
       title: editFeaturedForm.title.trim(),
       subtitle: editFeaturedForm.subtitle.trim() ? editFeaturedForm.subtitle.trim() : null,
       description: editFeaturedForm.description.trim(),
+      show_cta: editFeaturedForm.show_cta && !!editFeaturedForm.cta_text.trim() && !!editFeaturedForm.cta_url.trim(),
+      cta_text: editFeaturedForm.show_cta && editFeaturedForm.cta_text.trim() ? editFeaturedForm.cta_text.trim() : null,
+      cta_url: editFeaturedForm.show_cta && editFeaturedForm.cta_url.trim() ? editFeaturedForm.cta_url.trim() : null,
       background_image_url: editFeaturedForm.background_image_url.trim() ? editFeaturedForm.background_image_url.trim() : null,
       is_active: editFeaturedForm.is_active,
     }
@@ -248,6 +315,9 @@ export default function AdminPanel() {
       title: newFeaturedForm.title.trim(),
       subtitle: newFeaturedForm.subtitle.trim() ? newFeaturedForm.subtitle.trim() : null,
       description: newFeaturedForm.description.trim(),
+      show_cta: newFeaturedForm.show_cta && !!newFeaturedForm.cta_text.trim() && !!newFeaturedForm.cta_url.trim(),
+      cta_text: newFeaturedForm.show_cta && newFeaturedForm.cta_text.trim() ? newFeaturedForm.cta_text.trim() : null,
+      cta_url: newFeaturedForm.show_cta && newFeaturedForm.cta_url.trim() ? newFeaturedForm.cta_url.trim() : null,
       background_image_url: newFeaturedForm.background_image_url.trim() ? newFeaturedForm.background_image_url.trim() : null,
       is_active: newFeaturedForm.is_active,
       sort_order: maxOrder + 1,
@@ -258,6 +328,9 @@ export default function AdminPanel() {
       title: '',
       subtitle: '',
       description: '',
+      show_cta: false,
+      cta_text: '',
+      cta_url: '',
       background_image_url: '',
       is_active: true,
     })
@@ -332,10 +405,40 @@ export default function AdminPanel() {
                   className="px-3 py-2 rounded-xl text-sm outline-none md:col-span-2"
                   style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(73,148,201,0.35)', color: '#f0f0f0' }} />
               </div>
-              <textarea placeholder="Main description" value={newFeaturedForm.description}
+              <FeaturedHtmlToolbar
+                onBold={() => applyHtmlSnippet(newFeaturedDescriptionRef.current, newFeaturedForm.description, (description) => setNewFeaturedForm((p) => ({ ...p, description })), '<strong>', '</strong>')}
+                onItalic={() => applyHtmlSnippet(newFeaturedDescriptionRef.current, newFeaturedForm.description, (description) => setNewFeaturedForm((p) => ({ ...p, description })), '<em>', '</em>')}
+                onLink={() => applyHtmlSnippet(newFeaturedDescriptionRef.current, newFeaturedForm.description, (description) => setNewFeaturedForm((p) => ({ ...p, description })), '<a href="https://">', '</a>', 'link text')}
+                onBreak={() => applyHtmlSnippet(newFeaturedDescriptionRef.current, newFeaturedForm.description, (description) => setNewFeaturedForm((p) => ({ ...p, description })), '<br />', '', '')}
+                onList={() => applyHtmlSnippet(newFeaturedDescriptionRef.current, newFeaturedForm.description, (description) => setNewFeaturedForm((p) => ({ ...p, description })), '<ul>\n  <li>', '</li>\n</ul>', 'List item')}
+              />
+              <textarea ref={newFeaturedDescriptionRef} placeholder="Main description" value={newFeaturedForm.description}
                 onChange={(e) => setNewFeaturedForm((p) => ({ ...p, description: e.target.value }))}
                 className="w-full mb-3 px-3 py-2 rounded-xl text-sm outline-none resize-y min-h-[72px]"
                 style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(73,148,201,0.35)', color: '#f0f0f0' }} />
+              <p className="mb-3 text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                HTML allowed here: &lt;strong&gt;, &lt;em&gt;, &lt;a href&gt;, &lt;br /&gt;, &lt;ul&gt;, &lt;li&gt;
+              </p>
+              <label className="mb-3 flex items-center gap-2 text-sm" style={{ color: 'rgba(255,255,255,0.78)' }}>
+                <input
+                  type="checkbox"
+                  checked={newFeaturedForm.show_cta}
+                  onChange={(e) => setNewFeaturedForm((p) => ({ ...p, show_cta: e.target.checked }))}
+                />
+                Show CTA button
+              </label>
+              {newFeaturedForm.show_cta && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                  <input placeholder="CTA text (e.g. Claim now)" value={newFeaturedForm.cta_text}
+                    onChange={(e) => setNewFeaturedForm((p) => ({ ...p, cta_text: e.target.value }))}
+                    className="px-3 py-2 rounded-xl text-sm outline-none"
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(73,148,201,0.35)', color: '#f0f0f0' }} />
+                  <input placeholder="CTA link (https://...)" value={newFeaturedForm.cta_url}
+                    onChange={(e) => setNewFeaturedForm((p) => ({ ...p, cta_url: e.target.value }))}
+                    className="px-3 py-2 rounded-xl text-sm outline-none"
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(73,148,201,0.35)', color: '#f0f0f0' }} />
+                </div>
+              )}
               <label className="mb-3 flex items-center gap-2 text-sm" style={{ color: 'rgba(255,255,255,0.78)' }}>
                 <input
                   type="checkbox"
@@ -373,10 +476,40 @@ export default function AdminPanel() {
                         className="px-3 py-2 rounded-xl text-sm outline-none md:col-span-2"
                         style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(73,148,201,0.4)', color: '#f0f0f0' }} />
                     </div>
-                    <textarea value={editFeaturedForm.description} onChange={(e) => setEditFeaturedForm((p) => ({ ...p, description: e.target.value }))}
+                    <FeaturedHtmlToolbar
+                      onBold={() => applyHtmlSnippet(editFeaturedDescriptionRef.current, editFeaturedForm.description, (description) => setEditFeaturedForm((p) => ({ ...p, description })), '<strong>', '</strong>')}
+                      onItalic={() => applyHtmlSnippet(editFeaturedDescriptionRef.current, editFeaturedForm.description, (description) => setEditFeaturedForm((p) => ({ ...p, description })), '<em>', '</em>')}
+                      onLink={() => applyHtmlSnippet(editFeaturedDescriptionRef.current, editFeaturedForm.description, (description) => setEditFeaturedForm((p) => ({ ...p, description })), '<a href="https://">', '</a>', 'link text')}
+                      onBreak={() => applyHtmlSnippet(editFeaturedDescriptionRef.current, editFeaturedForm.description, (description) => setEditFeaturedForm((p) => ({ ...p, description })), '<br />', '', '')}
+                      onList={() => applyHtmlSnippet(editFeaturedDescriptionRef.current, editFeaturedForm.description, (description) => setEditFeaturedForm((p) => ({ ...p, description })), '<ul>\n  <li>', '</li>\n</ul>', 'List item')}
+                    />
+                    <textarea ref={editFeaturedDescriptionRef} value={editFeaturedForm.description} onChange={(e) => setEditFeaturedForm((p) => ({ ...p, description: e.target.value }))}
                       placeholder="Main description"
                       className="w-full px-3 py-2 rounded-xl text-sm outline-none resize-y min-h-[72px]"
                       style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(73,148,201,0.4)', color: '#f0f0f0' }} />
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                      HTML allowed here: &lt;strong&gt;, &lt;em&gt;, &lt;a href&gt;, &lt;br /&gt;, &lt;ul&gt;, &lt;li&gt;
+                    </p>
+                    <label className="flex items-center gap-2 text-sm" style={{ color: 'rgba(255,255,255,0.78)' }}>
+                      <input
+                        type="checkbox"
+                        checked={editFeaturedForm.show_cta}
+                        onChange={(e) => setEditFeaturedForm((p) => ({ ...p, show_cta: e.target.checked }))}
+                      />
+                      Show CTA button
+                    </label>
+                    {editFeaturedForm.show_cta && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <input value={editFeaturedForm.cta_text} onChange={(e) => setEditFeaturedForm((p) => ({ ...p, cta_text: e.target.value }))}
+                          placeholder="CTA text"
+                          className="px-3 py-2 rounded-xl text-sm outline-none"
+                          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(73,148,201,0.4)', color: '#f0f0f0' }} />
+                        <input value={editFeaturedForm.cta_url} onChange={(e) => setEditFeaturedForm((p) => ({ ...p, cta_url: e.target.value }))}
+                          placeholder="CTA link (https://...)"
+                          className="px-3 py-2 rounded-xl text-sm outline-none"
+                          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(73,148,201,0.4)', color: '#f0f0f0' }} />
+                      </div>
+                    )}
                     <label className="flex items-center gap-2 text-sm" style={{ color: 'rgba(255,255,255,0.78)' }}>
                       <input
                         type="checkbox"
@@ -414,7 +547,12 @@ export default function AdminPanel() {
                       {featured.subtitle && (
                         <p className="text-xs mt-0.5" style={{ color: 'rgba(255,231,153,0.85)' }}>{featured.subtitle}</p>
                       )}
-                      <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.58)' }}>{featured.description}</p>
+                      <div className="text-xs mt-1 featured-bonus-copy" style={{ color: 'rgba(255,255,255,0.58)' }} dangerouslySetInnerHTML={{ __html: featured.description }} />
+                      {featured.show_cta && featured.cta_text && featured.cta_url && (
+                        <p className="text-xs mt-2" style={{ color: '#CFE8FF' }}>
+                          CTA: {featured.cta_text} -> {featured.cta_url}
+                        </p>
+                      )}
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <button onClick={() => toggleFeaturedActive(featured)} className="px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer"

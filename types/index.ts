@@ -48,6 +48,9 @@ export interface FeaturedBonus {
   title: string
   subtitle: string | null
   description: string
+  show_cta: boolean
+  cta_text: string | null
+  cta_url: string | null
   background_image_url: string | null
   is_active: boolean
   sort_order: number
