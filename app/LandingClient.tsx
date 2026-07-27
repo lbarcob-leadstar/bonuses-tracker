@@ -7,6 +7,14 @@ export default function LandingPage() {
   const supabase = createClient()
   const [bonusCount, setBonusCount] = useState(10)
   const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '')
+  const [showEmailSignup, setShowEmailSignup] = useState(false)
+  const [email, setEmail] = useState('')
+  const [emailConfirm, setEmailConfirm] = useState('')
+  const [password, setPassword] = useState('')
+  const [passwordConfirm, setPasswordConfirm] = useState('')
+  const [emailSignupLoading, setEmailSignupLoading] = useState(false)
+  const [emailSignupError, setEmailSignupError] = useState<string | null>(null)
+  const [emailSignupMessage, setEmailSignupMessage] = useState<string | null>(null)
 
   useEffect(() => {
     const start = 10
@@ -48,6 +56,73 @@ export default function LandingPage() {
         redirectTo: `${appBaseUrl ?? window.location.origin}/auth/callback`,
       },
     })
+  }
+
+  const handleEmailSignup = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    const normalizedEmail = email.trim().toLowerCase()
+    const normalizedEmailConfirm = emailConfirm.trim().toLowerCase()
+
+    setEmailSignupError(null)
+    setEmailSignupMessage(null)
+
+    if (!normalizedEmail || !normalizedEmailConfirm || !password || !passwordConfirm) {
+      setEmailSignupError('Please complete all fields.')
+      return
+    }
+
+    if (normalizedEmail !== normalizedEmailConfirm) {
+      setEmailSignupError('Emails do not match.')
+      return
+    }
+
+    if (password !== passwordConfirm) {
+      setEmailSignupError('Passwords do not match.')
+      return
+    }
+
+    if (password.length < 6) {
+      setEmailSignupError('Password must be at least 6 characters long.')
+      return
+    }
+
+    setEmailSignupLoading(true)
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: normalizedEmail,
+        password,
+      })
+
+      if (error) throw error
+
+      if (data.session) {
+        window.location.href = '/app'
+        return
+      }
+
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        email: normalizedEmail,
+        password,
+      })
+
+      if (signInError) {
+        setEmailSignupMessage('Account created. Enable email confirmation OFF in Supabase to allow instant login without verification email.')
+        return
+      }
+
+      if (signInData.session) {
+        window.location.href = '/app'
+        return
+      }
+
+      setEmailSignupMessage('Account created. You can now sign in.')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Could not create your account.'
+      setEmailSignupError(message)
+    } finally {
+      setEmailSignupLoading(false)
+    }
   }
 
   return (
@@ -102,6 +177,99 @@ export default function LandingPage() {
         <p className="mt-4 text-sm" style={{ color: 'rgba(255,255,255,0.45)' }}>
           No credit card required · Syncs across all your devices
         </p>
+
+        <button
+          onClick={() => {
+            setShowEmailSignup((prev) => !prev)
+            setEmailSignupError(null)
+            setEmailSignupMessage(null)
+          }}
+          className="mt-5 text-sm font-semibold cursor-pointer"
+          style={{ color: '#CFE8FF' }}
+        >
+          {showEmailSignup ? 'Hide email sign up ▲' : 'Sign up with email ▼'}
+        </button>
+
+        {showEmailSignup && (
+          <form
+            onSubmit={handleEmailSignup}
+            className="mt-4 w-full max-w-md rounded-2xl p-4 text-left"
+            style={{ background: 'rgba(18,26,37,0.72)', border: '1px solid rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)' }}
+          >
+            <label className="block text-xs font-semibold mb-1" style={{ color: 'rgba(255,255,255,0.72)' }}>
+              Email
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+              className="w-full px-3 py-2.5 rounded-xl outline-none text-sm mb-3"
+              style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.16)', color: '#fff' }}
+              placeholder="you@example.com"
+            />
+
+            <label className="block text-xs font-semibold mb-1" style={{ color: 'rgba(255,255,255,0.72)' }}>
+              Confirm email
+            </label>
+            <input
+              type="email"
+              value={emailConfirm}
+              onChange={(e) => setEmailConfirm(e.target.value)}
+              autoComplete="email"
+              className="w-full px-3 py-2.5 rounded-xl outline-none text-sm mb-3"
+              style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.16)', color: '#fff' }}
+              placeholder="repeat your email"
+            />
+
+            <label className="block text-xs font-semibold mb-1" style={{ color: 'rgba(255,255,255,0.72)' }}>
+              Password
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="new-password"
+              className="w-full px-3 py-2.5 rounded-xl outline-none text-sm mb-3"
+              style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.16)', color: '#fff' }}
+              placeholder="at least 6 characters"
+            />
+
+            <label className="block text-xs font-semibold mb-1" style={{ color: 'rgba(255,255,255,0.72)' }}>
+              Confirm password
+            </label>
+            <input
+              type="password"
+              value={passwordConfirm}
+              onChange={(e) => setPasswordConfirm(e.target.value)}
+              autoComplete="new-password"
+              className="w-full px-3 py-2.5 rounded-xl outline-none text-sm"
+              style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.16)', color: '#fff' }}
+              placeholder="repeat your password"
+            />
+
+            {emailSignupError && (
+              <p className="mt-3 text-xs font-semibold" style={{ color: '#FFB4C0' }}>
+                {emailSignupError}
+              </p>
+            )}
+
+            {emailSignupMessage && !emailSignupError && (
+              <p className="mt-3 text-xs font-semibold" style={{ color: '#B8F0C8' }}>
+                {emailSignupMessage}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={emailSignupLoading}
+              className="mt-4 w-full px-4 py-3 rounded-xl text-sm font-bold cursor-pointer transition-opacity"
+              style={{ background: '#4994C9', color: '#fff', opacity: emailSignupLoading ? 0.7 : 1 }}
+            >
+              {emailSignupLoading ? 'Creating account...' : 'Create account with email'}
+            </button>
+          </form>
+        )}
       </div>
 
       <div className="relative z-10 w-full max-w-6xl mx-auto px-4 pb-14 grid grid-cols-1 md:grid-cols-3 gap-4">
