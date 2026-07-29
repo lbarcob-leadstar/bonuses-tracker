@@ -180,7 +180,7 @@ export default function LandingPage() {
           {logoColumns.map((column, columnIndex) => (
             <div
               key={`logo-col-${columnIndex}`}
-              className={`landing-logo-column ${columnIndex % 2 === 0 ? 'landing-logo-column-up' : 'landing-logo-column-down'} ${columnIndex >= 4 ? 'hidden lg:flex' : columnIndex >= 2 ? 'hidden md:flex' : 'flex'}`}
+              className={`landing-logo-column ${columnIndex % 2 === 0 ? 'landing-logo-column-up' : 'landing-logo-column-down'} ${columnIndex >= 4 ? 'hidden lg:flex' : columnIndex >= 3 ? 'hidden md:flex' : 'flex'}`}
             >
               <div className="landing-logo-track">
                 {[...column, ...column].map((logoUrl, logoIndex) => (
