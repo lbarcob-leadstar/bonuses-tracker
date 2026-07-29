@@ -339,7 +339,7 @@ export default function LandingPage() {
         ].map((feature) => (
           <div key={feature.title} className="casino-panel rounded-2xl p-5 text-left">
             <div className="mb-3 overflow-hidden rounded-xl" style={{ border: '1px solid rgba(255,255,255,0.14)', background: 'rgba(255,255,255,0.04)' }}>
-              <img src={feature.image} alt={`${feature.title} preview`} className="w-full h-28 object-cover" loading="lazy" />
+              <img src={feature.image} alt={`${feature.title} preview`} className="w-full h-auto object-contain" loading="lazy" />
             </div>
             <h3 className="font-bold text-lg mb-1" style={{ color: '#FFE799' }}>{feature.title}</h3>
             <p style={{ color: 'rgba(255,255,255,0.68)' }}>{feature.desc}</p>
