@@ -227,7 +227,7 @@ export default function LandingPage() {
         <button
           onClick={handleLogin}
           className="flex items-center gap-3 px-8 py-4 rounded-2xl text-lg font-bold transition-all duration-300 hover:scale-105 cursor-pointer"
-          style={{ background: '#E52D4B', boxShadow: '0 0 30px rgba(229,45,75,0.5)', color: '#fff' }}
+          style={{ background: '#FFFFFF', border: '2px solid #E62C4B', boxShadow: '0 0 24px rgba(230,44,75,0.28)', color: '#111111' }}
         >
           <GoogleIcon />
           Sign in with Google — It&apos;s Free
