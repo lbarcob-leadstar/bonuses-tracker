@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 
 export default function LandingPage() {
@@ -15,6 +15,7 @@ export default function LandingPage() {
   const [emailSignupLoading, setEmailSignupLoading] = useState(false)
   const [emailSignupError, setEmailSignupError] = useState<string | null>(null)
   const [emailSignupMessage, setEmailSignupMessage] = useState<string | null>(null)
+  const [casinoLogos, setCasinoLogos] = useState<string[]>([])
 
   useEffect(() => {
     const start = 10
@@ -48,6 +49,45 @@ export default function LandingPage() {
 
     return () => window.clearInterval(timerId)
   }, [])
+
+  useEffect(() => {
+    const loadCasinoLogos = async () => {
+      const { data, error } = await supabase
+        .from('casinos')
+        .select('logo_url, sort_order')
+        .eq('is_active', true)
+        .not('logo_url', 'is', null)
+        .order('sort_order', { ascending: true })
+
+      if (error) return
+
+      const logos = (data ?? [])
+        .map((item) => item.logo_url)
+        .filter((url): url is string => typeof url === 'string' && url.trim().length > 0)
+
+      setCasinoLogos(logos)
+    }
+
+    void loadCasinoLogos()
+  }, [supabase])
+
+  const logoColumns = useMemo(() => {
+    if (casinoLogos.length === 0) return [] as string[][]
+
+    const totalColumns = 6
+    const minItemsPerColumn = 12
+
+    return Array.from({ length: totalColumns }, (_, columnIndex) => {
+      const rotated = [...casinoLogos.slice(columnIndex), ...casinoLogos.slice(0, columnIndex)]
+      const repeated: string[] = []
+
+      while (repeated.length < minItemsPerColumn) {
+        repeated.push(...rotated)
+      }
+
+      return repeated.slice(0, minItemsPerColumn)
+    })
+  }, [casinoLogos])
 
   const handleLogin = async () => {
     await supabase.auth.signInWithOAuth({
@@ -134,6 +174,25 @@ export default function LandingPage() {
       }}
     >
       <div className="casino-texture" />
+
+      {logoColumns.length > 0 && (
+        <div className="landing-logo-marquee" aria-hidden="true">
+          {logoColumns.map((column, columnIndex) => (
+            <div
+              key={`logo-col-${columnIndex}`}
+              className={`landing-logo-column ${columnIndex % 2 === 0 ? 'landing-logo-column-up' : 'landing-logo-column-down'} ${columnIndex >= 4 ? 'hidden lg:flex' : columnIndex >= 2 ? 'hidden md:flex' : 'flex'}`}
+            >
+              <div className="landing-logo-track">
+                {[...column, ...column].map((logoUrl, logoIndex) => (
+                  <div key={`logo-${columnIndex}-${logoIndex}`} className="landing-logo-chip">
+                    <img src={logoUrl} alt="Casino logo" className="landing-logo-image" loading="lazy" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       <header className="casino-header relative z-10">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
