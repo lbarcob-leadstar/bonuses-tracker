@@ -333,12 +333,14 @@ export default function LandingPage() {
 
       <div className="relative z-10 w-full max-w-6xl mx-auto px-4 pb-14 grid grid-cols-1 md:grid-cols-3 gap-4">
         {[
-          { icon: '🎯', title: 'Smart Claim Flow', desc: 'Claim, unclaim, and track cooldowns per casino without friction.' },
-          { icon: '🔥', title: 'Streak Momentum', desc: 'Build streaks every day and see progress at a glance.' },
-          { icon: '📊', title: 'Personal Stats', desc: 'Monitor total claims, top casinos, and activity trends over time.' },
+          { image: '/desktop.png', title: 'Smart Claim Flow', desc: 'Claim, unclaim, and track cooldowns per casino without friction.' },
+          { image: '/mobile-2.png', title: 'Streak Momentum', desc: 'Build streaks every day and see progress at a glance.' },
+          { image: '/mobile-1.png', title: 'Personal Stats', desc: 'Monitor total claims, top casinos, and activity trends over time.' },
         ].map((feature) => (
           <div key={feature.title} className="casino-panel rounded-2xl p-5 text-left">
-            <div className="text-2xl mb-2">{feature.icon}</div>
+            <div className="mb-3 overflow-hidden rounded-xl" style={{ border: '1px solid rgba(255,255,255,0.14)', background: 'rgba(255,255,255,0.04)' }}>
+              <img src={feature.image} alt={`${feature.title} preview`} className="w-full h-28 object-cover" loading="lazy" />
+            </div>
             <h3 className="font-bold text-lg mb-1" style={{ color: '#FFE799' }}>{feature.title}</h3>
             <p style={{ color: 'rgba(255,255,255,0.68)' }}>{feature.desc}</p>
           </div>
