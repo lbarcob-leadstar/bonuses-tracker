@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Geist } from 'next/font/google'
 import Script from 'next/script'
+import GaPageViewTracker from './GaPageViewTracker'
 import './globals.css'
 
 const geist = Geist({ subsets: ['latin'] })
@@ -24,9 +25,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', '${GA_MEASUREMENT_ID}');
+            gtag('config', '${GA_MEASUREMENT_ID}', { send_page_view: false });
           `}
         </Script>
+        <GaPageViewTracker measurementId={GA_MEASUREMENT_ID} />
         {children}
       </body>
     </html>
