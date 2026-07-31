@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import { Geist } from 'next/font/google'
 import Script from 'next/script'
 import GaPageViewTracker from './GaPageViewTracker'
@@ -28,7 +29,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             gtag('config', '${GA_MEASUREMENT_ID}', { send_page_view: false });
           `}
         </Script>
-        <GaPageViewTracker measurementId={GA_MEASUREMENT_ID} />
+        <Suspense fallback={null}>
+          <GaPageViewTracker measurementId={GA_MEASUREMENT_ID} />
+        </Suspense>
         {children}
       </body>
     </html>
