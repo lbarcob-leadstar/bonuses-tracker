@@ -9,8 +9,9 @@ const geist = Geist({ subsets: ['latin'] })
 const GA_MEASUREMENT_ID = 'G-40C4SN8BCX'
 
 export const metadata: Metadata = {
-  title: 'Daily Bonus Tracker',
+  title: 'United Gamblers Daily Bonus Tracker',
   description: 'Track all your sweepstakes casino daily bonuses in one place.',
+  applicationName: 'United Gamblers Daily Bonus Tracker',
   verification: {
     google: 'smCsTYIUvk2BRGEaBRrelQHbcAja0_CYmYiK5vRdtf8',
   },

@@ -194,6 +194,8 @@ export default function LandingPage() {
         </div>
       )}
 
+      <h1 className="sr-only">United Gamblers Daily Bonus Tracker</h1>
+
       <header className="casino-header relative z-10">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center min-w-0">
