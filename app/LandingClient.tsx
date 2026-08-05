@@ -194,16 +194,17 @@ export default function LandingPage() {
         </div>
       )}
 
-      <h1 className="sr-only">United Gamblers Daily Bonus Tracker</h1>
-
       <header className="casino-header relative z-10">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center min-w-0">
+          <div className="flex items-center gap-3 min-w-0">
             <img
               src="/DBT-logo.png"
-              alt="Daily Bonus Tracker"
+              alt="United Gamblers Daily Bonus Tracker"
               className="h-12 sm:h-14 md:h-16 w-auto object-contain flex-shrink-0"
             />
+            <h1 className="font-black text-base md:text-lg leading-tight" style={{ color: '#FFE799', textShadow: '0 0 10px rgba(255,231,153,0.3)' }}>
+              United Gamblers Daily Bonus Tracker
+            </h1>
           </div>
         </div>
       </header>
@@ -223,7 +224,7 @@ export default function LandingPage() {
         </h2>
 
         <p className="text-lg md:text-xl max-w-3xl mb-10" style={{ color: 'rgba(255,255,255,0.68)' }}>
-          Claim faster, keep streaks alive, and get a single view of your daily progress across all major brands.
+          United Gamblers Daily Bonus Tracker helps sweepstakes casino players track, claim and manage their daily bonuses across all major brands — all in one place. Claim faster, keep streaks alive, and monitor your daily progress.
         </p>
 
         <button
