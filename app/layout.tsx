@@ -11,6 +11,9 @@ const GA_MEASUREMENT_ID = 'G-40C4SN8BCX'
 export const metadata: Metadata = {
   title: 'Daily Bonus Tracker',
   description: 'Track all your sweepstakes casino daily bonuses in one place.',
+  verification: {
+    google: 'smCsTYIUvk2BRGEaBRrelQHbcAja0_CYmYiK5vRdtf8',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
