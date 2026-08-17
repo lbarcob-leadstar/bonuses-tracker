@@ -69,7 +69,7 @@ export default function TermsOfServicePage() {
           <section>
             <h2 className="text-xl font-bold mb-2" style={{ color: '#f5f8ff' }}>8. Contact</h2>
             <p>
-              For legal questions, contact: support@unitedgamblers.com
+              For legal questions, contact: contact@unitedgamblers.com
             </p>
           </section>
         </div>

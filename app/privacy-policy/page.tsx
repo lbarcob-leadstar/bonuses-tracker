@@ -63,7 +63,7 @@ export default function PrivacyPolicyPage() {
           <section>
             <h2 className="text-xl font-bold mb-2" style={{ color: '#f5f8ff' }}>7. Contact</h2>
             <p>
-              For privacy questions, contact: support@unitedgamblers.com
+              For privacy questions, contact: contact@unitedgamblers.com
             </p>
           </section>
         </div>
