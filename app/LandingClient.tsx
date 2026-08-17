@@ -2,13 +2,16 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase'
+import type { LandingBlock } from '@/types'
 
 export default function LandingPage({
   heroBadge = 'Built for daily bonus grinders',
   heroDescription = 'United Gamblers Daily Bonus Tracker helps sweepstakes casino players track, claim and manage their daily bonuses across all major brands — all in one place. Claim faster, keep streaks alive, and monitor your daily progress.',
+  contentBlocks = [],
 }: {
   heroBadge?: string
   heroDescription?: string
+  contentBlocks?: LandingBlock[]
 } = {}) {
   const supabase = createClient()
   const [bonusCount, setBonusCount] = useState(10)
@@ -355,6 +358,41 @@ export default function LandingPage({
           </div>
         ))}
       </div>
+
+      {contentBlocks.length > 0 && (
+        <div className="relative z-10 w-full max-w-4xl mx-auto px-4 pb-10 space-y-6">
+          {contentBlocks.map((block) => {
+            if (block.type === 'heading') {
+              const Tag = (block.heading_level ?? 'h2') as 'h2' | 'h3' | 'h4'
+              const sizeMap: Record<string, string> = { h2: 'text-3xl md:text-4xl', h3: 'text-2xl md:text-3xl', h4: 'text-xl md:text-2xl' }
+              return (
+                <Tag key={block.id} className={`font-black leading-tight ${sizeMap[Tag] ?? 'text-2xl'}`} style={{ color: '#f0f6ff' }}>
+                  {block.content}
+                </Tag>
+              )
+            }
+            if (block.type === 'text') {
+              return (
+                <div key={block.id} className="rich-text-content text-base md:text-lg leading-relaxed" style={{ color: 'rgba(255,255,255,0.78)' }}
+                  dangerouslySetInnerHTML={{ __html: block.content ?? '' }} />
+              )
+            }
+            if (block.type === 'image') {
+              return (
+                <figure key={block.id} className="rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.12)' }}>
+                  <img src={block.image_url ?? ''} alt={block.image_alt ?? ''} className="w-full h-auto object-cover" loading="lazy" />
+                  {block.image_alt && (
+                    <figcaption className="px-4 py-2 text-sm text-center" style={{ color: 'rgba(255,255,255,0.5)', background: 'rgba(255,255,255,0.03)' }}>
+                      {block.image_alt}
+                    </figcaption>
+                  )}
+                </figure>
+              )
+            }
+            return null
+          })}
+        </div>
+      )}
 
       <footer className="relative z-10 pb-8 px-4">
         <div className="mx-auto max-w-6xl flex flex-wrap items-center justify-center gap-4 text-sm">

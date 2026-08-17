@@ -74,3 +74,15 @@ export interface LandingConfig {
   hero_description: string
   updated_at: string
 }
+
+export interface LandingBlock {
+  id: string
+  type: 'heading' | 'text' | 'image'
+  heading_level: 'h2' | 'h3' | 'h4' | null
+  content: string | null
+  image_url: string | null
+  image_alt: string | null
+  sort_order: number
+  is_active: boolean
+  created_at: string
+}

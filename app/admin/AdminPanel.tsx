@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase'
-import type { Casino, FeaturedBonus, LandingConfig } from '@/types'
+import type { Casino, FeaturedBonus, LandingBlock, LandingConfig } from '@/types'
 
 function FeaturedHtmlToolbar({
   onBold,
@@ -38,6 +38,12 @@ export default function AdminPanel() {
   const supabase = createClient()
   const [casinos, setCasinos] = useState<Casino[]>([])
   const [featuredBonuses, setFeaturedBonuses] = useState<FeaturedBonus[]>([])
+  const [landingBlocks, setLandingBlocks] = useState<LandingBlock[]>([])
+  const [editingBlockId, setEditingBlockId] = useState<string | null>(null)
+  const [showAddBlock, setShowAddBlock] = useState(false)
+  const [activeTab, setActiveTab] = useState<'landing' | 'featured' | 'casinos'>('landing')
+  const [editBlockForm, setEditBlockForm] = useState({ type: 'heading' as LandingBlock['type'], heading_level: 'h2' as string, content: '', image_url: '', image_alt: '' })
+  const [newBlockForm, setNewBlockForm] = useState({ type: 'heading' as LandingBlock['type'], heading_level: 'h2' as string, content: '', image_url: '', image_alt: '' })
   const [landingConfig, setLandingConfig] = useState<LandingConfig | null>(null)
   const [landingForm, setLandingForm] = useState({
     page_title: '',
@@ -170,13 +176,15 @@ export default function AdminPanel() {
   }, [])
 
   const loadAdminData = async () => {
-    const [{ data: casinoData }, { data: featuredData }, { data: landingData }] = await Promise.all([
+    const [{ data: casinoData }, { data: featuredData }, { data: landingData }, { data: blocksData }] = await Promise.all([
       supabase.from('casinos').select('*').order('sort_order'),
       supabase.from('featured_bonuses').select('*').order('sort_order'),
       supabase.from('landing_config').select('*').single(),
+      supabase.from('landing_blocks').select('*').order('sort_order'),
     ])
     setCasinos(casinoData ?? [])
     setFeaturedBonuses(featuredData ?? [])
+    setLandingBlocks(blocksData ?? [])
     if (landingData) {
       setLandingConfig(landingData)
       setLandingForm({
@@ -211,6 +219,81 @@ export default function AdminPanel() {
     }
     setIsSavingLanding(false)
     alert('Landing page config saved!')
+  }
+
+  const addLandingBlock = async () => {
+    const maxOrder = Math.max(...landingBlocks.map((b) => b.sort_order), 0)
+    const payload = {
+      type: newBlockForm.type,
+      heading_level: newBlockForm.type === 'heading' ? newBlockForm.heading_level : null,
+      content: newBlockForm.content.trim() || null,
+      image_url: newBlockForm.image_url.trim() || null,
+      image_alt: newBlockForm.image_alt.trim() || null,
+      sort_order: maxOrder + 1,
+      is_active: true,
+    }
+    const { data, error } = await supabase.from('landing_blocks').insert(payload).select().single()
+    if (!assertNoSupabaseError(error, 'Could not create block')) return
+    if (data) setLandingBlocks((prev) => [...prev, data])
+    setNewBlockForm({ type: 'heading', heading_level: 'h2', content: '', image_url: '', image_alt: '' })
+    setShowAddBlock(false)
+  }
+
+  const startEditBlock = (block: LandingBlock) => {
+    setEditingBlockId(block.id)
+    setEditBlockForm({
+      type: block.type,
+      heading_level: block.heading_level ?? 'h2',
+      content: block.content ?? '',
+      image_url: block.image_url ?? '',
+      image_alt: block.image_alt ?? '',
+    })
+  }
+
+  const saveEditBlock = async (id: string) => {
+    const payload = {
+      type: editBlockForm.type,
+      heading_level: editBlockForm.type === 'heading' ? editBlockForm.heading_level : null,
+      content: editBlockForm.content.trim() || null,
+      image_url: editBlockForm.image_url.trim() || null,
+      image_alt: editBlockForm.image_alt.trim() || null,
+    }
+    const { error } = await supabase.from('landing_blocks').update(payload).eq('id', id)
+    if (!assertNoSupabaseError(error, 'Could not save block')) return
+    setLandingBlocks((prev) => prev.map((b) => b.id === id ? { ...b, ...payload } : b))
+    setEditingBlockId(null)
+  }
+
+  const deleteBlock = async (id: string) => {
+    if (!confirm('Delete this block?')) return
+    const { error } = await supabase.from('landing_blocks').delete().eq('id', id)
+    if (!assertNoSupabaseError(error, 'Could not delete block')) return
+    setLandingBlocks((prev) => prev.filter((b) => b.id !== id))
+  }
+
+  const toggleBlockActive = async (block: LandingBlock) => {
+    const { error } = await supabase.from('landing_blocks').update({ is_active: !block.is_active }).eq('id', block.id)
+    if (!assertNoSupabaseError(error, 'Could not update block visibility')) return
+    setLandingBlocks((prev) => prev.map((b) => b.id === block.id ? { ...b, is_active: !b.is_active } : b))
+  }
+
+  const moveBlock = async (block: LandingBlock, direction: 'up' | 'down') => {
+    const sorted = [...landingBlocks].sort((a, b) => a.sort_order - b.sort_order)
+    const idx = sorted.findIndex((b) => b.id === block.id)
+    const swapIdx = direction === 'up' ? idx - 1 : idx + 1
+    if (swapIdx < 0 || swapIdx >= sorted.length) return
+    const swapBlock = sorted[swapIdx]
+    const aOrder = block.sort_order
+    const bOrder = swapBlock.sort_order
+    await Promise.all([
+      supabase.from('landing_blocks').update({ sort_order: bOrder }).eq('id', block.id),
+      supabase.from('landing_blocks').update({ sort_order: aOrder }).eq('id', swapBlock.id),
+    ])
+    setLandingBlocks((prev) => prev.map((b) => {
+      if (b.id === block.id) return { ...b, sort_order: bOrder }
+      if (b.id === swapBlock.id) return { ...b, sort_order: aOrder }
+      return b
+    }))
   }
 
   const toggleActive = async (casino: Casino) => {
@@ -438,17 +521,34 @@ export default function AdminPanel() {
               style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.1)' }}>
               ← Back to App
             </a>
-            <button onClick={() => setShowAdd(true)}
-              className="px-4 py-2 rounded-xl text-sm font-bold cursor-pointer"
-              style={{ background: '#E52D4B', color: '#fff', boxShadow: '0 0 15px rgba(229,45,75,0.4)' }}>
-              + Add Casino
-            </button>
+            {activeTab === 'casinos' && (
+              <button onClick={() => setShowAdd(true)}
+                className="px-4 py-2 rounded-xl text-sm font-bold cursor-pointer"
+                style={{ background: '#E52D4B', color: '#fff', boxShadow: '0 0 15px rgba(229,45,75,0.4)' }}>
+                + Add Casino
+              </button>
+            )}
           </div>
+        </div>
+        <div className="max-w-5xl mx-auto px-4 pb-0 flex gap-1">
+          {(['landing', 'featured', 'casinos'] as const).map((tab) => (
+            <button key={tab} onClick={() => setActiveTab(tab)}
+              className="px-5 py-2.5 text-sm font-semibold rounded-t-xl capitalize cursor-pointer transition-colors"
+              style={{
+                background: activeTab === tab ? '#1e252e' : 'transparent',
+                color: activeTab === tab ? '#FFE799' : 'rgba(255,255,255,0.5)',
+                borderBottom: activeTab === tab ? '2px solid #FFE799' : '2px solid transparent',
+              }}>
+              {tab === 'landing' ? 'Landing Page' : tab === 'featured' ? 'Featured Cards' : 'Casinos'}
+            </button>
+          ))}
         </div>
       </header>
 
       <div className="max-w-5xl mx-auto px-4 py-8">
-        {/* Landing Page Config */}
+        {/* ── LANDING TAB ── */}
+        {activeTab === 'landing' && (<>
+        {/* Landing SEO Config */}
         <div className="rounded-2xl p-6 mb-6"
           style={{ background: '#2C343F', border: '1px solid rgba(73,148,201,0.35)', boxShadow: '0 0 20px rgba(73,148,201,0.12)' }}>
           <div className="mb-4">
@@ -511,7 +611,201 @@ export default function AdminPanel() {
           </div>
         </div>
 
-        {/* Featured Bonuses */}
+        {/* Landing Content Blocks */}
+        <div className="rounded-2xl p-6 mb-6"
+          style={{ background: '#2C343F', border: '1px solid rgba(73,148,201,0.35)', boxShadow: '0 0 20px rgba(73,148,201,0.12)' }}>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="font-bold" style={{ color: '#d8f0ff' }}>Content Blocks</h2>
+              <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                Additional content shown below the feature cards on the landing page.
+              </p>
+            </div>
+            <button onClick={() => setShowAddBlock(true)}
+              className="px-4 py-2 rounded-xl text-sm font-bold cursor-pointer"
+              style={{ background: '#4994C9', color: '#fff', boxShadow: '0 0 12px rgba(73,148,201,0.35)' }}>
+              + Add Block
+            </button>
+          </div>
+
+          {showAddBlock && (
+            <div className="rounded-xl p-4 mb-4 space-y-3"
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(73,148,201,0.35)' }}>
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <label className="block text-xs font-semibold mb-1" style={{ color: 'rgba(255,255,255,0.72)' }}>Block type</label>
+                  <select value={newBlockForm.type} onChange={(e) => setNewBlockForm((p) => ({ ...p, type: e.target.value as LandingBlock['type'] }))}
+                    className="w-full px-3 py-2 rounded-xl text-sm outline-none"
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(73,148,201,0.35)', color: '#f0f0f0' }}>
+                    <option value="heading">Heading</option>
+                    <option value="text">Text / HTML</option>
+                    <option value="image">Image</option>
+                  </select>
+                </div>
+                {newBlockForm.type === 'heading' && (
+                  <div>
+                    <label className="block text-xs font-semibold mb-1" style={{ color: 'rgba(255,255,255,0.72)' }}>Level</label>
+                    <select value={newBlockForm.heading_level} onChange={(e) => setNewBlockForm((p) => ({ ...p, heading_level: e.target.value }))}
+                      className="px-3 py-2 rounded-xl text-sm outline-none"
+                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(73,148,201,0.35)', color: '#f0f0f0' }}>
+                      <option value="h2">H2</option>
+                      <option value="h3">H3</option>
+                      <option value="h4">H4</option>
+                    </select>
+                  </div>
+                )}
+              </div>
+              {newBlockForm.type !== 'image' && (
+                <div>
+                  <label className="block text-xs font-semibold mb-1" style={{ color: 'rgba(255,255,255,0.72)' }}>
+                    {newBlockForm.type === 'heading' ? 'Heading text' : 'Content (HTML allowed)'}
+                  </label>
+                  {newBlockForm.type === 'text' && (
+                    <FeaturedHtmlToolbar
+                      onBold={() => setNewBlockForm((p) => ({ ...p, content: p.content + '<strong>text</strong>' }))}
+                      onItalic={() => setNewBlockForm((p) => ({ ...p, content: p.content + '<em>text</em>' }))}
+                      onLink={() => setNewBlockForm((p) => ({ ...p, content: p.content + '<a href="https://">link text</a>' }))}
+                      onBreak={() => setNewBlockForm((p) => ({ ...p, content: p.content + '<br />' }))}
+                      onList={() => setNewBlockForm((p) => ({ ...p, content: p.content + '<ul>\n  <li>List item</li>\n</ul>' }))}
+                    />
+                  )}
+                  <textarea value={newBlockForm.content} onChange={(e) => setNewBlockForm((p) => ({ ...p, content: e.target.value }))}
+                    rows={newBlockForm.type === 'text' ? 4 : 2}
+                    className="w-full px-3 py-2 rounded-xl text-sm outline-none resize-y"
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(73,148,201,0.35)', color: '#f0f0f0' }} />
+                </div>
+              )}
+              {newBlockForm.type === 'image' && (
+                <>
+                  <div>
+                    <label className="block text-xs font-semibold mb-1" style={{ color: 'rgba(255,255,255,0.72)' }}>Image URL</label>
+                    <input value={newBlockForm.image_url} onChange={(e) => setNewBlockForm((p) => ({ ...p, image_url: e.target.value }))}
+                      placeholder="https://..."
+                      className="w-full px-3 py-2 rounded-xl text-sm outline-none"
+                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(73,148,201,0.35)', color: '#f0f0f0' }} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold mb-1" style={{ color: 'rgba(255,255,255,0.72)' }}>Alt text / caption</label>
+                    <input value={newBlockForm.image_alt} onChange={(e) => setNewBlockForm((p) => ({ ...p, image_alt: e.target.value }))}
+                      className="w-full px-3 py-2 rounded-xl text-sm outline-none"
+                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(73,148,201,0.35)', color: '#f0f0f0' }} />
+                  </div>
+                </>
+              )}
+              <div className="flex gap-2">
+                <button onClick={addLandingBlock} className="px-4 py-2 rounded-xl text-sm font-bold cursor-pointer"
+                  style={{ background: '#4994C9', color: '#fff' }}>Add block</button>
+                <button onClick={() => setShowAddBlock(false)} className="px-4 py-2 rounded-xl text-sm cursor-pointer"
+                  style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.6)' }}>Cancel</button>
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-2">
+            {[...landingBlocks].sort((a, b) => a.sort_order - b.sort_order).map((block) => (
+              <div key={block.id} className="rounded-xl p-3"
+                style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${block.is_active ? 'rgba(73,148,201,0.25)' : 'rgba(229,45,75,0.2)'}`, opacity: block.is_active ? 1 : 0.55 }}>
+                {editingBlockId === block.id ? (
+                  <div className="space-y-3">
+                    <div className="flex gap-3">
+                      <div className="flex-1">
+                        <label className="block text-xs font-semibold mb-1" style={{ color: 'rgba(255,255,255,0.72)' }}>Type</label>
+                        <select value={editBlockForm.type} onChange={(e) => setEditBlockForm((p) => ({ ...p, type: e.target.value as LandingBlock['type'] }))}
+                          className="w-full px-3 py-2 rounded-xl text-sm outline-none"
+                          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(73,148,201,0.4)', color: '#f0f0f0' }}>
+                          <option value="heading">Heading</option>
+                          <option value="text">Text / HTML</option>
+                          <option value="image">Image</option>
+                        </select>
+                      </div>
+                      {editBlockForm.type === 'heading' && (
+                        <div>
+                          <label className="block text-xs font-semibold mb-1" style={{ color: 'rgba(255,255,255,0.72)' }}>Level</label>
+                          <select value={editBlockForm.heading_level} onChange={(e) => setEditBlockForm((p) => ({ ...p, heading_level: e.target.value }))}
+                            className="px-3 py-2 rounded-xl text-sm outline-none"
+                            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(73,148,201,0.4)', color: '#f0f0f0' }}>
+                            <option value="h2">H2</option>
+                            <option value="h3">H3</option>
+                            <option value="h4">H4</option>
+                          </select>
+                        </div>
+                      )}
+                    </div>
+                    {editBlockForm.type !== 'image' && (
+                      <div>
+                        {editBlockForm.type === 'text' && (
+                          <FeaturedHtmlToolbar
+                            onBold={() => setEditBlockForm((p) => ({ ...p, content: p.content + '<strong>text</strong>' }))}
+                            onItalic={() => setEditBlockForm((p) => ({ ...p, content: p.content + '<em>text</em>' }))}
+                            onLink={() => setEditBlockForm((p) => ({ ...p, content: p.content + '<a href="https://">link text</a>' }))}
+                            onBreak={() => setEditBlockForm((p) => ({ ...p, content: p.content + '<br />' }))}
+                            onList={() => setEditBlockForm((p) => ({ ...p, content: p.content + '<ul>\n  <li>List item</li>\n</ul>' }))}
+                          />
+                        )}
+                        <textarea value={editBlockForm.content} onChange={(e) => setEditBlockForm((p) => ({ ...p, content: e.target.value }))}
+                          rows={editBlockForm.type === 'text' ? 4 : 2}
+                          className="w-full px-3 py-2 rounded-xl text-sm outline-none resize-y"
+                          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(73,148,201,0.4)', color: '#f0f0f0' }} />
+                      </div>
+                    )}
+                    {editBlockForm.type === 'image' && (
+                      <>
+                        <input value={editBlockForm.image_url} onChange={(e) => setEditBlockForm((p) => ({ ...p, image_url: e.target.value }))}
+                          placeholder="Image URL (https://...)"
+                          className="w-full px-3 py-2 rounded-xl text-sm outline-none"
+                          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(73,148,201,0.4)', color: '#f0f0f0' }} />
+                        <input value={editBlockForm.image_alt} onChange={(e) => setEditBlockForm((p) => ({ ...p, image_alt: e.target.value }))}
+                          placeholder="Alt text / caption"
+                          className="w-full px-3 py-2 rounded-xl text-sm outline-none"
+                          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(73,148,201,0.4)', color: '#f0f0f0' }} />
+                      </>
+                    )}
+                    <div className="flex gap-2">
+                      <button onClick={() => saveEditBlock(block.id)} className="px-4 py-2 rounded-xl text-sm font-bold cursor-pointer"
+                        style={{ background: '#4994C9', color: '#fff' }}>Save</button>
+                      <button onClick={() => setEditingBlockId(null)} className="px-4 py-2 rounded-xl text-sm cursor-pointer"
+                        style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.6)' }}>Cancel</button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3">
+                    <div className="flex flex-col gap-0.5 flex-shrink-0">
+                      <button onClick={() => moveBlock(block, 'up')} className="text-xs cursor-pointer px-1.5 py-0.5 rounded"
+                        style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)' }}>▲</button>
+                      <button onClick={() => moveBlock(block, 'down')} className="text-xs cursor-pointer px-1.5 py-0.5 rounded"
+                        style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)' }}>▼</button>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <span className="text-xs px-2 py-0.5 rounded-full mr-2" style={{ background: 'rgba(73,148,201,0.18)', color: '#C8E8FF' }}>
+                        {block.type === 'heading' ? `${block.heading_level?.toUpperCase()} heading` : block.type}
+                      </span>
+                      <span className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                        {block.type === 'image' ? (block.image_url ?? '—') : (block.content?.slice(0, 80) ?? '—')}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <button onClick={() => toggleBlockActive(block)} className="px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer"
+                        style={{ background: block.is_active ? 'rgba(255,255,255,0.05)' : 'rgba(229,45,75,0.2)', color: block.is_active ? 'rgba(255,255,255,0.4)' : '#E52D4B', border: '1px solid rgba(255,255,255,0.1)' }}>
+                        {block.is_active ? 'Hide' : 'Show'}
+                      </button>
+                      <button onClick={() => startEditBlock(block)} className="px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer"
+                        style={{ background: 'rgba(255,231,153,0.1)', color: '#FFE799', border: '1px solid rgba(255,231,153,0.2)' }}>Edit</button>
+                      <button onClick={() => deleteBlock(block.id)} className="px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer"
+                        style={{ background: 'rgba(229,45,75,0.1)', color: '#E52D4B', border: '1px solid rgba(229,45,75,0.2)' }}>Delete</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+            {landingBlocks.length === 0 && (
+              <p className="text-sm" style={{ color: 'rgba(255,255,255,0.55)' }}>No content blocks yet. Add one to place content below the feature cards.</p>
+            )}
+          </div>
+        </div>
+        </>)}
+
+        {/* ── FEATURED TAB ── */}
+        {activeTab === 'featured' && (<>
         <div className="rounded-2xl p-6 mb-6"
           style={{ background: '#2C343F', border: '1px solid rgba(73,148,201,0.35)', boxShadow: '0 0 20px rgba(73,148,201,0.12)' }}>
           <div className="flex items-center justify-between mb-4">
@@ -713,6 +1007,10 @@ export default function AdminPanel() {
             )}
           </div>
         </div>
+        </>)}
+
+        {/* ── CASINOS TAB ── */}
+        {activeTab === 'casinos' && (<>
 
         {showAdd && (
           <div className="rounded-2xl p-6 mb-6"
@@ -969,6 +1267,7 @@ export default function AdminPanel() {
             </div>
           ))}
         </div>
+        </>)}
       </div>
     </div>
   )
