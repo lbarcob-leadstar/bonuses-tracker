@@ -65,3 +65,12 @@ export interface CasinoWithClaim extends Casino {
   streak: number
   is_favorite: boolean
 }
+
+export interface LandingConfig {
+  id: string
+  page_title: string
+  meta_description: string
+  hero_badge: string
+  hero_description: string
+  updated_at: string
+}

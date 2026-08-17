@@ -3,7 +3,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 
-export default function LandingPage() {
+export default function LandingPage({
+  heroBadge = 'Built for daily bonus grinders',
+  heroDescription = 'United Gamblers Daily Bonus Tracker helps sweepstakes casino players track, claim and manage their daily bonuses across all major brands — all in one place. Claim faster, keep streaks alive, and monitor your daily progress.',
+}: {
+  heroBadge?: string
+  heroDescription?: string
+} = {}) {
   const supabase = createClient()
   const [bonusCount, setBonusCount] = useState(10)
   const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '')
@@ -212,7 +218,7 @@ export default function LandingPage() {
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 text-center pt-10 pb-14">
         <div className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold"
           style={{ background: 'rgba(73,148,201,0.16)', border: '1px solid rgba(73,148,201,0.42)', color: '#d8f0ff' }}>
-          Built for daily bonus grinders
+          {heroBadge}
         </div>
 
         <h2 className="text-5xl md:text-7xl font-black mb-4 leading-tight tracking-tight" style={{ color: '#f0f6ff' }}>
@@ -224,7 +230,7 @@ export default function LandingPage() {
         </h2>
 
         <p className="text-lg md:text-xl max-w-3xl mb-10" style={{ color: 'rgba(255,255,255,0.68)' }}>
-          United Gamblers Daily Bonus Tracker helps sweepstakes casino players track, claim and manage their daily bonuses across all major brands — all in one place. Claim faster, keep streaks alive, and monitor your daily progress.
+          {heroDescription}
         </p>
 
         <button

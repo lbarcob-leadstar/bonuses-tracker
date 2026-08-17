@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase'
-import type { Casino, FeaturedBonus } from '@/types'
+import type { Casino, FeaturedBonus, LandingConfig } from '@/types'
 
 function FeaturedHtmlToolbar({
   onBold,
@@ -38,6 +38,14 @@ export default function AdminPanel() {
   const supabase = createClient()
   const [casinos, setCasinos] = useState<Casino[]>([])
   const [featuredBonuses, setFeaturedBonuses] = useState<FeaturedBonus[]>([])
+  const [landingConfig, setLandingConfig] = useState<LandingConfig | null>(null)
+  const [landingForm, setLandingForm] = useState({
+    page_title: '',
+    meta_description: '',
+    hero_badge: '',
+    hero_description: '',
+  })
+  const [isSavingLanding, setIsSavingLanding] = useState(false)
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingFeaturedId, setEditingFeaturedId] = useState<string | null>(null)
@@ -162,13 +170,47 @@ export default function AdminPanel() {
   }, [])
 
   const loadAdminData = async () => {
-    const [{ data: casinoData }, { data: featuredData }] = await Promise.all([
+    const [{ data: casinoData }, { data: featuredData }, { data: landingData }] = await Promise.all([
       supabase.from('casinos').select('*').order('sort_order'),
       supabase.from('featured_bonuses').select('*').order('sort_order'),
+      supabase.from('landing_config').select('*').single(),
     ])
     setCasinos(casinoData ?? [])
     setFeaturedBonuses(featuredData ?? [])
+    if (landingData) {
+      setLandingConfig(landingData)
+      setLandingForm({
+        page_title: landingData.page_title,
+        meta_description: landingData.meta_description,
+        hero_badge: landingData.hero_badge,
+        hero_description: landingData.hero_description,
+      })
+    }
     setLoading(false)
+  }
+
+  const saveLandingConfig = async () => {
+    if (!landingForm.page_title.trim() || !landingForm.meta_description.trim()) {
+      alert('Page title and meta description are required.')
+      return
+    }
+    setIsSavingLanding(true)
+    const payload = {
+      page_title: landingForm.page_title.trim(),
+      meta_description: landingForm.meta_description.trim(),
+      hero_badge: landingForm.hero_badge.trim(),
+      hero_description: landingForm.hero_description.trim(),
+      updated_at: new Date().toISOString(),
+    }
+    const { error } = landingConfig
+      ? await supabase.from('landing_config').update(payload).eq('id', landingConfig.id)
+      : await supabase.from('landing_config').insert(payload)
+    if (!assertNoSupabaseError(error, 'Could not save landing config')) {
+      setIsSavingLanding(false)
+      return
+    }
+    setIsSavingLanding(false)
+    alert('Landing page config saved!')
   }
 
   const toggleActive = async (casino: Casino) => {
@@ -406,6 +448,70 @@ export default function AdminPanel() {
       </header>
 
       <div className="max-w-5xl mx-auto px-4 py-8">
+        {/* Landing Page Config */}
+        <div className="rounded-2xl p-6 mb-6"
+          style={{ background: '#2C343F', border: '1px solid rgba(73,148,201,0.35)', boxShadow: '0 0 20px rgba(73,148,201,0.12)' }}>
+          <div className="mb-4">
+            <h2 className="font-bold" style={{ color: '#d8f0ff' }}>Landing Page</h2>
+            <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>
+              Controls SEO metadata and visible text on the landing page.
+            </p>
+          </div>
+          <div className="space-y-3">
+            <div>
+              <label className="block text-xs font-semibold mb-1" style={{ color: 'rgba(255,255,255,0.72)' }}>Page Title (title tag)</label>
+              <input
+                value={landingForm.page_title}
+                onChange={(e) => setLandingForm((p) => ({ ...p, page_title: e.target.value }))}
+                placeholder="United Gamblers Daily Bonus Tracker"
+                className="w-full px-3 py-2 rounded-xl text-sm outline-none"
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(73,148,201,0.35)', color: '#f0f0f0' }}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold mb-1" style={{ color: 'rgba(255,255,255,0.72)' }}>Meta Description</label>
+              <textarea
+                value={landingForm.meta_description}
+                onChange={(e) => setLandingForm((p) => ({ ...p, meta_description: e.target.value }))}
+                placeholder="Track all your sweepstakes casino daily bonuses in one place."
+                rows={2}
+                className="w-full px-3 py-2 rounded-xl text-sm outline-none resize-y"
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(73,148,201,0.35)', color: '#f0f0f0' }}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold mb-1" style={{ color: 'rgba(255,255,255,0.72)' }}>Hero Badge text</label>
+              <input
+                value={landingForm.hero_badge}
+                onChange={(e) => setLandingForm((p) => ({ ...p, hero_badge: e.target.value }))}
+                placeholder="Built for daily bonus grinders"
+                className="w-full px-3 py-2 rounded-xl text-sm outline-none"
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(73,148,201,0.35)', color: '#f0f0f0' }}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold mb-1" style={{ color: 'rgba(255,255,255,0.72)' }}>Hero Description paragraph</label>
+              <textarea
+                value={landingForm.hero_description}
+                onChange={(e) => setLandingForm((p) => ({ ...p, hero_description: e.target.value }))}
+                placeholder="United Gamblers Daily Bonus Tracker helps sweepstakes casino players..."
+                rows={3}
+                className="w-full px-3 py-2 rounded-xl text-sm outline-none resize-y"
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(73,148,201,0.35)', color: '#f0f0f0' }}
+              />
+            </div>
+            <button
+              onClick={saveLandingConfig}
+              disabled={isSavingLanding}
+              className="px-5 py-2 rounded-xl text-sm font-bold cursor-pointer transition-opacity"
+              style={{ background: '#4994C9', color: '#fff', opacity: isSavingLanding ? 0.7 : 1 }}
+            >
+              {isSavingLanding ? 'Saving…' : 'Save Landing Config'}
+            </button>
+          </div>
+        </div>
+
+        {/* Featured Bonuses */}
         <div className="rounded-2xl p-6 mb-6"
           style={{ background: '#2C343F', border: '1px solid rgba(73,148,201,0.35)', boxShadow: '0 0 20px rgba(73,148,201,0.12)' }}>
           <div className="flex items-center justify-between mb-4">
