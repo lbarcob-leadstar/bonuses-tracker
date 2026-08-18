@@ -251,9 +251,9 @@ export default function AdminPanel() {
   }
 
   const saveEditBlock = async (id: string) => {
-    const payload = {
+    const payload: Partial<LandingBlock> = {
       type: editBlockForm.type,
-      heading_level: editBlockForm.type === 'heading' ? editBlockForm.heading_level : null,
+      heading_level: editBlockForm.type === 'heading' ? (editBlockForm.heading_level as LandingBlock['heading_level']) : null,
       content: editBlockForm.content.trim() || null,
       image_url: editBlockForm.image_url.trim() || null,
       image_alt: editBlockForm.image_alt.trim() || null,
