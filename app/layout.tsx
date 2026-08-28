@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import { Geist } from 'next/font/google'
 import Script from 'next/script'
+import { Analytics } from '@vercel/analytics/next'
 import GaPageViewTracker from './GaPageViewTracker'
 import './globals.css'
 
@@ -36,6 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Suspense fallback={null}>
           <GaPageViewTracker measurementId={GA_MEASUREMENT_ID} />
         </Suspense>
+        <Analytics />
         {children}
       </body>
     </html>
