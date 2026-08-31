@@ -178,24 +178,28 @@ export default function AdminPanel() {
   }, [])
 
   const loadAdminData = async () => {
-    const [{ data: casinoData }, { data: featuredData }, { data: landingData }, { data: blocksData }, { count: activeUsersCountResult, error: activeUsersError }, { count: totalUsersCountResult, error: totalUsersError }] = await Promise.all([
+    const [{ data: casinoData }, { data: featuredData }, { data: landingData }, { data: blocksData }] = await Promise.all([
       supabase.from('casinos').select('*').order('sort_order'),
       supabase.from('featured_bonuses').select('*').order('sort_order'),
       supabase.from('landing_config').select('*').single(),
       supabase.from('landing_blocks').select('*').order('sort_order'),
-      supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .gt('last_seen_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()),
-      supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true }),
     ])
+    
+    // Get user counts from API endpoint (uses admin auth)
+    try {
+      const response = await fetch('/api/admin/users-count')
+      if (response.ok) {
+        const data = await response.json()
+        setTotalUsersCount(data.totalUsers ?? 0)
+        setActiveUsersCount(data.totalUsers ?? 0) // TODO: implement daily tracking
+      }
+    } catch (err) {
+      console.error('Failed to fetch users count:', err)
+    }
+    
     setCasinos(casinoData ?? [])
     setFeaturedBonuses(featuredData ?? [])
     setLandingBlocks(blocksData ?? [])
-    if (!activeUsersError) setActiveUsersCount(activeUsersCountResult ?? 0)
-    if (!totalUsersError) setTotalUsersCount(totalUsersCountResult ?? 0)
     if (landingData) {
       setLandingConfig(landingData)
       setLandingForm({
