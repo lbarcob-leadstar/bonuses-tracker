@@ -268,7 +268,7 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
       .from('profiles')
       .select('last_seen_at')
       .eq('id', userId)
-      .single()
+      .maybeSingle()
 
     if (!profileError && profile?.last_seen_at) {
       const lastSeenAt = new Date(profile.last_seen_at)
@@ -277,10 +277,10 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
       if (isSameDay) return
     }
 
+    // Upsert since the profile row may not exist yet for this user
     await supabase
       .from('profiles')
-      .update({ last_seen_at: new Date().toISOString() })
-      .eq('id', userId)
+      .upsert({ id: userId, last_seen_at: new Date().toISOString() }, { onConflict: 'id' })
   }, [supabase])
 
   const loadData = useCallback(async (userId: string) => {

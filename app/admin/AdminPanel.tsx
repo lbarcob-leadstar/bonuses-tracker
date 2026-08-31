@@ -191,7 +191,7 @@ export default function AdminPanel() {
       if (response.ok) {
         const data = await response.json()
         setTotalUsersCount(data.totalUsers ?? 0)
-        setActiveUsersCount(data.totalUsers ?? 0) // TODO: implement daily tracking
+        setActiveUsersCount(data.activeToday ?? 0)
       }
     } catch (err) {
       console.error('Failed to fetch users count:', err)
