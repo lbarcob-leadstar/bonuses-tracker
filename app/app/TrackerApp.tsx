@@ -263,6 +263,26 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
     return elapsedMs < STREAK_ACTIVE_MS
   }, [now, STREAK_ACTIVE_MS])
 
+  const markUserActive = useCallback(async (userId: string) => {
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('last_seen_at')
+      .eq('id', userId)
+      .single()
+
+    if (!profileError && profile?.last_seen_at) {
+      const lastSeenAt = new Date(profile.last_seen_at)
+      const nowDate = new Date()
+      const isSameDay = lastSeenAt.toDateString() === nowDate.toDateString()
+      if (isSameDay) return
+    }
+
+    await supabase
+      .from('profiles')
+      .update({ last_seen_at: new Date().toISOString() })
+      .eq('id', userId)
+  }, [supabase])
+
   const loadData = useCallback(async (userId: string) => {
     const [{ data: casinoData }, { data: claimsData }, { data: favoritesData }, { data: featuredData }] = await Promise.all([
       supabase.from('casinos').select('*').eq('is_active', true).order('sort_order'),
@@ -312,15 +332,16 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
   }, [supabase])
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
         setUser(session.user)
+        await markUserActive(session.user.id)
         loadData(session.user.id)
       } else {
         window.location.href = '/'
       }
     })
-  }, [supabase, loadData])
+  }, [supabase, loadData, markUserActive])
 
   useEffect(() => {
     const timerId = window.setInterval(() => setNow(Date.now()), 1000)
