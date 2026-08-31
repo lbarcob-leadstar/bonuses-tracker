@@ -46,6 +46,7 @@ export default function AdminPanel() {
   const [newBlockForm, setNewBlockForm] = useState({ type: 'heading' as LandingBlock['type'], heading_level: 'h2' as string, content: '', image_url: '', image_alt: '' })
   const [landingConfig, setLandingConfig] = useState<LandingConfig | null>(null)
   const [activeUsersCount, setActiveUsersCount] = useState(0)
+  const [totalUsersCount, setTotalUsersCount] = useState(0)
   const [landingForm, setLandingForm] = useState({
     page_title: '',
     meta_description: '',
@@ -177,7 +178,7 @@ export default function AdminPanel() {
   }, [])
 
   const loadAdminData = async () => {
-    const [{ data: casinoData }, { data: featuredData }, { data: landingData }, { data: blocksData }, { count: activeUsersCountResult, error: activeUsersError }] = await Promise.all([
+    const [{ data: casinoData }, { data: featuredData }, { data: landingData }, { data: blocksData }, { count: activeUsersCountResult, error: activeUsersError }, { count: totalUsersCountResult, error: totalUsersError }] = await Promise.all([
       supabase.from('casinos').select('*').order('sort_order'),
       supabase.from('featured_bonuses').select('*').order('sort_order'),
       supabase.from('landing_config').select('*').single(),
@@ -186,11 +187,15 @@ export default function AdminPanel() {
         .from('profiles')
         .select('*', { count: 'exact', head: true })
         .gt('last_seen_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()),
+      supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true }),
     ])
     setCasinos(casinoData ?? [])
     setFeaturedBonuses(featuredData ?? [])
     setLandingBlocks(blocksData ?? [])
     if (!activeUsersError) setActiveUsersCount(activeUsersCountResult ?? 0)
+    if (!totalUsersError) setTotalUsersCount(totalUsersCountResult ?? 0)
     if (landingData) {
       setLandingConfig(landingData)
       setLandingForm({
@@ -518,7 +523,7 @@ export default function AdminPanel() {
             <span className="text-2xl">⚙️</span>
             <div>
               <h1 className="font-black text-lg" style={{ color: '#FFE799' }}>Admin Panel</h1>
-              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>{casinos.length} casinos · {featuredBonuses.length} featured cards · {activeUsersCount} active today</p>
+              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>{casinos.length} casinos · {featuredBonuses.length} featured cards · {activeUsersCount} active today · {totalUsersCount} total users</p>
             </div>
           </div>
           <div className="flex gap-3">
