@@ -18,6 +18,8 @@ export default function TrackerApp() {
   const [filter, setFilter] = useState<'all' | 'claimed' | 'unclaimed' | 'favorites'>('all')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [dashboardView, setDashboardView] = useState<'tracker' | 'stats'>('tracker')
+  const [statsRange, setStatsRange] = useState<7 | 30 | 90 | 180>(7)
+  const [statsMetric, setStatsMetric] = useState<'claims' | 'sc'>('claims')
   const [sortBy, setSortBy] = useState<'highest-sc' | 'highest-gc' | 'lowest-min-redemption' | 'longest-streak' | 'a-z' | 'z-a' | 'next-available'>('next-available')
   const [search, setSearch] = useState('')
   const [now, setNow] = useState(Date.now())
@@ -585,24 +587,26 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
 
     const today = new Date()
     today.setHours(0, 0, 0, 0)
-    const claimsPerDay = new Map<string, number>()
+    const activityByDay = new Map<string, { count: number, sc: number }>()
 
-    for (let i = 13; i >= 0; i -= 1) {
+    for (let i = statsRange - 1; i >= 0; i -= 1) {
       const d = new Date(today)
       d.setDate(today.getDate() - i)
       const key = d.toISOString().slice(0, 10)
-      claimsPerDay.set(key, 0)
+      activityByDay.set(key, { count: 0, sc: 0 })
     }
 
     for (const claim of claimHistory) {
       const key = claim.claimed_at.slice(0, 10)
-      if (claimsPerDay.has(key)) {
-        claimsPerDay.set(key, (claimsPerDay.get(key) ?? 0) + 1)
+      const activity = activityByDay.get(key)
+      if (activity) {
+        activity.count += 1
+        activity.sc += Number(byCasinoId.get(claim.casino_id)?.sc_amount ?? 0)
       }
     }
 
-    const recentActivity = [...claimsPerDay.entries()].map(([date, count]) => ({ date, count }))
-    const maxDailyClaims = Math.max(1, ...recentActivity.map((item) => item.count))
+    const recentActivity = [...activityByDay.entries()].map(([date, activity]) => ({ date, ...activity }))
+    const maxDailyClaims = Math.max(1, ...recentActivity.map((item) => statsMetric === 'claims' ? item.count : item.sc))
     const longestStreakAchieved = claimHistory.reduce((max, claim) => Math.max(max, claim.streak ?? 0), 0)
     const claimsLast7Days = recentActivity.slice(-7).reduce((sum, item) => sum + item.count, 0)
 
@@ -617,7 +621,7 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
       longestStreakAchieved,
       claimsLast7Days,
     }
-  }, [casinos, claimHistory])
+  }, [casinos, claimHistory, statsMetric, statsRange])
 
   if (loading) {
     return (
@@ -705,25 +709,74 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
               </div>
 
               <div className="casino-panel rounded-2xl p-5">
-                <h3 className="text-lg font-black mb-4" style={{ color: '#f4f7ff' }}>Activity (last 14 days)</h3>
-                <div className="h-44 flex items-end gap-1.5">
-                  {stats.recentActivity.map((item) => {
-                    const barHeight = Math.max(8, Math.round((item.count / stats.maxDailyClaims) * 100))
-                    return (
-                      <div key={item.date} className="flex-1 h-full flex flex-col items-center justify-end gap-1">
-                        <div
-                          className="w-full rounded-t-md"
-                          style={{
-                            height: `${barHeight}%`,
-                            background: 'linear-gradient(180deg, rgba(255,231,153,0.95), rgba(229,45,75,0.9))',
-                            boxShadow: '0 0 10px rgba(229,45,75,0.35)',
-                          }}
-                          title={`${item.date}: ${item.count} claims`}
-                        />
-                        <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.5)' }}>{item.date.slice(5)}</span>
-                      </div>
-                    )
-                  })}
+                <div className="flex flex-col gap-3 mb-4 sm:flex-row sm:items-center sm:justify-between">
+                  <h3 className="text-lg font-black" style={{ color: '#f4f7ff' }}>Daily Activity</h3>
+                  <div className="flex flex-wrap gap-1.5">
+                    {([['7', '1 week'], ['30', '1 month'], ['90', '3 months'], ['180', '6 months']] as const).map(([value, label]) => (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => setStatsRange(Number(value) as 7 | 30 | 90 | 180)}
+                        className="rounded-lg px-2.5 py-1 text-[11px] font-bold cursor-pointer"
+                        style={{
+                          background: statsRange === Number(value) ? '#4994C9' : 'rgba(255,255,255,0.07)',
+                          color: statsRange === Number(value) ? '#fff' : 'rgba(255,255,255,0.65)',
+                          border: `1px solid ${statsRange === Number(value) ? '#4994C9' : 'rgba(255,255,255,0.12)'}`,
+                        }}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex items-center justify-between gap-3 mb-4">
+                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Hover a day for its exact totals</p>
+                  <div className="flex rounded-lg p-0.5" style={{ background: 'rgba(255,255,255,0.07)' }}>
+                    {([['claims', 'Bonus claimed'], ['sc', 'Total SC claimed']] as const).map(([value, label]) => (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => setStatsMetric(value)}
+                        className="rounded-md px-2.5 py-1 text-[11px] font-bold cursor-pointer"
+                        style={{
+                          background: statsMetric === value ? '#E52D4B' : 'transparent',
+                          color: statsMetric === value ? '#fff' : 'rgba(255,255,255,0.6)',
+                        }}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="overflow-x-auto pb-1">
+                  <div className="h-44 flex items-end gap-1.5" style={{ minWidth: stats.recentActivity.length > 30 ? `${stats.recentActivity.length * 18}px` : '100%' }}>
+                    {stats.recentActivity.map((item) => {
+                      const value = statsMetric === 'claims' ? item.count : item.sc
+                      const barHeight = value === 0 ? 4 : Math.max(8, Math.round((value / stats.maxDailyClaims) * 100))
+                      const scLabel = item.sc.toLocaleString('en-US', { maximumFractionDigits: 2 })
+                      return (
+                        <div key={item.date} className="group relative flex-1 h-full flex flex-col items-center justify-end gap-1">
+                          <div className="pointer-events-none absolute bottom-6 z-10 w-max rounded-lg px-2.5 py-1.5 text-[11px] opacity-0 transition-opacity group-hover:opacity-100"
+                            style={{ background: '#17202b', color: '#f4f7ff', border: '1px solid rgba(255,255,255,0.18)', boxShadow: '0 6px 16px rgba(0,0,0,0.25)' }}>
+                            <div className="font-bold">{item.date}</div>
+                            <div>{item.count} {item.count === 1 ? 'bonus' : 'bonuses'} claimed</div>
+                            <div>{scLabel} SC claimed</div>
+                          </div>
+                          <div
+                            className="w-full rounded-t-md"
+                            style={{
+                              height: `${barHeight}%`,
+                              background: statsMetric === 'claims'
+                                ? 'linear-gradient(180deg, rgba(255,231,153,0.95), rgba(229,45,75,0.9))'
+                                : 'linear-gradient(180deg, rgba(200,232,255,0.95), rgba(73,148,201,0.9))',
+                              boxShadow: '0 0 10px rgba(229,45,75,0.35)',
+                            }}
+                          />
+                          <span className="text-[10px] whitespace-nowrap" style={{ color: 'rgba(255,255,255,0.5)' }}>{item.date.slice(5)}</span>
+                        </div>
+                      )
+                    })}
+                  </div>
                 </div>
               </div>
             </div>
