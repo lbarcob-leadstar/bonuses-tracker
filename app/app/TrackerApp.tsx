@@ -264,23 +264,18 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
   }, [now, STREAK_ACTIVE_MS])
 
   const markUserActive = useCallback(async (userId: string) => {
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('last_seen_at')
-      .eq('id', userId)
-      .maybeSingle()
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session?.access_token || session.user.id !== userId) return
 
-    if (!profileError && profile?.last_seen_at) {
-      const lastSeenAt = new Date(profile.last_seen_at)
-      const nowDate = new Date()
-      const isSameDay = lastSeenAt.toDateString() === nowDate.toDateString()
-      if (isSameDay) return
+    const response = await fetch('/api/activity', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    })
+
+    if (!response.ok) {
+      const { error } = await response.json().catch(() => ({ error: 'Unknown activity error' }))
+      console.error('Failed to record user activity:', error)
     }
-
-    // Upsert since the profile row may not exist yet for this user
-    await supabase
-      .from('profiles')
-      .upsert({ id: userId, last_seen_at: new Date().toISOString() }, { onConflict: 'id' })
   }, [supabase])
 
   const loadData = useCallback(async (userId: string) => {
