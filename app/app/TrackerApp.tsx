@@ -1299,6 +1299,24 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
         </>
         )}
       </div>
+      <div className="max-w-6xl mx-auto px-4 pb-8 relative z-10">
+        <div className="casino-panel rounded-2xl px-4 py-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.68)' }}>
+            Any feedback? Talk to us
+          </p>
+          <a
+            href="mailto:contact@unitedgamblers.com?subject=Daily%20Bonus%20Tracker%20feedback"
+            className="inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-bold transition-transform duration-200 hover:-translate-y-px"
+            style={{ background: '#FFE799', color: '#1C2837', boxShadow: '0 8px 16px rgba(255,231,153,0.18)' }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M4 5.5h16v13H4z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+              <path d="m5 7 7 5.5L19 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            contact@unitedgamblers.com
+          </a>
+        </div>
+      </div>
     </div>
   )
 }
