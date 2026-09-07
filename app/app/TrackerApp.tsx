@@ -28,6 +28,7 @@ export default function TrackerApp() {
   const [streakFxByCasino, setStreakFxByCasino] = useState<Record<string, number>>({})
   const [featuredBonuses, setFeaturedBonuses] = useState<FeaturedBonus[]>([])
   const [claimHistory, setClaimHistory] = useState<Array<{ casino_id: string, claimed_at: string, streak: number | null }>>([])
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false)
 
 
 type HeroMetricIconName = 'streak' | 'claimed' | 'completion' | 'reset' | 'favorite'
@@ -454,6 +455,35 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
     window.location.href = '/'
   }
 
+  const handleDeleteAccount = async () => {
+    if (!user || isDeletingAccount) return
+    const confirmed = window.confirm('Delete your account permanently? Your claims, favorites, and profile will also be deleted. This cannot be undone.')
+    if (!confirmed) return
+
+    setIsDeletingAccount(true)
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session?.access_token) {
+      alert('Your session has expired. Please sign in again.')
+      setIsDeletingAccount(false)
+      return
+    }
+
+    const response = await fetch('/api/account/delete', {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    })
+
+    if (!response.ok) {
+      const { error } = await response.json().catch(() => ({ error: 'Unable to delete account' }))
+      alert(error)
+      setIsDeletingAccount(false)
+      return
+    }
+
+    await supabase.auth.signOut()
+    window.location.href = '/'
+  }
+
   const toggleFavorite = async (casino: CasinoWithClaim) => {
     if (!user) return
 
@@ -649,6 +679,14 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
           </div>
           <div className="flex items-center gap-4">
             <span className="text-sm hidden md:block" style={{ color: 'rgba(255,255,255,0.5)' }}>{user?.email}</span>
+            <button
+              onClick={handleDeleteAccount}
+              disabled={isDeletingAccount}
+              className="px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer disabled:cursor-wait"
+              style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.58)', border: '1px solid rgba(255,255,255,0.12)', opacity: isDeletingAccount ? 0.6 : 1 }}
+            >
+              {isDeletingAccount ? 'Deleting…' : 'Delete account'}
+            </button>
             <button onClick={handleSignOut} className="px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer hover:-translate-y-px"
               style={{ background: 'rgba(229,45,75,0.2)', color: '#E52D4B', border: '1px solid rgba(229,45,75,0.3)' }}>
               Sign Out
