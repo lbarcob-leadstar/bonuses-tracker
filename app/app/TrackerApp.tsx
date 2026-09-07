@@ -679,17 +679,17 @@ function HeroMetricIcon({ icon }: { icon: HeroMetricIconName }) {
           </div>
           <div className="flex items-center gap-4">
             <span className="text-sm hidden md:block" style={{ color: 'rgba(255,255,255,0.5)' }}>{user?.email}</span>
+            <button onClick={handleSignOut} className="px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer hover:-translate-y-px"
+              style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.12)' }}>
+              Sign Out
+            </button>
             <button
               onClick={handleDeleteAccount}
               disabled={isDeletingAccount}
               className="px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer disabled:cursor-wait"
-              style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.58)', border: '1px solid rgba(255,255,255,0.12)', opacity: isDeletingAccount ? 0.6 : 1 }}
+              style={{ background: 'rgba(229,45,75,0.2)', color: '#E52D4B', border: '1px solid rgba(229,45,75,0.3)', opacity: isDeletingAccount ? 0.6 : 1 }}
             >
               {isDeletingAccount ? 'Deleting…' : 'Delete account'}
-            </button>
-            <button onClick={handleSignOut} className="px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer hover:-translate-y-px"
-              style={{ background: 'rgba(229,45,75,0.2)', color: '#E52D4B', border: '1px solid rgba(229,45,75,0.3)' }}>
-              Sign Out
             </button>
           </div>
         </div>
